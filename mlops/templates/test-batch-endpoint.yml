@@ -19,7 +19,7 @@ steps:
     scriptLocation: inlineScript
     inlineScript: |
 
-      python ./src/test_batch_endpoint.py \
+      python mlops/templates/src/test_batch_endpoint.py \
         --endpoint_name "${{parameters.endpoint_name}}" \
         --request_batch_file "${{parameters.sample_request}}" \
         --request_type "${{parameters.request_type}}" \
