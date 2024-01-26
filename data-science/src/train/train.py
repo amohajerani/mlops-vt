@@ -72,7 +72,7 @@ def main(args):
 
     # Train a Random Forest Regression Model with the training set
     model = RandomForestRegressor(n_estimators = args.regressor__n_estimators,
-                                  bootstrap = args.regressor__bootstrap,
+                                  bootstrap = bool(args.regressor__bootstrap),
                                   max_depth = args.regressor__max_depth,
                                   max_features = args.regressor__max_features,
                                   min_samples_leaf = args.regressor__min_samples_leaf,
