@@ -21,7 +21,7 @@ steps:
     scriptLocation: inlineScript
     inlineScript: |
 
-      python src/create_online_deployment.py \
+      python ./src/create_online_deployment.py \
         --endpoint_name "${{parameters.endpoint_name}}" \
         --deployment_name "${{parameters.deployment_name}}" \
         --model_path "${{parameters.model_path}}" \

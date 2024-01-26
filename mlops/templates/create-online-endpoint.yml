@@ -19,7 +19,7 @@ steps:
     scriptLocation: inlineScript
     inlineScript: |
 
-      python src/create_online_endpoint.py \
+      python ./src/create_online_endpoint.py \
         --endpoint_name "${{parameters.endpoint_name}}" \
         --description "${{parameters.endpoint_description}}" \
         --auth_mode "${{parameters.auth_mode}}" \
