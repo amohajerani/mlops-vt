@@ -54,7 +54,7 @@ stages:
               size: Standard_DS3_v2
               min_instances: 0
               max_instances: 1
-              cluster_tier: low_priority
+              cluster_tier: dedicated
           - template: templates/${{ variables.version }}/register-environment.yml@mlops-templates
             parameters:
               environment_name: taxi-train-env
