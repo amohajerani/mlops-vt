@@ -21,7 +21,7 @@ steps:
     scriptLocation: inlineScript
     inlineScript: |
 
-      python templates/src/python-sdk-v2/register_data_asset.py \
+      python src/register_data_asset.py \
         --data_name "${{parameters.data_name}}" \
         --description "${{parameters.data_description}}" \
         --data_path "${{parameters.data_path}}" \
