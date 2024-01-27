@@ -23,7 +23,7 @@ steps:
         if [[ -z "$compute_name" ]]
         then
           echo "Compute does not exists. Creating the cluster..."
-          python templates/src/python-sdk-v2/create_compute.py --cluster_name ${{ parameters.cluster_name }} --size ${{ parameters.size }} --min_instances ${{ parameters.min_instances }} --max_instances ${{ parameters.max_instances }} --cluster_tier ${{ parameters.cluster_tier }}
+          python templates/scripts/create_compute.py --cluster_name ${{ parameters.cluster_name }} --size ${{ parameters.size }} --min_instances ${{ parameters.min_instances }} --max_instances ${{ parameters.max_instances }} --cluster_tier ${{ parameters.cluster_tier }}
         else
           echo "Compute exists. Skipping cluster creation."
           exit 0

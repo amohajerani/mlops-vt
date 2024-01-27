@@ -14,7 +14,7 @@ steps:
     scriptLocation: inlineScript
     inlineScript: |
 
-      python mlops/templates/src/test_online_endpoint.py \
+      python mlops/scripts/test_online_endpoint.py \
         --endpoint_name "${{parameters.endpoint_name}}" \
         --request_file "${{parameters.sample_request}}" \
 

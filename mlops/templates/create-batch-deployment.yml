@@ -21,7 +21,7 @@ steps:
     scriptLocation: inlineScript
     inlineScript: |
 
-      python mlops/templates/src/create_batch_deployment.py \
+      python mlops/scripts/create_batch_deployment.py \
         --deployment_name "${{parameters.deployment_name}}" \
         --description "${{parameters.deployment_description}}" \
         --endpoint_name "${{parameters.endpoint_name}}" \

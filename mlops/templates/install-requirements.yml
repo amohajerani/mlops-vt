@@ -11,8 +11,6 @@ steps:
     pip install azure-core
     pip install azure-cli
     pip install azure-common
-    pip install azure-core
-    pip install azure-identity
     pip install azure-mgmt-core 
     pip install azure-storage-blob
     pip install azure-storage-file-datalake

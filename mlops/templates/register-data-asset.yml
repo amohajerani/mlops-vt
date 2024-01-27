@@ -18,7 +18,7 @@ steps:
     scriptLocation: inlineScript
     inlineScript: |
 
-      python mlops/templates/src/register_data_asset.py \
+      python mlops/scripts/register_data_asset.py \
         --data_name "${{parameters.data_name}}" \
         --description "${{parameters.data_description}}" \
         --data_path "${{parameters.data_path}}" \

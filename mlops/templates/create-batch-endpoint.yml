@@ -16,7 +16,7 @@ steps:
     scriptLocation: inlineScript
     inlineScript: |
 
-      python mlops/templates/src/create_batch_endpoint.py \
+      python mlops/scripts/create_batch_endpoint.py \
         --endpoint_name "${{parameters.endpoint_name}}" \
         --description "${{parameters.endpoint_description}}" \
         --auth_mode "${{parameters.auth_mode}}" \
