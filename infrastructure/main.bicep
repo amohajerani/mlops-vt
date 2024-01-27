@@ -82,12 +82,3 @@ module mlw './modules/aml_workspace.bicep' = {
   }
 }
 
-// AML compute cluster
-module mlwcc './modules/aml_computecluster.bicep' = {
-  name: 'mlwcc'
-  scope: resourceGroup(rg.name)
-  params: {
-    location: location
-    workspaceName: mlw.outputs.amlsName
-  }
-}

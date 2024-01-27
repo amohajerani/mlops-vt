@@ -7,14 +7,12 @@ variables:
   postfix: 3
   location: eastus
   environment: prod
-  enable_aml_computecluster: true
   enable_monitoring: false
 
   # Azure DevOps
   ado_service_connection_rg: Azure-ARM-Prod-vtpoc
   ado_service_connection_aml_ws: Azure-ARM-Prod-vtpoc
 
-  # DO NOT TOUCH
 
   # For pipeline reference
   resource_group: rg-$(namespace)-$(postfix)$(environment)
