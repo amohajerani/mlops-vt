@@ -51,7 +51,7 @@ stages:
               data_type: uri_file
           - template: ../templates/run-pipeline.yml
             parameters:
-              pipeline_path: mlops/azureml/train/run_pipeline.py
+              pipeline_path: mlops/scripts/run_pipeline.py
               experiment_name: taxi-train-pipeline
               data_name: taxi-data
               environment_name: taxi-train-env
