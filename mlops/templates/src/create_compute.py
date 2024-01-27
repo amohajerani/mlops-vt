@@ -1,4 +1,3 @@
-"""MLOps v2 NLP Python SDK register environment script."""
 import os
 import argparse
 import traceback

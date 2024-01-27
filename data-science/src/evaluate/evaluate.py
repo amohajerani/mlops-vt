@@ -1,5 +1,3 @@
-# Copyright (c) Microsoft Corporation. All rights reserved.
-# Licensed under the MIT License.
 """
 Evaluates trained ML model using test dataset.
 Saves predictions, evaluation results and deploy flag.

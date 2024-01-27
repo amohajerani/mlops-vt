@@ -1,6 +1,3 @@
-# Copyright (c) Microsoft Corporation. All rights reserved.
-# Licensed under the MIT License.
-
 steps:
   - task: AzureCLI@2
     displayName: Install AML CLI v2
