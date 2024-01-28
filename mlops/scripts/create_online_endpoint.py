@@ -1,7 +1,5 @@
 import argparse
-
 from azure.ai.ml.entities import ManagedOnlineEndpoint
-
 from azure.identity import DefaultAzureCredential
 from azure.ai.ml import MLClient
 
