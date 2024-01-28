@@ -27,10 +27,20 @@ def main():
         print(ex)
 
     # invoke and test endpoint
-    ml_client.online_endpoints.invoke(
+    response = ml_client.online_endpoints.invoke(
         endpoint_name=args.endpoint_name,
         request_file=args.request_file
     )
+    # Print the response
+    print("Response:", response)
+
+
+    # Check the response
+    if 'error' in response:
+        print("Test failed, received error:", response['error'])
+    else:
+        print("Test passed, received expected response")
+
 
 if __name__ == "__main__":
     main()

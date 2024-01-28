@@ -15,7 +15,6 @@ steps:
     scriptType: bash
     scriptLocation: inlineScript
     inlineScript: |
-
       python mlops/scripts/create_online_endpoint.py \
         --endpoint_name "${{parameters.endpoint_name}}" \
         --description "${{parameters.endpoint_description}}" \

@@ -27,7 +27,7 @@ stages:
               script: |
                 set -e
                 mkdir "$(Build.Repository.Name)"
-          - template: ../templates/install-az-cli.yml
+          - template: ../templates/install-az-ext.yml
           - template: ../templates/install-requirements.yml
           - template: ../templates/connect-to-workspace.yml
           - template: ../templates/create-compute.yml
