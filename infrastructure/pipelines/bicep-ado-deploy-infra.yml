@@ -40,7 +40,7 @@ stages:
               scriptLocation: "inlineScript"
               inlineScript: |
                 az deployment sub validate \
-                  --name $(Build.DefinitionName) \
+                  --name $(Build.BuildId) \
                   --template-file ./infrastructure/main.bicep \
                   --location $(location) \
                   --parameters location=$(location) prefix=$(namespace) postfix=$(postfix) env=$(environment)
@@ -68,7 +68,7 @@ stages:
                       az --version
                       echo "deploying bicep..."
                       az deployment sub create \
-                        --name $(Build.DefinitionName) \
+                        --name $(Build.BuildId) \
                         --location $(location) \
                         --template-file ./infrastructure/main.bicep \
                         --parameters location=$(location) prefix=$(namespace) postfix=$(postfix) env=$(environment)
