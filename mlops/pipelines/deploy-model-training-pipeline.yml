@@ -1,36 +1,22 @@
-# Copyright (c) Microsoft Corporation. All rights reserved.
-# Licensed under the MIT License.
-
 name: deploy-model-training-pipeline
 
 variables:
   - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
-      # 'main' branch: PRD environment
       - template: ../../config-infra-prod.yml
   - ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
-      # 'develop' or feature branches: DEV environment
       - template: ../../config-infra-dev.yml
-  - name: version
-    value: python-sdk-v2
 
 trigger: none
 
 pool:
   vmImage: ubuntu-20.04
 
-resources:
-  repositories:
-    - repository: mlops-templates # Template Repo
-      name: mlops-templates
-      type: git
-      ref: main
-
 stages:
   - stage: DeployTrainingPipeline
     displayName: Deploy Training Pipeline
     jobs:
       - job: DeployTrainingPipeline
-        timeoutInMinutes: 120 # how long to run the job before automatically cancelling
+        timeoutInMinutes: 120
         steps:
           - checkout: self
             path: s/
@@ -41,35 +27,31 @@ stages:
               script: |
                 set -e
                 mkdir "$(Build.Repository.Name)"
-                mkdir "mlops-templates"
-          - checkout: mlops-templates
-            path: s/templates/
-          - template: templates/aml-cli-v2/install-az-cli.yml@mlops-templates
-          - template: templates/aml-cli-v2/install-aml-cli.yml@mlops-templates
-          - template: templates/python-sdk-v2/install-requirements.yml@mlops-templates
-          - template: templates/aml-cli-v2/connect-to-workspace.yml@mlops-templates
-          - template: templates/aml-cli-v2/create-compute.yml@mlops-templates
+          - template: ../templates/install-az-ext.yml
+          - template: ../templates/install-requirements.yml
+          - template: ../templates/connect-to-workspace.yml
+          - template: ../templates/create-compute.yml
             parameters:
               cluster_name: cpu-cluster
               size: Standard_DS3_v2
               min_instances: 0
-              max_instances: 4
-              cluster_tier: low_priority
-          - template: templates/${{ variables.version }}/register-environment.yml@mlops-templates
+              max_instances: 1
+              cluster_tier: dedicated
+          - template: ../templates/register-environment.yml
             parameters:
               environment_name: taxi-train-env
               environment_description: "Training Environment for Taxi Pipeline"
               environment_path: data-science/environment/train-conda.yml
               build_type: conda
-          - template: templates/${{ variables.version }}/register-data-asset.yml@mlops-templates
+          - template: ../templates/register-data-asset.yml
             parameters:
               data_name: taxi-data
               data_description: taxi-training-dataset
               data_path: data/taxi-data.csv
               data_type: uri_file
-          - template: templates/${{ variables.version }}/run-pipeline.yml@mlops-templates
+          - template: ../templates/run-pipeline.yml
             parameters:
-              pipeline_path: mlops/azureml/train/run_pipeline.py
+              pipeline_path: mlops/scripts/run_pipeline.py
               experiment_name: taxi-train-pipeline
               data_name: taxi-data
               environment_name: taxi-train-env

@@ -1,0 +1,18 @@
+steps:
+  - task: AzureCLI@2
+    displayName: Install AZ ml extension
+    inputs:
+      azureSubscription: $(ado_service_connection_aml_ws)
+      scriptType: bash
+      scriptLocation: inlineScript
+      workingDirectory: $(System.DefaultWorkingDirectory)
+      inlineScript: |
+        set -e # fail on error
+        az version
+        az extension add -n ml -y
+        az extension list   
+
+
+
+
+

@@ -1,5 +1,3 @@
-# Copyright (c) Microsoft Corporation. All rights reserved.
-# Licensed under the MIT License.
 """
 Registers trained ML model if deploy flag is True.
 """

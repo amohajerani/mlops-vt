@@ -1,0 +1,27 @@
+parameters:
+  - name: modelPath
+    type: string
+    default: 'taxi-model@latest'
+  - name: storageAccount
+    type: string
+  - name: containerName
+    type: string
+    default: 'models'
+
+steps:
+  - task: AzureCLI@2
+    displayName: 'Download model file from Blob Storage'
+    inputs:
+      azureSubscription: 'Prod Service Connection'
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        model_file_path=$(az storage blob download --account-name ${{ parameters.storageAccount }} --container-name ${{ parameters.containerName }} --name ${{ parameters.modelPath }} --file ./model)
+        echo "##vso[task.setvariable variable=modelFilePath]$model_file_path"
+  - task: AzureCLI@2
+    displayName: 'Register model in Prod workspace'
+    inputs:
+      azureSubscription: 'Prod Service Connection'
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: 'az ml model register -n ${{ parameters.modelPath }} -p $(modelFilePath) --ws-name $(aml_workspace) --ws-resource-group $(resourceGroupName)'

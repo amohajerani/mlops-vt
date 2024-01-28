@@ -1,5 +1,3 @@
-# Copyright (c) Microsoft Corporation. All rights reserved.
-# Licensed under the MIT License.
 """
 Trains ML model using training dataset. Saves trained model.
 """
@@ -49,7 +47,7 @@ def parse_args():
                         help='Method of selecting samples for training each tree')
     parser.add_argument('--regressor__max_depth', type=int, default=10,
                         help=' Maximum number of levels in tree')
-    parser.add_argument('--regressor__max_features', type=str, default='auto',
+    parser.add_argument('--regressor__max_features', type=str, default=1.0,
                         help='Number of features to consider at every split')
     parser.add_argument('--regressor__min_samples_leaf', type=int, default=4,
                         help='Minimum number of samples required at each leaf node')
@@ -72,7 +70,7 @@ def main(args):
 
     # Train a Random Forest Regression Model with the training set
     model = RandomForestRegressor(n_estimators = args.regressor__n_estimators,
-                                  bootstrap = args.regressor__bootstrap,
+                                  bootstrap = bool(args.regressor__bootstrap),
                                   max_depth = args.regressor__max_depth,
                                   max_features = args.regressor__max_features,
                                   min_samples_leaf = args.regressor__min_samples_leaf,
