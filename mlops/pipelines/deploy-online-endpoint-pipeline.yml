@@ -16,10 +16,10 @@ pool:
   vmImage: ubuntu-20.04
 
 stages:
-  - stage: CreateOnlineEndpoint
-    displayName: Create/Update Online Endpoint
+  - stage: DeployDev
+    displayName: Create/Update Online Endpoint in Dev
     jobs:
-      - job: DeployOnlineEndpoint
+      - job: DeployOnlineEndpointDev
         steps:
           - checkout: self
             path: s/
@@ -34,6 +34,40 @@ stages:
           - template: ../templates/install-az-ext.yml
           - template: ../templates/install-requirements.yml
           - template: ../templates/connect-to-workspace.yml
+          - template: ../templates/create-online-endpoint.yml
+            parameters:
+              endpoint_name: "${{ variables.endpoint_name }}"
+              endpoint_description: "Taxi Online Endpoint"
+              auth_mode: "key"
+          - template: ../templates/create-online-deployment.yml
+            parameters:
+              deployment_name: taxi-online-dp
+              endpoint_name: "${{ variables.endpoint_name }}"
+              model_path: "taxi-model@latest"
+              traffic_allocation: 100
+          - template: ../templates/test-online-endpoint.yml
+            parameters:
+              endpoint_name: "${{ variables.endpoint_name }}"
+              sample_request: data/taxi-request.json
+          - template: ../templates/store_model.yml
+            parameters:
+              modelPath: "taxi-model@latest"
+              storageAccount: "${{ variables.storage_account }}"
+              containerName: "models"
+
+  - stage: DeployProd
+    displayName: Create/Update Online Endpoint in Prod
+    dependsOn: DeployDev
+    condition: succeeded('DeployDev')
+    jobs:
+      - job: DeployOnlineEndpointProd
+        steps:
+          - template: ../templates/connect-to-workspace.yml
+          - template: ../templates/load_model.yml
+            parameters:
+              modelPath: "taxi-model@latest"
+              storageAccount: "${{ variables.storage_account }}"
+              containerName: "models"
           - template: ../templates/create-online-endpoint.yml
             parameters:
               endpoint_name: "${{ variables.endpoint_name }}"
