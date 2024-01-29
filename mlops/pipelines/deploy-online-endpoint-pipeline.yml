@@ -52,7 +52,6 @@ stages:
           - template: ../templates/store_model.yml
             parameters:
               modelPath: "taxi-model@latest"
-              storageAccount: "${{ variables.storage_account }}"
               containerName: "models"
 
   - stage: DeployProd

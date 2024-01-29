@@ -2,8 +2,6 @@ parameters:
   - name: modelPath
     type: string
     default: 'taxi-model@latest'
-  - name: storageAccount
-    type: string
   - name: containerName
     type: string
     default: 'models'
@@ -21,8 +19,8 @@ steps:
   - task: AzureCLI@2
     displayName: 'Copy model file to Blob Storage'
     inputs:
-      azureSubscription: $(ado_service_connection_aml_ws)
+      azureSubscription: $(ado_service_connection_rg)
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
-        az storage blob upload --account-name ${{ parameters.storageAccount }} --container-name ${{ parameters.containerName }} --name $(modelFilePath) --type block --file $(modelFilePath) --connection-string $(storage_connection_string)
+        az storage blob upload --account-name $(storage_account) --container-name ${{ parameters.containerName }} --name $(modelFilePath) --type block --file $(modelFilePath)
