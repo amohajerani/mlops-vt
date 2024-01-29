@@ -1,6 +1,7 @@
 name: deploy-online-endpoint-pipeline
 
 variables:
+  - group: vtpoc-vg
   - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
       # 'main' branch: PRD environment
       - template: ../../config-infra-prod.yml
