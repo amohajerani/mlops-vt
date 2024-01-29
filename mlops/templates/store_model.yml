@@ -13,7 +13,9 @@ steps:
         echo "Latest model version: $latest_model_version"  # Debug output
         model_path=$(az ml model show -n taxi-model --version $latest_model_version --query 'path')
         echo "Model show: $model_path"  # Debug output
-        echo "##vso[task.setvariable variable=modelFilePath]$model_path"
+        az ml model download -n taxi-model --version $latest_model_version --target ./  # Download model to local file system
+        local_model_path="./taxi-model"  # Adjust this path as needed
+        echo "##vso[task.setvariable variable=modelFilePath]$local_model_path"
   - task: AzureCLI@2
     displayName: 'Copy model file to Blob Storage'
     inputs:
