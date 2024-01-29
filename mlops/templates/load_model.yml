@@ -12,7 +12,7 @@ steps:
   - task: AzureCLI@2
     displayName: 'Download model file from Blob Storage'
     inputs:
-      azureSubscription: 'Prod Service Connection'
+      azureSubscription: $(ado_service_connection_aml_ws)
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
@@ -21,7 +21,7 @@ steps:
   - task: AzureCLI@2
     displayName: 'Register model in Prod workspace'
     inputs:
-      azureSubscription: 'Prod Service Connection'
+      azureSubscription: $(ado_service_connection_rg)
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: 'az ml model register -n ${{ parameters.modelPath }} -p $(modelFilePath) --ws-name $(aml_workspace) --ws-resource-group $(resourceGroupName)'
