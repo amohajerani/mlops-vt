@@ -6,8 +6,14 @@ steps:
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
-        latest_model_version=$(az ml model list -n taxi-model --query "[?name=='taxi-model'].version" -o tsv | sort -r | head -n 1)
-        model_path=$(az ml model show -n taxi-model --version $latest_model_version --query 'artifactPath' -o tsv)
+        set -x
+        model_list=$(az ml model list -n taxi-model --query "[?name=='taxi-model'].version" -o tsv)
+        echo "Model list: $model_list"  # Debug output
+        latest_model_version=$(echo "$model_list" | sort -r | head -n 1)
+        echo "Latest model version: $latest_model_version"  # Debug output
+        model_show=$(az ml model show -n taxi-model --version $latest_model_version --query 'artifactPath' -o tsv)
+        echo "Model show: $model_show"  # Debug output
+        model_path=$(echo "$model_show" | cut -d' ' -f2)
         echo "Model path: $model_path"  # Debug output
         echo "##vso[task.setvariable variable=modelFilePath]$model_path"
   - task: AzureCLI@2
@@ -17,4 +23,5 @@ steps:
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
+        set -x
         az storage blob upload --account-name $(storage_account) --container-name models --name $(modelFilePath) --type block --file $(modelFilePath)
