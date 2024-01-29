@@ -35,7 +35,6 @@ stages:
           - template: ../templates/install-az-ext.yml
           - template: ../templates/install-requirements.yml
           - template: ../templates/connect-to-workspace.yml
-          - template: ../templates/store_model.yml
           - template: ../templates/create-online-endpoint.yml
             parameters:
               endpoint_name: "${{ variables.endpoint_name }}"
@@ -51,7 +50,7 @@ stages:
             parameters:
               endpoint_name: "${{ variables.endpoint_name }}"
               sample_request: data/taxi-request.json
-
+          - template: ../templates/store_model.yml
 
   - stage: DeployProd
     displayName: Create/Update Online Endpoint in Prod

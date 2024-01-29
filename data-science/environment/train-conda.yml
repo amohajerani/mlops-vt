@@ -13,6 +13,7 @@ dependencies:
       - pandas
       - joblib
       - matplotlib
+      - pytest
       - azureml-inference-server-http
       - snowflake-connector-python
       - git+https://github.com/microsoft/AzureML-Observability#subdirectory=aml-obs-client
