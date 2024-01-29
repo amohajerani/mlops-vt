@@ -20,7 +20,7 @@ steps:
         model_path=$(echo "$model_show" | cut -d' ' -f2)
         echo "Model path: $model_path"  # Debug output
         echo "##vso[task.setvariable variable=modelFilePath]$model_path"
-        model_show=$(az ml model show -n taxi-model --version 2 --query 'artifactPath' -o tsv)
+        model_show=$(az ml model show -n taxi-model --version 2 -o tsv)
         echo "Model show: $model_show"  # Debug output
   - task: AzureCLI@2
     displayName: 'Copy model file to Blob Storage'
