@@ -1,0 +1,21 @@
+parameters:
+  - name: snowflake_account
+    type: string
+  - name: snowflake_user
+    type: string
+  - name: snowflake_password
+    type: string
+  - name: subscription_id
+    type: string
+
+
+
+steps:   
+- task: AzureCLI@2
+  displayName: Import data from Snowflake
+  inputs:
+    azureSubscription: $(ado_service_connection_rg)
+    scriptType: bash
+    scriptLocation: inlineScript
+    inlineScript: |
+          python mlops/scripts/data_import.py $(aml_workspace) ${{parameters.snowflake_account}} ${{parameters.snowflake_user}} ${{parameters.snowflake_password}} ${{parameters.subscription_id}} $(resource_group)

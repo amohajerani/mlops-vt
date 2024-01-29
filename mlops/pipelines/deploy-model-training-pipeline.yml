@@ -29,7 +29,14 @@ stages:
                 mkdir "$(Build.Repository.Name)"
           - template: ../templates/install-az-ext.yml
           - template: ../templates/install-requirements.yml
+          - template: ../templates/run-unit-tests.yml
           - template: ../templates/connect-to-workspace.yml
+          - template: ../templates/import-data.yml
+            parameters:
+              snowflake_account: $(SNOWFLAKE_ACCOUNT)
+              snowflake_user: $(SNOWFLAKE_USER)
+              snowflake_password: $(SNOWFLAKE_PASSWORD)
+              subscription_id: $(SUBSCRIPTION_ID)
           - template: ../templates/create-compute.yml
             parameters:
               cluster_name: cpu-cluster
