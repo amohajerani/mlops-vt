@@ -6,4 +6,4 @@ steps:
     scriptType: bash
     scriptLocation: inlineScript
     inlineScript: |
-      pytest ../tests/
+      pytest mlops/tests/
