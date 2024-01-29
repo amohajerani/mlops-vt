@@ -15,4 +15,5 @@ steps:
     pip install azure-storage-blob
     pip install azure-storage-file-datalake
     pip install azure-storage-file-share
+    pip install pytest
   displayName: 'Install python dependencies'
