@@ -9,6 +9,8 @@ steps:
         set -x
         subscription_info=$(az account show --query "{id:id, name:name}" -o tsv)
         echo "Subscription info: $subscription_info"  # Debug output
+        all_models=$(az ml model list -o table)
+        echo "All models: $all_models"  # Debug output
         model_list=$(az ml model list -n taxi-model --query "[?name=='taxi-model'].version" -o tsv)
         echo "Model list: $model_list"  # Debug output
         latest_model_version=$(echo "$model_list" | sort -r | head -n 1)
