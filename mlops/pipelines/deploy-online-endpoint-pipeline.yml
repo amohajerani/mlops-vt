@@ -50,9 +50,6 @@ stages:
               endpoint_name: "${{ variables.endpoint_name }}"
               sample_request: data/taxi-request.json
           - template: ../templates/store_model.yml
-            parameters:
-              modelPath: "taxi-model@latest"
-              containerName: "models"
 
   - stage: DeployProd
     displayName: Create/Update Online Endpoint in Prod

@@ -1,11 +1,3 @@
-parameters:
-  - name: modelPath
-    type: string
-    default: 'taxi-model@latest'
-  - name: containerName
-    type: string
-    default: 'models'
-
 steps:
   - task: AzureCLI@2
     displayName: 'Get model file path'
@@ -14,8 +6,9 @@ steps:
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
-        model_path=$(az ml model show -n ${{ parameters.modelPath }} --query 'artifactPath' -o tsv)
-        echo "##vso[task.setvariable variable=modelFilePath]$model_path"
+      latest_model_version=$(az ml model list -n taxi-model --query "[?name=='taxi-model'].version" -o tsv | sort -r | head -n 1)
+      model_path=$(az ml model show -n taxi-model --version $latest_model_version --query 'artifactPath' -o tsv)
+      echo "##vso[task.setvariable variable=modelFilePath]$model_path"
   - task: AzureCLI@2
     displayName: 'Copy model file to Blob Storage'
     inputs:
@@ -23,4 +16,4 @@ steps:
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
-        az storage blob upload --account-name $(storage_account) --container-name ${{ parameters.containerName }} --name $(modelFilePath) --type block --file $(modelFilePath)
+        az storage blob upload --account-name $(storage_account) --container-name models --name $(modelFilePath) --type block --file $(modelFilePath)
