@@ -7,21 +7,13 @@ steps:
       scriptLocation: 'inlineScript'
       inlineScript: |
         set -x
-        subscription_info=$(az account show --query "{id:id, name:name}" -o tsv)
-        echo "Subscription info: $subscription_info"  # Debug output
-        all_models=$(az ml model list -o table)
-        echo "All models: $all_models"  # Debug output
         model_list=$(az ml model list -n taxi-model --query "[?name=='taxi-model'].version" -o tsv)
         echo "Model list: $model_list"  # Debug output
         latest_model_version=$(echo "$model_list" | sort -r | head -n 1)
         echo "Latest model version: $latest_model_version"  # Debug output
-        model_show=$(az ml model show -n taxi-model --version $latest_model_version --query 'artifactPath' -o tsv)
-        echo "Model show: $model_show"  # Debug output
-        model_path=$(echo "$model_show" | cut -d' ' -f2)
-        echo "Model path: $model_path"  # Debug output
+        model_path=$(az ml model show -n taxi-model --version $latest_model_version --query 'path')
+        echo "Model show: $model_path"  # Debug output
         echo "##vso[task.setvariable variable=modelFilePath]$model_path"
-        model_show=$(az ml model show -n taxi-model --version 2 -o tsv)
-        echo "Model show: $model_show"  # Debug output
   - task: AzureCLI@2
     displayName: 'Copy model file to Blob Storage'
     inputs:
