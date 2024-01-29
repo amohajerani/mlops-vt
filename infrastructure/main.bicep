@@ -14,6 +14,7 @@ param tags object = {
 }
 
 var baseName  = '${prefix}-${postfix}${env}'
+var baseNameAlphaNum  = '${prefix}${postfix}${env}'
 var resourceGroupName = 'rg-${baseName}'
 
 resource rg 'Microsoft.Resources/resourceGroups@2020-06-01' = {
@@ -28,7 +29,7 @@ module st './modules/storage_account.bicep' = {
   name: 'st'
   scope: resourceGroup(rg.name)
   params: {
-    baseName: basename
+    baseName: baseNameAlphaNum
     location: location
     tags: tags
   }
@@ -61,7 +62,7 @@ module cr './modules/container_registry.bicep' = {
   name: 'cr'
   scope: resourceGroup(rg.name)
   params: {
-    baseName: basename
+    baseName: baseNameAlphaNum
     location: location
     tags: tags
   }

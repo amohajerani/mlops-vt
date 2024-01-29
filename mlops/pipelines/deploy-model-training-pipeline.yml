@@ -1,6 +1,7 @@
 name: deploy-model-training-pipeline
 
 variables:
+  - group: vtpoc-vg
   - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
       - template: ../../config-infra-prod.yml
   - ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
