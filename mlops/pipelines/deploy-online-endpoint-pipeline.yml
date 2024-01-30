@@ -69,6 +69,8 @@ stages:
             inputs:
               artifact: 'MyPipelineArtifact'
               path: './models'
+          - template: ../templates/install-az-ext.yml
+          - template: ../templates/install-requirements.yml
           - template: ../templates/connect-to-workspace.yml
           - template: ../templates/register_model.yml
             parameters:
