@@ -18,4 +18,10 @@ steps:
     scriptType: bash
     scriptLocation: inlineScript
     inlineScript: |
-          python mlops/scripts/import_data.py $(aml_workspace) ${{parameters.snowflake_account}} ${{parameters.snowflake_user}} ${{parameters.snowflake_password}} ${{parameters.subscription_id}} $(resource_group)
+          python mlops/scripts/import_data.py \
+          $(aml_workspace) \
+          ${{parameters.snowflake_account}} \
+          ${{parameters.snowflake_user}} \
+          ${{parameters.snowflake_password}} \
+          ${{parameters.subscription_id}} \
+          $(resource_group)

@@ -67,7 +67,6 @@ def main():
         command="python prep.py \
                 --raw_data ${{inputs.raw_data}} \
                 --train_data ${{outputs.train_data}}  \
-                --val_data ${{outputs.val_data}} \
                 --test_data ${{outputs.test_data}} \
                 --enable_monitoring ${{inputs.enable_monitoring}} \
                 --table_name ${{inputs.table_name}}",
@@ -79,7 +78,6 @@ def main():
             },
         outputs={
             "train_data": Output(type="uri_folder"),
-            "val_data": Output(type="uri_folder"),
             "test_data": Output(type="uri_folder"),
             }
     )
