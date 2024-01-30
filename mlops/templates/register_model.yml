@@ -10,5 +10,5 @@ steps:
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
-      echo subscription_id: $(ado_service_connection_aml_ws)
-      az ml model register -n taxi-model -p $(model_path) --ws-name $(aml_workspace) --ws-resource-group $(resource_group)
+        echo subscription_id: $(ado_service_connection_aml_ws)
+        az ml model register -n taxi-model -p $(model_path) --ws-name $(aml_workspace) --ws-resource-group $(resource_group)
