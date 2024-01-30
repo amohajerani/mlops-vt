@@ -1,11 +1,6 @@
 parameters:
   - name: model_path
     type: string
-  - name: storageAccount
-    type: string
-  - name: containerName
-    type: string
-    default: 'models'
 
 steps:
   - task: AzureCLI@2
