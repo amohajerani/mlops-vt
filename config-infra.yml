@@ -1,0 +1,33 @@
+# Dev environment
+variables:
+  # Global
+  ap_vm_image: ubuntu-20.04
+
+  namespace: vtpoc #Note: A namespace with many characters will cause storage account creation to fail due to storage account names having a limit of 24 characters.
+  postfix: 6
+  location: eastus
+
+  # dev
+  enable_monitoring_dev: false
+  ado_service_connection_rg_dev: Azure-ARM-DEV-vtpoc
+  ado_service_connection_aml_ws_dev: Azure-ARM-DEV-vtpoc
+
+  resource_group_dev: rg-$(namespace)-$(postfix)dev
+  aml_workspace_dev: mlw-$(namespace)-$(postfix)dev
+  application_insights_dev: mlw-$(namespace)-$(postfix)dev
+  key_vault_dev: kv-$(namespace)-$(postfix)dev
+  container_registry_dev: cr$(namespace)$(postfix)dev
+  storage_account_dev: st$(namespace)$(postfix)dev
+
+
+# prod
+  enable_monitoring_prod: false
+  ado_service_connection_rg_prod: Azure-ARM-PROD-vtpoc
+  ado_service_connection_aml_ws_prod: Azure-ARM-PROD-vtpoc
+
+  resource_group_prod: rg-$(namespace)-$(postfix)prod
+  aml_workspace_prod: mlw-$(namespace)-$(postfix)prod
+  application_insights_prod: mlw-$(namespace)-$(postfix)prod
+  key_vault_prod: kv-$(namespace)-$(postfix)prod
+  container_registry_prod: cr$(namespace)$(postfix)prod
+  storage_account_prod: st$(namespace)$(postfix)prod

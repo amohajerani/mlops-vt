@@ -19,6 +19,11 @@ pool:
 stages:
   - stage: DeployDev
     displayName: Create/Update Online Endpoint in Dev
+    variables:
+      - group: vtpoc-vg
+      - template: ../../config-infra-dev.yml
+      - name: endpoint_name
+        value: taxi-online-$(namespace)$(postfix)$(environment)
     jobs:
       - job: DeployOnlineEndpointDev
         steps:
@@ -62,6 +67,11 @@ stages:
     displayName: Create/Update Online Endpoint in Prod
     dependsOn: DeployDev
     condition: succeeded('DeployDev')
+    variables:
+      - group: vtpoc-vg
+      - template: ../../config-infra-prod.yml
+      - name: endpoint_name
+        value: taxi-online-$(namespace)$(postfix)$(environment)
     jobs:
       - job: DeployOnlineEndpointProd
         steps:
