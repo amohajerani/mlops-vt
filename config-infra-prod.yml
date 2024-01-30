@@ -11,8 +11,8 @@ variables:
   enable_monitoring: false
 
   # Azure DevOps
-  ado_service_connection_rg: Azure-ARM-Prod-vtpoc
-  ado_service_connection_aml_ws: Azure-ARM-Prod-vtpoc
+  ado_service_connection_rg: Azure-ARM-PROD-vtpoc
+  ado_service_connection_aml_ws: Azure-ARM-PROD-vtpoc
 
 
   # For pipeline reference
