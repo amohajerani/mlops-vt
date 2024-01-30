@@ -7,7 +7,7 @@ variables:
   postfix: 6
   location: eastus
   environment: prod
-  subscription: PROD
+  subscriptionId: '81abea19-79ba-4bd3-8f04-e9761df1bd23'
   enable_monitoring: false
 
   # Azure DevOps
