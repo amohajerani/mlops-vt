@@ -35,6 +35,13 @@ stages:
           - template: ../templates/install-az-ext.yml
           - template: ../templates/install-requirements.yml
           - template: ../templates/connect-to-workspace.yml
+          # the next two tasks should move to the bottom
+          - template: ../templates/store_model.yml
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: './models'
+              artifact: 'MyPipelineArtifact'
+              publishLocation: 'pipeline'
           - template: ../templates/create-online-endpoint.yml
             parameters:
               endpoint_name: "${{ variables.endpoint_name }}"
@@ -50,12 +57,7 @@ stages:
             parameters:
               endpoint_name: "${{ variables.endpoint_name }}"
               sample_request: data/taxi-request.json
-          - template: ../templates/store_model.yml
-          - task: PublishPipelineArtifact@1
-            inputs:
-              targetPath: './models'
-              artifact: 'MyPipelineArtifact'
-              publishLocation: 'pipeline'
+
 
 
   - stage: DeployProd

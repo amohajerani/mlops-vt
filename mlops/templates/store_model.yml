@@ -1,6 +1,6 @@
 steps:
   - task: AzureCLI@2
-    displayName: 'Get model file path'
+    displayName: 'Download model from AML workspace'
     inputs:
       azureSubscription: $(ado_service_connection_aml_ws)
       scriptType: 'bash'
@@ -13,4 +13,4 @@ steps:
         echo "Latest model version: $latest_model_version"  # Debug output
         model_path=$(az ml model show -n taxi-model --version $latest_model_version --query 'path')
         echo "Model show: $model_path"  # Debug output
-        az ml model download -n taxi-model --version $latest_model_version  -p ./models --overwrite
+        az ml model download -n taxi-model --version $latest_model_version  -p ./models
