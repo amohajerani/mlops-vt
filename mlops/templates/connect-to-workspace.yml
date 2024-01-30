@@ -6,6 +6,8 @@ steps:
       scriptType: bash
       scriptLocation: inlineScript
       inlineScript: |
+        set -x
+        echo "ado_service_connection_aml_ws: $(ado_service_connection_aml_ws)"
         az configure --defaults group=$(resource_group) workspace=$(aml_workspace)
         currentId=$(az account show -o tsv --query id | tr -d '"\r')
         echo "##vso[task.setvariable variable=subscription_id;]$currentId"
