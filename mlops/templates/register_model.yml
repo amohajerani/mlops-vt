@@ -12,4 +12,4 @@ steps:
       inlineScript: |
         set -x
         echo service connection: $(ado_service_connection_aml_ws)
-        az ml model register -n taxi-model -p ${{ parameters.model_path }}  --ws-name $(aml_workspace) --ws-resource-group $(resource_group) --subscription-id $(subscriptionId)
+        az ml model register -n taxi-model -p ${{ parameters.model_path }}  --ws-name $(aml_workspace) --ws-resource-group $(resource_group)
