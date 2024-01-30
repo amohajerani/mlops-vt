@@ -75,6 +75,16 @@ stages:
     jobs:
       - job: DeployOnlineEndpointProd
         steps:
+          - checkout: self
+            path: s/
+          - task: Bash@3
+            displayName: "Create checkout repository folder(s)"
+            inputs:
+              targetType: "inline"
+              script: |
+                set -e
+                mkdir "$(Build.Repository.Name)"
+                mkdir "mlops-templates"
           - task: DownloadPipelineArtifact@2
             inputs:
               artifact: 'MyPipelineArtifact'
