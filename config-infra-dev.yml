@@ -7,6 +7,7 @@ variables:
   postfix: 6
   location: eastus
   environment: dev
+  subscription: DEV
   enable_monitoring: false
 
   # Azure DevOps
