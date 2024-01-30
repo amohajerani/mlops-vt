@@ -35,13 +35,44 @@ stages:
           - template: ../templates/install-az-ext.yml
           - template: ../templates/install-requirements.yml
           - template: ../templates/connect-to-workspace.yml
-          # the next two tasks should move to the bottom
+#          - template: ../templates/create-online-endpoint.yml
+#            parameters:
+#              endpoint_name: "${{ variables.endpoint_name }}"
+#              endpoint_description: "Taxi Online Endpoint"
+#              auth_mode: "key"
+#          - template: ../templates/create-online-deployment.yml
+#            parameters:
+#              deployment_name: taxi-online-dp
+#              endpoint_name: "${{ variables.endpoint_name }}"
+#              model_path: "taxi-model@latest"
+#              traffic_allocation: 100
+          - template: ../templates/test-online-endpoint.yml
+            parameters:
+              endpoint_name: "${{ variables.endpoint_name }}"
+              sample_request: data/taxi-request.json
           - template: ../templates/store_model.yml
           - task: PublishPipelineArtifact@1
             inputs:
               targetPath: './models'
               artifact: 'MyPipelineArtifact'
               publishLocation: 'pipeline'
+
+
+  - stage: DeployProd
+    displayName: Create/Update Online Endpoint in Prod
+    dependsOn: DeployDev
+    condition: succeeded('DeployDev')
+    jobs:
+      - job: DeployOnlineEndpointProd
+        steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifact: 'MyPipelineArtifact'
+              path: './models'
+          - template: ../templates/connect-to-workspace.yml
+          - template: ../templates/register_model.yml
+            parameters:
+              model_path: './models/taxi-model/taxi-model'
           - template: ../templates/create-online-endpoint.yml
             parameters:
               endpoint_name: "${{ variables.endpoint_name }}"
@@ -57,38 +88,3 @@ stages:
             parameters:
               endpoint_name: "${{ variables.endpoint_name }}"
               sample_request: data/taxi-request.json
-
-
-
-  - stage: DeployProd
-    displayName: Create/Update Online Endpoint in Prod
-    dependsOn: DeployDev
-    condition: succeeded('DeployDev')
-    jobs:
-      - job: DeployOnlineEndpointProd
-        steps:
-          - task: DownloadPipelineArtifact@2
-            inputs:
-              artifact: 'MyPipelineArtifact'
-              path: './models'
-          - template: ../templates/connect-to-workspace.yml
-#          - template: ../templates/register_model.yml
-#            parameters:
-#              asset_path: './models'
-#              storageAccount: "${{ variables.storage_account }}"
-#              containerName: "models"
-#          - template: ../templates/create-online-endpoint.yml
-#            parameters:
-#              endpoint_name: "${{ variables.endpoint_name }}"
-#              endpoint_description: "Taxi Online Endpoint"
-#              auth_mode: "key"
-#          - template: ../templates/create-online-deployment.yml
-#            parameters:
-#              deployment_name: taxi-online-dp
-#              endpoint_name: "${{ variables.endpoint_name }}"
-#              model_path: "taxi-model@latest"
-#              traffic_allocation: 100
-#          - template: ../templates/test-online-endpoint.yml
-#            parameters:
-#              endpoint_name: "${{ variables.endpoint_name }}"
-#              sample_request: data/taxi-request.json
