@@ -37,9 +37,9 @@ stages:
                 set -e
                 mkdir "$(Build.Repository.Name)"
                 mkdir "mlops-templates"
+          - template: ../templates/connect-to-workspace.yml
           - template: ../templates/install-az-ext.yml
           - template: ../templates/install-requirements.yml
-          - template: ../templates/connect-to-workspace.yml
 #          - template: ../templates/create-online-endpoint.yml
 #            parameters:
 #              endpoint_name: "${{ variables.endpoint_name }}"
@@ -79,9 +79,9 @@ stages:
             inputs:
               artifact: 'MyPipelineArtifact'
               path: './models'
+          - template: ../templates/connect-to-workspace.yml
           - template: ../templates/install-az-ext.yml
           - template: ../templates/install-requirements.yml
-          - template: ../templates/connect-to-workspace.yml
           - template: ../templates/register_model.yml
             parameters:
               model_path: './models/taxi-model/taxi-model'
