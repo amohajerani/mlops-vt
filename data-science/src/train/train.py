@@ -81,7 +81,7 @@ def get_mapper_0(column_names):
             },
         ]
     )
-    mapper = DataFrameMapper(features=definition, input_df=True, sparse=True)
+    mapper = DataFrameMapper(features=definition, input_df=True, sparse=True, df_out=True)
     
     return mapper
     
@@ -95,7 +95,7 @@ def get_mapper_1(column_names):
             },
         ]
     )
-    mapper = DataFrameMapper(features=definition, input_df=True, sparse=True)
+    mapper = DataFrameMapper(features=definition, input_df=True, sparse=True, df_out=True)
     
     return mapper
     
@@ -115,7 +115,7 @@ def get_mapper_2(column_names):
             },
         ]
     )
-    mapper = DataFrameMapper(features=definition, input_df=True, sparse=True)
+    mapper = DataFrameMapper(features=definition, input_df=True, sparse=True, df_out=True)
     
     return mapper
     
@@ -130,7 +130,7 @@ def get_mapper_3(column_names):
             },
         ]
     )
-    mapper = DataFrameMapper(features=definition, input_df=True, sparse=True)
+    mapper = DataFrameMapper(features=definition, input_df=True, sparse=True, df_out=True)
     
     return mapper
 
@@ -258,16 +258,14 @@ def main(args):
     model = model_pipeline.fit(X_train, y_train)
 
     # log model hyperparameters
-    mlflow.log_param("model", "RandomForestRegressor")
-    mlflow.log_param("n_estimators", args.regressor__n_estimators)
-    mlflow.log_param("bootstrap", args.regressor__bootstrap)
-    mlflow.log_param("max_depth", args.regressor__max_depth)
-    mlflow.log_param("max_features", args.regressor__max_features)
-    mlflow.log_param("min_samples_leaf", args.regressor__min_samples_leaf)
-    mlflow.log_param("min_samples_split", args.regressor__min_samples_split)
-
-    # Train model with the train set
-    model.fit(X_train, y_train)
+    mlflow.log_param("model", "XGBRegressor")
+    mlflow.log_param("n_estimators", model.get_params()['model__n_estimators'])
+    mlflow.log_param("learning_rate", model.get_params()['model__learning_rate'])
+    mlflow.log_param("max_depth", model.get_params()['model__max_depth'])
+    mlflow.log_param("subsample", model.get_params()['model__subsample'])
+    mlflow.log_param("colsample_bytree", model.get_params()['model__colsample_bytree'])
+    mlflow.log_param("reg_alpha", model.get_params()['model__reg_alpha'])
+    mlflow.log_param("reg_lambda", model.get_params()['model__reg_lambda'])
 
     # Predict using the Regression Model
     yhat_train = model.predict(X_train)
