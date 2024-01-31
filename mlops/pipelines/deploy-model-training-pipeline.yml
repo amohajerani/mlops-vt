@@ -38,7 +38,7 @@ stages:
           - template: ../templates/create-compute.yml
             parameters:
               cluster_name: cpu-cluster
-              size: Standard_DS3_v2
+              size: Standard_E4_v3
               min_instances: 0
               max_instances: 1
               cluster_tier: dedicated
