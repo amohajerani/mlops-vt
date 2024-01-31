@@ -81,7 +81,7 @@ def get_mapper_0(column_names):
             },
         ]
     )
-    mapper = DataFrameMapper(features=definition, input_df=True, sparse=True, df_out=True)
+    mapper = DataFrameMapper(features=definition, input_df=True, sparse=False, df_out=True)
     
     return mapper
     
