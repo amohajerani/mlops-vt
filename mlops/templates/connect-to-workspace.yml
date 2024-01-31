@@ -8,6 +8,7 @@ steps:
       inlineScript: |
         set -x
         set -e
+        az account list --output table
         echo "ado_service_connection_aml_ws: $(ado_service_connection_aml_ws)"
         echo "subscriptionId: $(subscriptionId)"
         az account set --subscription $(subscriptionId)
