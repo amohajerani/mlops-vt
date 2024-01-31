@@ -43,8 +43,9 @@ def parse_args():
 def string_cast(x):
     return x.astype(str)
 
-def wrap_in_list(x):
-    return [x]
+
+def wrap_in_list_and_convert_to_string(x):
+    return [str(i) for i in x]
 
 def get_mapper_0(column_names):
     definition = gen_features(
@@ -76,7 +77,7 @@ def get_mapper_0(column_names):
                 'stop_words': None,
                 'strip_accents': None,
                 'token_pattern': '(?u)\\b\\w\\w+\\b',
-                'tokenizer': wrap_in_list,
+                'tokenizer': wrap_in_list_and_convert_to_string,
                 'vocabulary': None,
             },
         ]
