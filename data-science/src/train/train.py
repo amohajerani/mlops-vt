@@ -22,6 +22,7 @@ from sklearn_pandas.dataframe_mapper import DataFrameMapper
 from sklearn_pandas.features_generator import gen_features
 from sklearn.impute import SimpleImputer
 from sklearn.impute import MissingIndicator
+from sklearn.pipeline import FeatureUnion
 
 logger = logging.getLogger("azureml.training.tabular")
 
@@ -105,7 +106,6 @@ def get_mapper_2(column_names):
                 'fill_value': None,
                 'missing_values': numpy.nan,
                 'strategy': 'mean',
-                'verbose': 0,
             },
         ]
     )
@@ -136,7 +136,7 @@ def generate_data_transformation_config():
     50 columns in several column groups), these columns are handled by grouping based on type. Each column
     group then has a unique mapper applied to all columns in the group.
     '''
-    from sklearn.pipeline import FeatureUnion
+    
     
     column_group_3 = [['GENDERID'], ['PROVIDERAGE'], ['TENURE'], ['PROD_DSNP'], ['PROD_CKD'], ['PROD_DEE'], ['PROD_FOBT'], ['PROD_SPIROMETRY'], ['PROD_HBA1C'], ['PROD_HHRA'], ['PROD_MHC'], ['PROD_MTM'], ['PROD_OMW'], ['PROD_PAD']]
     
