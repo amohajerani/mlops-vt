@@ -57,6 +57,7 @@ def get_mapper_0(column_names):
             },
             {
                 'class': FunctionTransformer,
+                'func': string_cast,
             },
             {
                 'class': CountVectorizer,
