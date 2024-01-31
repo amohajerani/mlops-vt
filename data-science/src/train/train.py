@@ -150,7 +150,7 @@ def generate_data_transformation_config():
     
     column_group_1 = ['SERVICE_DAY', 'DATEOFBIRTH', 'HIRINGDATE']
     
-    column_group_0 = ['STATE', 'CLIENT', 'LOB', 'EMPLOYEETYPENAME', 'PROVIDERSTATE', 'DEGREE']
+    column_group_0 = [['STATE'], ['CLIENT'], ['LOB'], ['EMPLOYEETYPENAME'], ['PROVIDERSTATE'], ['DEGREE']]
     
     feature_union = FeatureUnion([
         ('mapper_0', get_mapper_0(column_group_0)),
