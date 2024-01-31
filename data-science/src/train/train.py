@@ -51,6 +51,11 @@ def get_mapper_0(column_names):
         columns=column_names,
         classes=[
             {
+                'class': SimpleImputer,
+                'strategy': 'constant',
+                'fill_value': '',
+            },
+            {
                 'class': FunctionTransformer,
             },
             {
