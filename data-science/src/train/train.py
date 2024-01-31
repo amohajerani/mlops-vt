@@ -95,7 +95,7 @@ def get_mapper_1(column_names):
             },
         ]
     )
-    mapper = DataFrameMapper(features=definition, input_df=True, sparse=True, df_out=True)
+    mapper = DataFrameMapper(features=definition, input_df=True, sparse=False, df_out=True)
     
     return mapper
     
@@ -115,7 +115,7 @@ def get_mapper_2(column_names):
             },
         ]
     )
-    mapper = DataFrameMapper(features=definition, input_df=True, sparse=True, df_out=True)
+    mapper = DataFrameMapper(features=definition, input_df=True, sparse=False, df_out=True)
     
     return mapper
     
@@ -130,7 +130,7 @@ def get_mapper_3(column_names):
             },
         ]
     )
-    mapper = DataFrameMapper(features=definition, input_df=True, sparse=True, df_out=True)
+    mapper = DataFrameMapper(features=definition, input_df=True, sparse=False, df_out=True)
     
     return mapper
 
