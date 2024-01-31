@@ -17,21 +17,7 @@ import mlflow.sklearn
 import mlflow.pyfunc
 from mlflow.tracking import MlflowClient
 
-TARGET_COL = "cost"
-
-NUMERIC_COLS = [
-    "distance", "dropoff_latitude", "dropoff_longitude", "passengers", "pickup_latitude",
-    "pickup_longitude", "pickup_weekday", "pickup_month", "pickup_monthday", "pickup_hour",
-    "pickup_minute", "pickup_second", "dropoff_weekday", "dropoff_month", "dropoff_monthday",
-    "dropoff_hour", "dropoff_minute", "dropoff_second"
-]
-
-CAT_NOM_COLS = [
-    "store_forward", "vendor"
-]
-
-CAT_ORD_COLS = [
-]
+TARGET_COL = "VISIT_TIME"
 
 def parse_args():
     '''Parse input arguments'''
@@ -54,7 +40,7 @@ def main(args):
 
     # Split the data into inputs and outputs
     y_test = test_data[TARGET_COL]
-    X_test = test_data[NUMERIC_COLS + CAT_NOM_COLS + CAT_ORD_COLS]
+    X_test = test_data.drop(columns=TARGET_COL)
 
     # Load the model from input port
     model =  mlflow.sklearn.load_model(args.model_input) 
@@ -116,14 +102,15 @@ def model_promotion(model_name, evaluation_output, X_test, y_test, yhat_test, sc
     predictions = {}
 
     client = MlflowClient()
+    # Get the latest version of the model
+    model_run = client.search_model_versions(f"name='{model_name}'")[0]
+    model_version = model_run.version
 
-    for model_run in client.search_model_versions(f"name='{model_name}'"):
-        model_version = model_run.version
-        mdl = mlflow.pyfunc.load_model(
-            model_uri=f"models:/{model_name}/{model_version}")
-        predictions[f"{model_name}:{model_version}"] = mdl.predict(X_test)
-        scores[f"{model_name}:{model_version}"] = r2_score(
-            y_test, predictions[f"{model_name}:{model_version}"])
+    mdl = mlflow.pyfunc.load_model(
+        model_uri=f"models:/{model_name}/{model_version}")
+    predictions[f"{model_name}:{model_version}"] = mdl.predict(X_test)
+    scores[f"{model_name}:{model_version}"] = r2_score(
+        y_test, predictions[f"{model_name}:{model_version}"])
 
     if scores:
         if score >= max(list(scores.values())):
