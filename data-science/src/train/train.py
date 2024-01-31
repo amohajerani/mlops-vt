@@ -11,30 +11,21 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
-from azureml.training.tabular._diagnostics import logging_utilities
 import mlflow
 import mlflow.sklearn
 import logging
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import FunctionTransformer
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn_pandas.dataframe_mapper import DataFrameMapper
+from sklearn_pandas.features_generator import gen_features
+from sklearn.impute import SimpleImputer
+from sklearn.impute import MissingIndicator
 
 logger = logging.getLogger("azureml.training.tabular")
 
 TARGET_COL = "VISIT_TIME"
-
-NUMERIC_COLS = [
-    "distance", "dropoff_latitude", "dropoff_longitude", "passengers", "pickup_latitude",
-    "pickup_longitude", "pickup_weekday", "pickup_month", "pickup_monthday", "pickup_hour",
-    "pickup_minute", "pickup_second", "dropoff_weekday", "dropoff_month", "dropoff_monthday",
-    "dropoff_hour", "dropoff_minute", "dropoff_second"
-]
-
-CAT_NOM_COLS = [
-    "store_forward", "vendor"
-]
-
-CAT_ORD_COLS = [
-]
 
 
 def parse_args():
@@ -48,19 +39,18 @@ def parse_args():
 
     return args
 
+def string_cast(x):
+    return x.astype(str)
+
+def wrap_in_list(x):
+    return [x]
+
 def get_mapper_0(column_names):
-    from azureml.training.tabular.featurization.text.stringcast_transformer import StringCastTransformer
-    from azureml.training.tabular.featurization.utilities import wrap_in_list
-    from numpy import uint8
-    from sklearn.feature_extraction.text import CountVectorizer
-    from sklearn_pandas.dataframe_mapper import DataFrameMapper
-    from sklearn_pandas.features_generator import gen_features
-    
     definition = gen_features(
         columns=column_names,
         classes=[
             {
-                'class': StringCastTransformer,
+                'class': FunctionTransformer,
             },
             {
                 'class': CountVectorizer,
@@ -90,24 +80,11 @@ def get_mapper_0(column_names):
     
     
 def get_mapper_1(column_names):
-    from azureml.training.tabular.featurization.categorical.cat_imputer import CatImputer
-    from azureml.training.tabular.featurization.datetime.datetime_transformer import DateTimeFeaturesTransformer
-    from azureml.training.tabular.featurization.text.stringcast_transformer import StringCastTransformer
-    from sklearn_pandas.dataframe_mapper import DataFrameMapper
-    from sklearn_pandas.features_generator import gen_features
-    
     definition = gen_features(
         columns=column_names,
         classes=[
             {
-                'class': CatImputer,
-                'copy': True,
-            },
-            {
-                'class': StringCastTransformer,
-            },
-            {
-                'class': DateTimeFeaturesTransformer,
+                'class': StandardScaler,
             },
         ]
     )
@@ -117,9 +94,6 @@ def get_mapper_1(column_names):
     
     
 def get_mapper_2(column_names):
-    from sklearn.impute import SimpleImputer
-    from sklearn_pandas.dataframe_mapper import DataFrameMapper
-    from sklearn_pandas.features_generator import gen_features
     
     definition = gen_features(
         columns=column_names,
@@ -140,16 +114,13 @@ def get_mapper_2(column_names):
     return mapper
     
     
-def get_mapper_3(column_names):
-    from azureml.training.tabular.featurization.generic.imputation_marker import ImputationMarker
-    from sklearn_pandas.dataframe_mapper import DataFrameMapper
-    from sklearn_pandas.features_generator import gen_features
-    
+def get_mapper_3(column_names):  
     definition = gen_features(
         columns=column_names,
         classes=[
             {
-                'class': ImputationMarker,
+                'class': MissingIndicator,
+                'features': 'all',  # this will add a mask for all features
             },
         ]
     )

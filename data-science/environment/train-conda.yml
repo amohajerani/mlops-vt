@@ -14,7 +14,7 @@ dependencies:
       - joblib
       - matplotlib
       - xgboost
-      - azureml-training-tabular
+      - sklearn-pandas
       - azureml-inference-server-http
       - git+https://github.com/microsoft/AzureML-Observability#subdirectory=aml-obs-client
       - git+https://github.com/microsoft/AzureML-Observability#subdirectory=aml-obs-collector
