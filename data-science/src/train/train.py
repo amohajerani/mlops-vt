@@ -114,7 +114,7 @@ def build_model_pipeline():
     
     
     logger.info("Running build_model_pipeline")
-# Create the pipeline
+    # Create the pipeline
     pipeline = Pipeline(steps=[('truncator', CustomStringTruncator('CLIENT')),
         ('preprocessor', preprocessor),
                            ('classifier', model_definition())])
@@ -136,13 +136,11 @@ def main(args):
 
     # log model hyperparameters
     mlflow.log_param("model", "XGBRegressor")
-    mlflow.log_param("n_estimators", model.get_params()['model__n_estimators'])
-    mlflow.log_param("learning_rate", model.get_params()['model__learning_rate'])
-    mlflow.log_param("max_depth", model.get_params()['model__max_depth'])
-    mlflow.log_param("subsample", model.get_params()['model__subsample'])
-    mlflow.log_param("colsample_bytree", model.get_params()['model__colsample_bytree'])
-    mlflow.log_param("reg_alpha", model.get_params()['model__reg_alpha'])
-    mlflow.log_param("reg_lambda", model.get_params()['model__reg_lambda'])
+    mlflow.log_param("n_estimators", model.get_params()['n_estimators'])
+    mlflow.log_param("max_depth", model.get_params()['max_depth'])
+    mlflow.log_param("objective", model.get_params()['objective'])
+    mlflow.log_param("reg_alpha", model.get_params()['reg_alpha'])
+    mlflow.log_param("reg_lambda", model.get_params()['reg_lambda'])
 
     # Predict using the Regression Model
     yhat_train = model.predict(X_train)
