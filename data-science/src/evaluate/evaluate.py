@@ -98,7 +98,8 @@ def model_evaluation(X_test, y_test, model, evaluation_output):
 
 def model_promotion(model_name, evaluation_output, X_test, y_test, yhat_test, score):
     '''
-    Compare the current model with the latest version of the model in the registry.
+    # Compare the current model with the latest version of the model in the registry.
+    # TODO: uncomment this piece
 
     scores = {}
     predictions = {}
