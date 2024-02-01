@@ -7,10 +7,10 @@ steps:
       scriptLocation: 'inlineScript'
       inlineScript: |
         set -x
-        model_list=$(az ml model list -n taxi-model --query "[?name=='taxi-model'].version" -o tsv)
+        model_list=$(az ml model list -n vt-model --query "[?name=='vt-model'].version" -o tsv)
         echo "Model list: $model_list"  # Debug output
         latest_model_version=$(echo "$model_list" | sort -r | head -n 1)
         echo "Latest model version: $latest_model_version"  # Debug output
-        model_path=$(az ml model show -n taxi-model --version $latest_model_version --query 'path')
+        model_path=$(az ml model show -n vt-model --version $latest_model_version --query 'path')
         echo "Model show: $model_path"  # Debug output
-        az ml model download -n taxi-model --version $latest_model_version  -p ./models
+        az ml model download -n vt-model --version $latest_model_version  -p ./models

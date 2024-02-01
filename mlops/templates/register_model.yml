@@ -13,4 +13,4 @@ steps:
         set -x
         echo service connection: $(ado_service_connection_aml_ws)
         az account set --subscription $(subscriptionId)
-        az ml model create -n taxi-model -p ${{ parameters.model_path }}  --workspace-name $(aml_workspace) --resource-group $(resource_group) --type mlflow_model
+        az ml model create -n vt-model -p ${{ parameters.model_path }}  --workspace-name $(aml_workspace) --resource-group $(resource_group) --type mlflow_model

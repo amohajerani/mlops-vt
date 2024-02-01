@@ -42,6 +42,18 @@ def parse_args():
 
     return args
 
+class ArrayToDataFrameTransformer(BaseEstimator, TransformerMixin):
+    def __init__(self, column_names):
+        self.column_names = column_names
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        if isinstance(X, np.ndarray):
+            X = pd.DataFrame(X, columns=self.column_names)
+        return X
+
 class CustomStringTruncator(BaseEstimator, TransformerMixin):
     def __init__(self, column_name):
         self.column_name = column_name
@@ -112,12 +124,14 @@ def build_model_pipeline():
     Defines the scikit-learn pipeline steps.
     '''
     
-    
+    column_names = numerical_features + categorical_features
     logger.info("Running build_model_pipeline")
     # Create the pipeline
-    pipeline = Pipeline(steps=[('truncator', CustomStringTruncator('CLIENT')),
+    pipeline = Pipeline(steps=[
+        ('array_to_df', ArrayToDataFrameTransformer(column_names)),
+        ('truncator', CustomStringTruncator('CLIENT')),
         ('preprocessor', preprocessor),
-                           ('classifier', model_definition())])
+        ('classifier', model_definition())])
     return pipeline
 
 
@@ -126,6 +140,10 @@ def main(args):
 
     # Read train data
     train_data = pd.read_parquet(Path(args.train_data))
+
+    # Reorder columns
+    column_order = numerical_features + categorical_features + [TARGET_COL]
+    train_data = train_data[column_order]
 
     # Split the data into input(X) and output(y)
     y_train = train_data[TARGET_COL]

@@ -12,7 +12,7 @@ parameters:
   default: "false"
 - name: table_name
   type: string
-  default: "taximonitoring"
+  default: "vtmonitoring"
 
 
 steps:
