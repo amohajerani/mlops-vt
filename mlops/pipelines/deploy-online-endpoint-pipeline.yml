@@ -40,17 +40,17 @@ stages:
           - template: ../templates/connect-to-workspace.yml
           - template: ../templates/install-az-ext.yml
           - template: ../templates/install-requirements.yml
-#          - template: ../templates/create-online-endpoint.yml
-#            parameters:
-#              endpoint_name: "${{ variables.endpoint_name }}"
-#              endpoint_description: "Taxi Online Endpoint"
-#              auth_mode: "key"
-#          - template: ../templates/create-online-deployment.yml
-#            parameters:
-#              deployment_name: taxi-online-dp
-#              endpoint_name: "${{ variables.endpoint_name }}"
-#              model_path: "taxi-model@latest"
-#              traffic_allocation: 100
+          - template: ../templates/create-online-endpoint.yml
+            parameters:
+              endpoint_name: "${{ variables.endpoint_name }}"
+              endpoint_description: "Taxi Online Endpoint"
+              auth_mode: "key"
+          - template: ../templates/create-online-deployment.yml
+            parameters:
+              deployment_name: taxi-online-dp
+              endpoint_name: "${{ variables.endpoint_name }}"
+              model_path: "taxi-model@latest"
+              traffic_allocation: 100
           - template: ../templates/test-online-endpoint.yml
             parameters:
               endpoint_name: "${{ variables.endpoint_name }}"
