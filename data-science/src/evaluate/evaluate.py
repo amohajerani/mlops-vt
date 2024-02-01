@@ -142,7 +142,10 @@ def model_promotion(model_name, evaluation_output, X_test, y_test, yhat_test, sc
 
     return predictions, deploy_flag
     '''
-    return None, 1
+    deploy_flag = 1
+    with open((Path(evaluation_output) / "deploy_flag"), 'w') as outfile:
+        outfile.write(f"{int(deploy_flag)}")
+    return None, deploy_flag
     
 
 if __name__ == "__main__":
