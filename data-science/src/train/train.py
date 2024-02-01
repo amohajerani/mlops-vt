@@ -136,11 +136,11 @@ def main(args):
 
     # log model hyperparameters
     mlflow.log_param("model", "XGBRegressor")
-    mlflow.log_param("n_estimators", model.get_params()['n_estimators'])
-    mlflow.log_param("max_depth", model.get_params()['max_depth'])
-    mlflow.log_param("objective", model.get_params()['objective'])
-    mlflow.log_param("reg_alpha", model.get_params()['reg_alpha'])
-    mlflow.log_param("reg_lambda", model.get_params()['reg_lambda'])
+    mlflow.log_param("n_estimators", model.named_steps['classifier'].get_params()['n_estimators'])
+    mlflow.log_param("max_depth", model.named_steps['classifier'].get_params()['max_depth'])
+    mlflow.log_param("objective", model.named_steps['classifier'].get_params()['objective'])
+    mlflow.log_param("reg_alpha", model.named_steps['classifier'].get_params()['reg_alpha'])
+    mlflow.log_param("reg_lambda", model.named_steps['classifier'].get_params()['reg_lambda'])
 
     # Predict using the Regression Model
     yhat_train = model.predict(X_train)
