@@ -15,18 +15,20 @@ from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 import mlflow
 import mlflow.sklearn
 import logging
-from sklearn.preprocessing import StandardScaler
-from sklearn.preprocessing import FunctionTransformer
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn_pandas.dataframe_mapper import DataFrameMapper
-from sklearn_pandas.features_generator import gen_features
+from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
-from sklearn.impute import MissingIndicator
-from sklearn.pipeline import FeatureUnion
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.pipeline import Pipeline
+from xgboost.sklearn import XGBRegressor
+from sklearn.base import BaseEstimator, TransformerMixin
 
 logger = logging.getLogger("azureml.training.tabular")
 
 TARGET_COL = "VISIT_TIME"
+# Define your categorical and numerical columns
+categorical_features = ['STATE', 'CLIENT', 'LOB', 'EMPLOYEETYPENAME', 'PROVIDERSTATE', 'DEGREE']
+numerical_features = ['PROD_CKD', 'PROD_PAD', 'VISIT_TIME_MEAN', 'PROD_HHRA', 'GENDERID', 'PROD_MHC', 'PROVIDERAGE', 'PROD_DEE', 'TENURE', 'VISIT_COUNT', 'PROD_DSNP', 'PROD_SPIROMETRY', 'PROD_OMW', 'PROD_FOBT', 'PROD_HBA1C', 'APPT_LNG', 'APPT_LAT', 'PROD_MTM']
 
 
 def parse_args():
@@ -40,156 +42,18 @@ def parse_args():
 
     return args
 
-def string_cast(x):
-    return x.astype(str)
+class CustomStringTruncator(BaseEstimator, TransformerMixin):
+    def __init__(self, column_name):
+        self.column_name = column_name
 
+    def fit(self, X, y=None):
+        return self
 
-def wrap_in_list_and_convert_to_string(x):
-    return [str(i) for i in x]
-
-def get_mapper_0(column_names):
-    definition = gen_features(
-        columns=column_names,
-        classes=[
-            {
-                'class': SimpleImputer,
-                'strategy': 'constant',
-                'fill_value': '',
-            },
-            {
-                'class': FunctionTransformer,
-                'func': string_cast,
-            },
-            {
-                'class': CountVectorizer,
-                'analyzer': 'word',
-                'binary': True,
-                'decode_error': 'strict',
-                'dtype': numpy.uint8,
-                'encoding': 'utf-8',
-                'input': 'content',
-                'lowercase': True,
-                'max_df': 1.0,
-                'max_features': None,
-                'min_df': 1,
-                'ngram_range': (1, 1),
-                'preprocessor': None,
-                'stop_words': None,
-                'strip_accents': None,
-                'token_pattern': '(?u)\\b\\w\\w+\\b',
-                'tokenizer': wrap_in_list_and_convert_to_string,
-                'vocabulary': None,
-            },
-        ]
-    )
-    mapper = DataFrameMapper(features=definition, input_df=True, sparse=False, df_out=True)
+    def transform(self, X):
+        X[self.column_name] = X[self.column_name].str[:4].str.lower()
+        return X    
     
-    return mapper
-    
-    
-def get_mapper_1(column_names):
-    definition = gen_features(
-        columns=column_names,
-        classes=[
-            {
-                'class': StandardScaler,
-            },
-        ]
-    )
-    mapper = DataFrameMapper(features=definition, input_df=True, sparse=False, df_out=True)
-    
-    return mapper
-    
-    
-def get_mapper_2(column_names):
-    
-    definition = gen_features(
-        columns=column_names,
-        classes=[
-            {
-                'class': SimpleImputer,
-                'add_indicator': False,
-                'copy': True,
-                'fill_value': None,
-                'missing_values': numpy.nan,
-                'strategy': 'mean',
-            },
-        ]
-    )
-    mapper = DataFrameMapper(features=definition, input_df=True, sparse=False, df_out=True)
-    
-    return mapper
-    
-    
-def get_mapper_3(column_names):  
-    definition = gen_features(
-        columns=column_names,
-        classes=[
-            {
-                'class': MissingIndicator,
-                'features': 'all',  # this will add a mask for all features
-            },
-        ]
-    )
-    mapper = DataFrameMapper(features=definition, input_df=True, sparse=False, df_out=True)
-    
-    return mapper
-
-def generate_data_transformation_config():
-    '''
-    Specifies the featurization step in the final scikit-learn pipeline.
-    
-    If you have many columns that need to have the same featurization/transformation applied (for example,
-    50 columns in several column groups), these columns are handled by grouping based on type. Each column
-    group then has a unique mapper applied to all columns in the group.
-    '''
-    
-    
-    column_group_3 = [['GENDERID'], ['PROVIDERAGE'], ['TENURE'], ['PROD_DSNP'], ['PROD_CKD'], ['PROD_DEE'], ['PROD_FOBT'], ['PROD_SPIROMETRY'], ['PROD_HBA1C'], ['PROD_HHRA'], ['PROD_MHC'], ['PROD_MTM'], ['PROD_OMW'], ['PROD_PAD']]
-    
-    column_group_2 = [['APPT_LAT'], ['APPT_LNG'], ['GENDERID'], ['PROVIDERAGE'], ['TENURE'], ['PROD_DSNP'], ['PROD_CKD'], ['PROD_DEE'], ['PROD_FOBT'], ['PROD_SPIROMETRY'], ['PROD_HBA1C'], ['PROD_HHRA'], ['PROD_MHC'], ['PROD_MTM'], ['PROD_OMW'], ['PROD_PAD'], ['VISIT_TIME_MEAN'], ['VISIT_COUNT']]
-    
-    column_group_1 = ['SERVICE_DAY', 'DATEOFBIRTH', 'HIRINGDATE']
-    
-    column_group_0 = [['STATE'], ['CLIENT'], ['LOB'], ['EMPLOYEETYPENAME'], ['PROVIDERSTATE'], ['DEGREE']]
-    
-    feature_union = FeatureUnion([
-        ('mapper_0', get_mapper_0(column_group_0)),
-        ('mapper_1', get_mapper_1(column_group_1)),
-        ('mapper_2', get_mapper_2(column_group_2)),
-        ('mapper_3', get_mapper_3(column_group_3)),
-    ])
-    return feature_union
-
-def generate_preprocessor_config():
-    '''
-    Specifies a preprocessing step to be done after featurization in the final scikit-learn pipeline.
-    
-    Normally, this preprocessing step only consists of data standardization/normalization that is
-    accomplished with sklearn.preprocessing. Automated ML only specifies a preprocessing step for
-    non-ensemble classification and regression models.
-    '''
-    from sklearn.preprocessing import Normalizer
-    
-    preproc = Normalizer(
-        copy=True,
-        norm='l1'
-    )
-    
-    return preproc
-    
-    
-def generate_algorithm_config():
-    '''
-    Specifies the actual algorithm and hyperparameters for training the model.
-    
-    It is the last stage of the final scikit-learn pipeline. For ensemble models, generate_preprocessor_config_N()
-    (if needed) and generate_algorithm_config_N() are defined for each learner in the ensemble model,
-    where N represents the placement of each learner in the ensemble model's list. For stack ensemble
-    models, the meta learner generate_algorithm_config_meta() is defined.
-    '''
-    from xgboost.sklearn import XGBRegressor
-    
+def model_definition():  
     algorithm = XGBRegressor(
         base_score=0.5,
         booster='gbtree',
@@ -227,21 +91,33 @@ def generate_algorithm_config():
     
     return algorithm
 
+
+# Create the transformers
+categorical_transformer = Pipeline(steps=[
+    ('imputer', SimpleImputer(strategy='most_frequent')),
+    ('onehot', OneHotEncoder(handle_unknown='ignore'))])
+
+numerical_transformer = Pipeline(steps=[
+    ('imputer', SimpleImputer(strategy='median')),
+    ('scaler', StandardScaler())])
+
+# Combine the transformers using ColumnTransformer
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('num', numerical_transformer, numerical_features),
+        ('cat', categorical_transformer, categorical_features)])
+
 def build_model_pipeline():
     '''
     Defines the scikit-learn pipeline steps.
     '''
-    from sklearn.pipeline import Pipeline
+    
     
     logger.info("Running build_model_pipeline")
-    pipeline = Pipeline(
-        steps=[
-            ('featurization', generate_data_transformation_config()),
-            ('preproc', generate_preprocessor_config()),
-            ('model', generate_algorithm_config()),
-        ]
-    )
-    
+# Create the pipeline
+    pipeline = Pipeline(steps=[('truncator', CustomStringTruncator('CLIENT')),
+        ('preprocessor', preprocessor),
+                           ('classifier', model_definition())])
     return pipeline
 
 
