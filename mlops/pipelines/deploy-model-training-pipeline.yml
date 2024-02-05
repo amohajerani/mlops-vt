@@ -1,0 +1,58 @@
+name: deploy-model-training-pipeline
+
+variables:
+  - group: vtpoc-vg
+  - template: ../../config-infra-dev.yml
+
+trigger: none
+
+pool:
+  vmImage: ubuntu-20.04
+
+stages:
+  - stage: DeployTrainingPipeline
+    displayName: Deploy Training Pipeline
+    jobs:
+      - job: DeployTrainingPipeline
+        timeoutInMinutes: 120
+        steps:
+          - checkout: self
+            path: s/
+          - task: Bash@3
+            displayName: "Create checkout repository folder(s)"
+            inputs:
+              targetType: "inline"
+              script: |
+                set -e
+                mkdir "$(Build.Repository.Name)"
+          - template: ../templates/install-az-ext.yml
+          - template: ../templates/install-requirements.yml
+          - template: ../templates/run-unit-tests.yml
+          - template: ../templates/connect-to-workspace.yml
+          - template: ../templates/import-data.yml
+            parameters:
+              snowflake_account: $(SNOWFLAKE_ACCOUNT)
+              snowflake_user: $(SNOWFLAKE_USER)
+              snowflake_password: $(SNOWFLAKE_PASSWORD)
+              subscription_id: $(SUBSCRIPTION_ID)
+          - template: ../templates/create-compute.yml
+            parameters:
+              cluster_name: cpu-cluster
+              size: Standard_F4s_v2
+              min_instances: 0
+              max_instances: 1
+              cluster_tier: dedicated
+          - template: ../templates/register-environment.yml
+            parameters:
+              environment_name: vt-train-env
+              environment_description: "Training Environment for VT Pipeline"
+              environment_path: data-science/environment/train-conda.yml
+              build_type: conda
+          - template: ../templates/run-pipeline.yml
+            parameters:
+              experiment_name: vt-train-pipeline
+              data_name: train
+              environment_name: vt-train-env
+              compute_name: cpu-cluster
+              enable_monitoring: $(enable_monitoring)
+              table_name: "vtmonitoring"
