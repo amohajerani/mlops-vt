@@ -19,13 +19,6 @@ trigger: none
 pool:
   vmImage: ubuntu-20.04
 
-resources:
-  repositories:
-    - repository: mlops-templates # Template Repo
-      name: mlops-templates
-      type: git
-      ref: main
-
 stages:
   - stage: CreateBatchEndpoint
     displayName: Create/Update Batch Endpoint
@@ -42,8 +35,6 @@ stages:
                 set -e
                 mkdir "$(Build.Repository.Name)"
                 mkdir "mlops-templates"
-          - checkout: mlops-templates
-            path: s/templates/
           - template: templates/aml-cli-v2/install-az-cli.yml@mlops-templates
           - template: templates/aml-cli-v2/install-aml-cli.yml@mlops-templates
           - template: templates/aml-cli-v2/connect-to-workspace.yml@mlops-templates
@@ -54,19 +45,19 @@ stages:
               min_instances: 0
               max_instances: 5
               cluster_tier: dedicated
-          - template: templates/${{ variables.version }}/create-batch-endpoint.yml@mlops-templates
+          - template: templates/${{ variables.version }}/create-batch-endpoint.yml
             parameters:
               endpoint_name: "${{ variables.endpoint_name }}"
               endpoint_description: "VT batch endpoint"
               auth_mode: "aad_token"
-          - template: templates/${{ variables.version }}/create-batch-deployment.yml@mlops-templates
+          - template: templates/${{ variables.version }}/create-batch-deployment.yml
             parameters:
               deployment_name: vt-batch-dp
               deployment_description: "VT batch deployment"
               endpoint_name: "${{ variables.endpoint_name }}"
               model_path: "vt-model@latest"
               compute: batch-cluster
-          - template: templates/${{ variables.version }}/test-batch-endpoint.yml@mlops-templates
+          - template: templates/${{ variables.version }}/test-batch-endpoint.yml
             parameters:
               endpoint_name: "${{ variables.endpoint_name }}"
               sample_request: data/vt-batch.csv
