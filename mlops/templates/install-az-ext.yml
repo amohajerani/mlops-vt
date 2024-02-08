@@ -8,6 +8,7 @@ steps:
       workingDirectory: $(System.DefaultWorkingDirectory)
       inlineScript: |
         set -e # fail on error
+        set -x # display command
         az version
         az extension add -n ml -y
         az extension list   

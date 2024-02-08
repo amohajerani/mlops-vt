@@ -12,9 +12,7 @@ parameters:
   default: "false"
 - name: table_name
   type: string
-  default: "taximonitoring"
-- name: pipeline_path
-  type: string
+  default: "vtmonitoring"
 
 
 steps:
@@ -26,7 +24,7 @@ steps:
       scriptLocation: inlineScript
       inlineScript: |
         set -e 
-        python ${{ parameters.pipeline_path }} \
+        python mlops/scripts/run_pipeline.py \
           --experiment_name ${{ parameters.experiment_name }} \
           --data_name ${{ parameters.data_name }} \
           --environment_name ${{ parameters.environment_name }} \

@@ -2,10 +2,7 @@ name: deploy-model-training-pipeline
 
 variables:
   - group: vtpoc-vg
-  - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
-      - template: ../../config-infra-prod.yml
-  - ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
-      - template: ../../config-infra-dev.yml
+  - template: ../../config-infra-dev.yml
 
 trigger: none
 
@@ -41,28 +38,21 @@ stages:
           - template: ../templates/create-compute.yml
             parameters:
               cluster_name: cpu-cluster
-              size: Standard_DS3_v2
+              size: Standard_F4s_v2
               min_instances: 0
               max_instances: 1
               cluster_tier: dedicated
           - template: ../templates/register-environment.yml
             parameters:
-              environment_name: taxi-train-env
-              environment_description: "Training Environment for Taxi Pipeline"
+              environment_name: vt-train-env
+              environment_description: "Training Environment for VT Pipeline"
               environment_path: data-science/environment/train-conda.yml
               build_type: conda
-          - template: ../templates/register-data-asset.yml
-            parameters:
-              data_name: taxi-data
-              data_description: taxi-training-dataset
-              data_path: data/taxi-data.csv
-              data_type: uri_file
           - template: ../templates/run-pipeline.yml
             parameters:
-              pipeline_path: mlops/scripts/run_pipeline.py
-              experiment_name: taxi-train-pipeline
-              data_name: taxi-data
-              environment_name: taxi-train-env
+              experiment_name: vt-train-pipeline
+              data_name: train
+              environment_name: vt-train-env
               compute_name: cpu-cluster
               enable_monitoring: $(enable_monitoring)
-              table_name: "taximonitoring"
+              table_name: "vtmonitoring"

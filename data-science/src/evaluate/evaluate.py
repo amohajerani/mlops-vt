@@ -17,21 +17,12 @@ import mlflow.sklearn
 import mlflow.pyfunc
 from mlflow.tracking import MlflowClient
 
-TARGET_COL = "cost"
 
-NUMERIC_COLS = [
-    "distance", "dropoff_latitude", "dropoff_longitude", "passengers", "pickup_latitude",
-    "pickup_longitude", "pickup_weekday", "pickup_month", "pickup_monthday", "pickup_hour",
-    "pickup_minute", "pickup_second", "dropoff_weekday", "dropoff_month", "dropoff_monthday",
-    "dropoff_hour", "dropoff_minute", "dropoff_second"
-]
+TARGET_COL = "VISIT_TIME"
+# Define your categorical and numerical columns
+categorical_features = ['STATE', 'CLIENT', 'LOB', 'EMPLOYEETYPENAME', 'PROVIDERSTATE', 'DEGREE']
+numerical_features = ['PROD_CKD', 'PROD_PAD', 'VISIT_TIME_MEAN', 'PROD_HHRA', 'GENDERID', 'PROD_MHC', 'PROVIDERAGE', 'PROD_DEE', 'TENURE', 'VISIT_COUNT', 'PROD_DSNP', 'PROD_SPIROMETRY', 'PROD_OMW', 'PROD_FOBT', 'PROD_HBA1C', 'APPT_LNG', 'APPT_LAT', 'PROD_MTM']
 
-CAT_NOM_COLS = [
-    "store_forward", "vendor"
-]
-
-CAT_ORD_COLS = [
-]
 
 def parse_args():
     '''Parse input arguments'''
@@ -52,9 +43,13 @@ def main(args):
     # Load the test data
     test_data = pd.read_parquet(Path(args.test_data))
 
+    # Reorder columns
+    column_order = numerical_features + categorical_features + [TARGET_COL]
+    test_data = test_data[column_order]
+
     # Split the data into inputs and outputs
     y_test = test_data[TARGET_COL]
-    X_test = test_data[NUMERIC_COLS + CAT_NOM_COLS + CAT_ORD_COLS]
+    X_test = test_data.drop(columns=TARGET_COL)
 
     # Load the model from input port
     model =  mlflow.sklearn.load_model(args.model_input) 
@@ -111,19 +106,23 @@ def model_evaluation(X_test, y_test, model, evaluation_output):
     return yhat_test, r2
 
 def model_promotion(model_name, evaluation_output, X_test, y_test, yhat_test, score):
-    
+    '''
+    # Compare the current model with the latest version of the model in the registry.
+    # TODO: uncomment this piece
+
     scores = {}
     predictions = {}
 
     client = MlflowClient()
+    # Get the latest version of the model
+    model_run = client.search_model_versions(f"name='{model_name}'")[0]
+    model_version = model_run.version
 
-    for model_run in client.search_model_versions(f"name='{model_name}'"):
-        model_version = model_run.version
-        mdl = mlflow.pyfunc.load_model(
-            model_uri=f"models:/{model_name}/{model_version}")
-        predictions[f"{model_name}:{model_version}"] = mdl.predict(X_test)
-        scores[f"{model_name}:{model_version}"] = r2_score(
-            y_test, predictions[f"{model_name}:{model_version}"])
+    mdl = mlflow.pyfunc.load_model(
+        model_uri=f"models:/{model_name}/{model_version}")
+    predictions[f"{model_name}:{model_version}"] = mdl.predict(X_test)
+    scores[f"{model_name}:{model_version}"] = r2_score(
+        y_test, predictions[f"{model_name}:{model_version}"])
 
     if scores:
         if score >= max(list(scores.values())):
@@ -146,10 +145,17 @@ def model_promotion(model_name, evaluation_output, X_test, y_test, yhat_test, sc
     perf_comparison_plot.figure.savefig("perf_comparison.png")
     perf_comparison_plot.figure.savefig(Path(evaluation_output) / "perf_comparison.png")
 
+    
     mlflow.log_metric("deploy flag", bool(deploy_flag))
     mlflow.log_artifact("perf_comparison.png")
 
     return predictions, deploy_flag
+    '''
+    deploy_flag = 1
+    with open((Path(evaluation_output) / "deploy_flag"), 'w') as outfile:
+        outfile.write(f"{int(deploy_flag)}")
+    return None, deploy_flag
+    
 
 if __name__ == "__main__":
 

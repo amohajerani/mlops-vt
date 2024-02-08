@@ -1,0 +1,64 @@
+name: tf-ado-deploy-infra
+
+variables:
+  - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+      # 'main' branch: PRD environment
+      - template: ../../config-infra-prod.yml
+  - ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
+      # 'develop' or feature branches: DEV environment
+      - template: ../../config-infra-dev.yml
+
+trigger: none
+
+pool:
+  vmImage: ubuntu-20.04
+
+stages:
+  - stage: CreateStorageAccountForTerraformState
+    displayName: Create Storage for Terraform
+    jobs:
+      - job: CreateStorageForTerraform
+        displayName: Create Storage for Terraform
+        steps:
+          - checkout: self
+            path: s/
+          - task: Bash@3
+            displayName: "Create checkout repository folder(s)"
+            inputs:
+              targetType: "inline"
+              script: |
+                set -e
+                mkdir "$(Build.Repository.Name)"
+                mkdir "mlops-templates"
+          - template: templates/create-resource-group.yml
+          - template: templates/create-storage-account.yml
+          - task: Bash@3
+            displayName: "Wait for storage account provisioning"
+            inputs:
+              targetType: "inline"
+              script: |
+                echo "Waiting for storage account provisioning..."
+                sleep 30
+          - template: templates/create-storage-container.yml
+  - stage: DeployAzureMachineLearningRG
+    displayName: Deploy AML Workspace
+    jobs:
+      - job: DeployAMLWorkspace
+        displayName: Deploy Terraform
+        steps:
+          - checkout: self
+            path: s/
+          - task: Bash@3
+            displayName: "Create checkout repository folder(s)"
+            inputs:
+              targetType: "inline"
+              script: |
+                set -e
+                mkdir "$(Build.Repository.Name)"
+                mkdir "mlops-templates"
+          - template: templates/create-sp-variables.yml
+          - template: templates/install-terraform.yml
+          - template: templates/run-terraform-init.yml
+          - template: templates/run-terraform-validate.yml
+          - template: templates/run-terraform-plan.yml
+          - template: templates/run-terraform-apply.yml

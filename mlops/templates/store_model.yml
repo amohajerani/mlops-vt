@@ -1,27 +1,16 @@
 steps:
   - task: AzureCLI@2
-    displayName: 'Get model file path'
+    displayName: 'Download model from AML workspace'
     inputs:
       azureSubscription: $(ado_service_connection_aml_ws)
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
         set -x
-        model_list=$(az ml model list -n taxi-model --query "[?name=='taxi-model'].version" -o tsv)
+        model_list=$(az ml model list -n vt-model --query "[?name=='vt-model'].version" -o tsv)
         echo "Model list: $model_list"  # Debug output
         latest_model_version=$(echo "$model_list" | sort -r | head -n 1)
         echo "Latest model version: $latest_model_version"  # Debug output
-        model_path=$(az ml model show -n taxi-model --version $latest_model_version --query 'path')
+        model_path=$(az ml model show -n vt-model --version $latest_model_version --query 'path')
         echo "Model show: $model_path"  # Debug output
-        az ml model download -n taxi-model --version $latest_model_version   # Download model to local file system
-        local_model_path="./taxi-model"  # Adjust this path as needed
-        echo "##vso[task.setvariable variable=modelFilePath]$local_model_path"
-  - task: AzureCLI@2
-    displayName: 'Copy model file to Blob Storage'
-    inputs:
-      azureSubscription: $(ado_service_connection_rg)
-      scriptType: 'bash'
-      scriptLocation: 'inlineScript'
-      inlineScript: |
-        set -x
-        az storage blob upload --account-name $(storage_account) --container-name models --name $(modelFilePath) --type block --file $(modelFilePath)
+        az ml model download -n vt-model --version $latest_model_version  -p ./models

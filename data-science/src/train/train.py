@@ -3,6 +3,7 @@ Trains ML model using training dataset. Saves trained model.
 """
 
 import argparse
+import numpy
 
 from pathlib import Path
 
@@ -10,27 +11,24 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
-
 import mlflow
 import mlflow.sklearn
+import logging
+from sklearn.compose import ColumnTransformer
+from sklearn.impute import SimpleImputer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.pipeline import Pipeline
+from xgboost.sklearn import XGBRegressor
+from sklearn.base import BaseEstimator, TransformerMixin
 
-TARGET_COL = "cost"
+logger = logging.getLogger("azureml.training.tabular")
 
-NUMERIC_COLS = [
-    "distance", "dropoff_latitude", "dropoff_longitude", "passengers", "pickup_latitude",
-    "pickup_longitude", "pickup_weekday", "pickup_month", "pickup_monthday", "pickup_hour",
-    "pickup_minute", "pickup_second", "dropoff_weekday", "dropoff_month", "dropoff_monthday",
-    "dropoff_hour", "dropoff_minute", "dropoff_second"
-]
-
-CAT_NOM_COLS = [
-    "store_forward", "vendor"
-]
-
-CAT_ORD_COLS = [
-]
+TARGET_COL = "VISIT_TIME"
+# Define your categorical and numerical columns
+categorical_features = ['STATE', 'CLIENT', 'LOB', 'EMPLOYEETYPENAME', 'PROVIDERSTATE', 'DEGREE']
+numerical_features = ['PROD_CKD', 'PROD_PAD', 'VISIT_TIME_MEAN', 'PROD_HHRA', 'GENDERID', 'PROD_MHC', 'PROVIDERAGE', 'PROD_DEE', 'TENURE', 'VISIT_COUNT', 'PROD_DSNP', 'PROD_SPIROMETRY', 'PROD_OMW', 'PROD_FOBT', 'PROD_HBA1C', 'APPT_LNG', 'APPT_LAT', 'PROD_MTM']
 
 
 def parse_args():
@@ -40,23 +38,102 @@ def parse_args():
     parser.add_argument("--train_data", type=str, help="Path to train dataset")
     parser.add_argument("--model_output", type=str, help="Path of output model")
 
-    # classifier specific arguments
-    parser.add_argument('--regressor__n_estimators', type=int, default=500,
-                        help='Number of trees')
-    parser.add_argument('--regressor__bootstrap', type=int, default=1,
-                        help='Method of selecting samples for training each tree')
-    parser.add_argument('--regressor__max_depth', type=int, default=10,
-                        help=' Maximum number of levels in tree')
-    parser.add_argument('--regressor__max_features', type=str, default=1.0,
-                        help='Number of features to consider at every split')
-    parser.add_argument('--regressor__min_samples_leaf', type=int, default=4,
-                        help='Minimum number of samples required at each leaf node')
-    parser.add_argument('--regressor__min_samples_split', type=int, default=5,
-                        help='Minimum number of samples required to split a node')
-
     args = parser.parse_args()
 
     return args
+
+class ArrayToDataFrameTransformer(BaseEstimator, TransformerMixin):
+    def __init__(self, column_names):
+        self.column_names = column_names
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        if isinstance(X, np.ndarray):
+            X = pd.DataFrame(X, columns=self.column_names)
+        return X
+
+class CustomStringTruncator(BaseEstimator, TransformerMixin):
+    def __init__(self, column_name):
+        self.column_name = column_name
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        X[self.column_name] = X[self.column_name].str[:4].str.lower()
+        return X    
+    
+def model_definition():  
+    algorithm = XGBRegressor(
+        base_score=0.5,
+        booster='gbtree',
+        colsample_bylevel=1,
+        colsample_bynode=1,
+        colsample_bytree=0.5,
+        eta=0.2,
+        gamma=0,
+        gpu_id=-1,
+        grow_policy='lossguide',
+        importance_type='gain',
+        interaction_constraints='',
+        learning_rate=0.200000003,
+        max_bin=63,
+        max_delta_step=0,
+        max_depth=2,
+        max_leaves=0,
+        min_child_weight=1,
+        missing=numpy.nan,
+        monotone_constraints='()',
+        n_estimators=200,
+        n_jobs=0,
+        num_parallel_tree=1,
+        objective='reg:squarederror',
+        random_state=0,
+        reg_alpha=2.3958333333333335,
+        reg_lambda=0.9375,
+        scale_pos_weight=1,
+        subsample=0.9,
+        tree_method='hist',
+        validate_parameters=1,
+        verbose=-10,
+        verbosity=0
+    )
+    
+    return algorithm
+
+
+# Create the transformers
+categorical_transformer = Pipeline(steps=[
+    ('imputer', SimpleImputer(strategy='most_frequent')),
+    ('onehot', OneHotEncoder(handle_unknown='ignore'))])
+
+numerical_transformer = Pipeline(steps=[
+    ('imputer', SimpleImputer(strategy='median')),
+    ('scaler', StandardScaler())])
+
+# Combine the transformers using ColumnTransformer
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('num', numerical_transformer, numerical_features),
+        ('cat', categorical_transformer, categorical_features)])
+
+def build_model_pipeline():
+    '''
+    Defines the scikit-learn pipeline steps.
+    '''
+    
+    column_names = numerical_features + categorical_features
+    logger.info("Running build_model_pipeline")
+    # Create the pipeline
+    pipeline = Pipeline(steps=[
+        ('array_to_df', ArrayToDataFrameTransformer(column_names)),
+        ('truncator', CustomStringTruncator('CLIENT')),
+        ('preprocessor', preprocessor),
+        ('classifier', model_definition())])
+    return pipeline
+
 
 def main(args):
     '''Read train dataset, train model, save trained model'''
@@ -64,30 +141,24 @@ def main(args):
     # Read train data
     train_data = pd.read_parquet(Path(args.train_data))
 
+    # Reorder columns
+    column_order = numerical_features + categorical_features + [TARGET_COL]
+    train_data = train_data[column_order]
+
     # Split the data into input(X) and output(y)
     y_train = train_data[TARGET_COL]
-    X_train = train_data[NUMERIC_COLS + CAT_NOM_COLS + CAT_ORD_COLS]
-
-    # Train a Random Forest Regression Model with the training set
-    model = RandomForestRegressor(n_estimators = args.regressor__n_estimators,
-                                  bootstrap = bool(args.regressor__bootstrap),
-                                  max_depth = args.regressor__max_depth,
-                                  max_features = args.regressor__max_features,
-                                  min_samples_leaf = args.regressor__min_samples_leaf,
-                                  min_samples_split = args.regressor__min_samples_split,
-                                  random_state=0)
+    X_train = train_data.drop(columns=[TARGET_COL])
+    logger.info("Running train_model")
+    model_pipeline = build_model_pipeline()
+    model = model_pipeline.fit(X_train, y_train)
 
     # log model hyperparameters
-    mlflow.log_param("model", "RandomForestRegressor")
-    mlflow.log_param("n_estimators", args.regressor__n_estimators)
-    mlflow.log_param("bootstrap", args.regressor__bootstrap)
-    mlflow.log_param("max_depth", args.regressor__max_depth)
-    mlflow.log_param("max_features", args.regressor__max_features)
-    mlflow.log_param("min_samples_leaf", args.regressor__min_samples_leaf)
-    mlflow.log_param("min_samples_split", args.regressor__min_samples_split)
-
-    # Train model with the train set
-    model.fit(X_train, y_train)
+    mlflow.log_param("model", "XGBRegressor")
+    mlflow.log_param("n_estimators", model.named_steps['classifier'].get_params()['n_estimators'])
+    mlflow.log_param("max_depth", model.named_steps['classifier'].get_params()['max_depth'])
+    mlflow.log_param("objective", model.named_steps['classifier'].get_params()['objective'])
+    mlflow.log_param("reg_alpha", model.named_steps['classifier'].get_params()['reg_alpha'])
+    mlflow.log_param("reg_lambda", model.named_steps['classifier'].get_params()['reg_lambda'])
 
     # Predict using the Regression Model
     yhat_train = model.predict(X_train)
@@ -124,20 +195,6 @@ if __name__ == "__main__":
     # -------------------------------------- #
 
     args = parse_args()
-
-    lines = [
-        f"Train dataset input path: {args.train_data}",
-        f"Model output path: {args.model_output}",
-        f"n_estimators: {args.regressor__n_estimators}",
-        f"bootstrap: {args.regressor__bootstrap}",
-        f"max_depth: {args.regressor__max_depth}",
-        f"max_features: {args.regressor__max_features}",
-        f"min_samples_leaf: {args.regressor__min_samples_leaf}",
-        f"min_samples_split: {args.regressor__min_samples_split}"
-    ]
-
-    for line in lines:
-        print(line)
 
     main(args)
 

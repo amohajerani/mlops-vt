@@ -15,4 +15,7 @@ steps:
     pip install azure-storage-blob
     pip install azure-storage-file-datalake
     pip install azure-storage-file-share
+    pip install pytest
+    pip install pandas
+    pip install snowflake-connector-python
   displayName: 'Install python dependencies'

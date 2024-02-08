@@ -4,9 +4,10 @@ variables:
   ap_vm_image: ubuntu-20.04
 
   namespace: vtpoc #Note: A namespace with many characters will cause storage account creation to fail due to storage account names having a limit of 24 characters.
-  postfix: 6
+  postfix: 7
   location: eastus
   environment: dev
+  subscriptionId: 'ea6d544d-2425-4667-8d38-51f050d9d69e'
   enable_monitoring: false
 
   # Azure DevOps
@@ -21,3 +22,14 @@ variables:
   key_vault: kv-$(namespace)-$(postfix)$(environment)
   container_registry: cr$(namespace)$(postfix)$(environment)
   storage_account: st$(namespace)$(postfix)$(environment)
+
+  # For terraform reference
+  terraform_version: 1.3.6
+  terraform_workingdir: infrastructure
+  terraform_st_location: $(location)
+  terraform_st_resource_group: rg-$(namespace)-$(postfix)$(environment)-tf
+  terraform_st_storage_account: st$(namespace)$(postfix)$(environment)tf
+  terraform_st_container_name: default
+  terraform_st_key: mlops-tab
+
+  enable_aml_computecluster: "false"

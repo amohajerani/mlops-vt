@@ -9,7 +9,7 @@ variables:
       # 'develop' or feature branches: DEV environment
       - template: ../../config-infra-dev.yml
   - name: endpoint_name
-    value: taxi-online-$(namespace)$(postfix)$(environment)
+    value: vt-online-$(namespace)$(postfix)$(environment)
 
 trigger: none
 
@@ -19,6 +19,11 @@ pool:
 stages:
   - stage: DeployDev
     displayName: Create/Update Online Endpoint in Dev
+    variables:
+      - group: vtpoc-vg
+      - template: ../../config-infra-dev.yml
+      - name: endpoint_name
+        value: vt-online-$(namespace)$(postfix)$(environment)
     jobs:
       - job: DeployOnlineEndpointDev
         steps:
@@ -32,52 +37,66 @@ stages:
                 set -e
                 mkdir "$(Build.Repository.Name)"
                 mkdir "mlops-templates"
+          - template: ../templates/connect-to-workspace.yml
           - template: ../templates/install-az-ext.yml
           - template: ../templates/install-requirements.yml
-          - template: ../templates/connect-to-workspace.yml
-          - template: ../templates/store_model.yml
           - template: ../templates/create-online-endpoint.yml
             parameters:
               endpoint_name: "${{ variables.endpoint_name }}"
-              endpoint_description: "Taxi Online Endpoint"
+              endpoint_description: "VT Online Endpoint"
               auth_mode: "key"
           - template: ../templates/create-online-deployment.yml
             parameters:
-              deployment_name: taxi-online-dp
+              deployment_name: vt-online-dp
               endpoint_name: "${{ variables.endpoint_name }}"
-              model_path: "taxi-model@latest"
+              model_path: "vt-model@latest"
               traffic_allocation: 100
           - template: ../templates/test-online-endpoint.yml
             parameters:
               endpoint_name: "${{ variables.endpoint_name }}"
-              sample_request: data/taxi-request.json
+              sample_request: data/test-request.json
+          - template: ../templates/store_model.yml
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: './models'
+              artifact: 'MyPipelineArtifact'
+              publishLocation: 'pipeline'
 
 
   - stage: DeployProd
     displayName: Create/Update Online Endpoint in Prod
     dependsOn: DeployDev
     condition: succeeded('DeployDev')
+    variables:
+      - group: vtpoc-vg
+      - template: ../../config-infra-prod.yml
+      - name: endpoint_name
+        value: vt-online-$(namespace)$(postfix)$(environment)
     jobs:
       - job: DeployOnlineEndpointProd
         steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifact: 'MyPipelineArtifact'
+              path: './models'
           - template: ../templates/connect-to-workspace.yml
-          - template: ../templates/load_model.yml
+          - template: ../templates/install-az-ext.yml
+          - template: ../templates/install-requirements.yml
+          - template: ../templates/register_model.yml
             parameters:
-              modelPath: "taxi-model@latest"
-              storageAccount: "${{ variables.storage_account }}"
-              containerName: "models"
+              model_path: './models/vt-model/vt-model'
           - template: ../templates/create-online-endpoint.yml
             parameters:
               endpoint_name: "${{ variables.endpoint_name }}"
-              endpoint_description: "Taxi Online Endpoint"
+              endpoint_description: "VT Online Endpoint"
               auth_mode: "key"
           - template: ../templates/create-online-deployment.yml
             parameters:
-              deployment_name: taxi-online-dp
+              deployment_name: vt-online-dp
               endpoint_name: "${{ variables.endpoint_name }}"
-              model_path: "taxi-model@latest"
+              model_path: "vt-model@latest"
               traffic_allocation: 100
           - template: ../templates/test-online-endpoint.yml
             parameters:
               endpoint_name: "${{ variables.endpoint_name }}"
-              sample_request: data/taxi-request.json
+              sample_request: data/test-request.json

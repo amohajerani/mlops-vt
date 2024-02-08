@@ -26,7 +26,7 @@ def parse_args():
     parser.add_argument("--data_name", type=str, help="Data Asset Name")
     parser.add_argument("--environment_name", type=str, help="Registered Environment Name")
     parser.add_argument("--enable_monitoring", type=str, help="Enable Monitoring", default="false")
-    parser.add_argument("--table_name", type=str, help="ADX Monitoring Table Name", default="taximonitoring")
+    parser.add_argument("--table_name", type=str, help="ADX Monitoring Table Name", default="vtmonitoring")
     
     args = parser.parse_args()
 
@@ -67,7 +67,6 @@ def main():
         command="python prep.py \
                 --raw_data ${{inputs.raw_data}} \
                 --train_data ${{outputs.train_data}}  \
-                --val_data ${{outputs.val_data}} \
                 --test_data ${{outputs.test_data}} \
                 --enable_monitoring ${{inputs.enable_monitoring}} \
                 --table_name ${{inputs.table_name}}",
@@ -79,7 +78,6 @@ def main():
             },
         outputs={
             "train_data": Output(type="uri_folder"),
-            "val_data": Output(type="uri_folder"),
             "test_data": Output(type="uri_folder"),
             }
     )
@@ -138,7 +136,7 @@ def main():
 
     # 2. Construct pipeline
     @pipeline()
-    def taxi_training_pipeline(raw_data, enable_monitoring, table_name):
+    def vt_training_pipeline(raw_data, enable_monitoring, table_name):
         
         prep = prep_data(
             raw_data=raw_data,
@@ -151,14 +149,14 @@ def main():
         )
 
         evaluate = evaluate_model(
-            model_name="taxi-model",
+            model_name="vt-model",
             model_input=train.outputs.model_output,
             test_data=prep.outputs.test_data
         )
 
 
         register = register_model(
-            model_name="taxi-model",
+            model_name="vt-model",
             model_path=train.outputs.model_output,
             evaluation_output=evaluate.outputs.evaluation_output
         )
@@ -171,7 +169,7 @@ def main():
         }
 
 
-    pipeline_job = taxi_training_pipeline(
+    pipeline_job = vt_training_pipeline(
         Input(path=args.data_name + "@latest", type="uri_file"), args.enable_monitoring, args.table_name
     )
 
