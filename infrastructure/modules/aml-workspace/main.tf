@@ -24,7 +24,7 @@ resource "azurerm_machine_learning_compute_cluster" "adl_aml_ws_compute_cluster"
   vm_priority                   = "LowPriority"
   vm_size                       = "Standard_DS3_v2"
   machine_learning_workspace_id = azurerm_machine_learning_workspace.mlw.id
-  count                         = var.enable_aml_computecluster ? 1 : 0
+  count                         = var.enable_aml_computecluster=="true" ? 1 : 0
 
   scale_settings {
     min_node_count                       = 0
