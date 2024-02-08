@@ -49,11 +49,9 @@ stages:
                 set -e
                 mkdir "$(Build.Repository.Name)"
                 mkdir "mlops-templates"
-          - checkout: mlops-templates
-            path: s/templates/
-          - template: templates/infra/create-sp-variables.yml@mlops-templates
-          - template: templates/infra/install-terraform.yml@mlops-templates
-          - template: templates/infra/run-terraform-init.yml@mlops-templates
-          - template: templates/infra/run-terraform-validate.yml@mlops-templates
-          - template: templates/infra/run-terraform-plan.yml@mlops-templates
-          - template: templates/infra/run-terraform-apply.yml@mlops-templates
+          - template: templates/create-sp-variables.yml
+          - template: templates/install-terraform.yml
+          - template: templates/run-terraform-init.yml
+          - template: templates/run-terraform-validate.yml
+          - template: templates/run-terraform-plan.yml
+          - template: templates/run-terraform-apply.yml
