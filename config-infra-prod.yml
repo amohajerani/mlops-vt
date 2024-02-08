@@ -32,3 +32,4 @@ variables:
   terraform_st_container_name: default
   terraform_st_key: mlops-tab
 
+  enable_aml_computecluster: "false"
