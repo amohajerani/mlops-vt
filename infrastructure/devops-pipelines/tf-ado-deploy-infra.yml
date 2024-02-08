@@ -32,6 +32,13 @@ stages:
                 mkdir "mlops-templates"
           - template: templates/create-resource-group.yml
           - template: templates/create-storage-account.yml
+          - task: Bash@3
+            displayName: "Wait for storage account provisioning"
+            inputs:
+              targetType: "inline"
+              script: |
+                echo "Waiting for storage account provisioning..."
+                sleep 30
           - template: templates/create-storage-container.yml
   - stage: DeployAzureMachineLearningRG
     displayName: Deploy AML Workspace

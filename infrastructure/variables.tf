@@ -19,6 +19,7 @@ variable "postfix" {
 }
 
 variable "enable_aml_computecluster" {
+  type        = bool
   description = "Variable to enable or disable AML compute cluster"
 }
 

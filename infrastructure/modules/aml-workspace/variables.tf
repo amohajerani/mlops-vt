@@ -50,6 +50,7 @@ variable "container_registry_id" {
 }
 
 variable "enable_aml_computecluster" {
+  type        = bool
   description = "Variable to enable or disable AML compute cluster"
   default     = false
 }
