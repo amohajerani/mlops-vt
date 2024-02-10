@@ -16,7 +16,7 @@ trigger: none
 resources:
   pipelines:
   - pipeline: MyBuildPipeline
-    source: deploy-model-training-pipeline
+    source: build
     trigger: 
       branches:
       - main
