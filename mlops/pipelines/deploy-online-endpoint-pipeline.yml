@@ -13,6 +13,15 @@ variables:
 
 trigger: none
 
+resources:
+  pipelines:
+  - pipeline: MyBuildPipeline
+    source: deploy-model-training-pipeline
+    trigger: 
+      branches:
+      - main
+      - dev
+
 pool:
   vmImage: ubuntu-20.04
 
