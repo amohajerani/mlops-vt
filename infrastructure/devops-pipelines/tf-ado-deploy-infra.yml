@@ -55,7 +55,6 @@ stages:
               script: |
                 set -e
                 mkdir "$(Build.Repository.Name)"
-                mkdir "mlops-templates"
           - template: templates/create-sp-variables.yml
           - template: templates/install-terraform.yml
           - template: templates/run-terraform-init.yml
