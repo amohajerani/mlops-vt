@@ -67,10 +67,24 @@ stages:
                     artifact: 'MyPipelineArtifact'
                     publishLocation: 'pipeline'
 
+- stage: PROD_Approval
+    condition: and(succeeded('DeployDev'), eq(variables['Build.SourceBranchName'], 'main'))
+  jobs:
+    - job: waitForValidation
+      displayName: Wait for external validation
+      pool: server
+      timeoutInMinutes: 4320 # job times out in 3 days
+      steps:
+        - task: ManualValidation@0
+          timeoutInMinutes: 1440 # task times out in 1 day
+          inputs:
+            instructions: 'Please validate the PROD build configuration and resume'
+            onTimeout: 'reject'
+
+
   - stage: DeployProd
     displayName: Create/Update Online Endpoint in Prod
     dependsOn: DeployDev
-    condition: and(succeeded('DeployDev'), eq(variables['Build.SourceBranchName'], 'main'))
     variables:
       - group: vtpoc-vg
       - template: ../../config-infra-prod.yml
@@ -83,13 +97,6 @@ stages:
           runOnce:
             deploy:
               steps:
-                - task: ManualValidation@0
-                  timeoutInMinutes: 1440 # task times out in 1 day
-                  inputs:
-                    notifyUsers: |
-                      amohajerani6@gmail.com
-                    instructions: 'Please validate the deployment configuration and resume'
-                    onTimeout: 'resume'
                 - task: DownloadPipelineArtifact@2
                   inputs:
                     artifact: 'MyPipelineArtifact'
