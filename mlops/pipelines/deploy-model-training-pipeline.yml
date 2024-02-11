@@ -2,9 +2,29 @@ name: deploy-model-training-pipeline
 
 variables:
   - group: vtpoc-vg
-  - template: ../../config-infra-dev.yml
+  - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+      # 'main' branch: PRD environment
+      - template: ../../config-infra-prod.yml
+  - ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
+      # 'develop' or feature branches: DEV environment
+      - template: ../../config-infra-dev.yml
 
-trigger: none
+trigger:
+  branches:
+    include:
+    - dev
+    - main
+  paths:
+    include:
+    - 'mlops/*'
+    - 'data_science/*'
+schedules:
+- cron: "0 1 * * 1"
+  displayName: Weekly build
+  branches:
+    include:
+    - main
+  always: true
 
 pool:
   vmImage: ubuntu-20.04
