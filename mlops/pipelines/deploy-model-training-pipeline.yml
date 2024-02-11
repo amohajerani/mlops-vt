@@ -18,6 +18,8 @@ trigger:
     include:
     - 'mlops/*'
     - 'data_science/*'
+    exclude:
+    - 'mlops/pipelines/deploy-online-endpoint-pipeline.yml'
 schedules:
 - cron: "0 1 * * 1"
   displayName: Weekly build

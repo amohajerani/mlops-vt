@@ -67,19 +67,19 @@ stages:
                     artifact: 'MyPipelineArtifact'
                     publishLocation: 'pipeline'
 
-- stage: PROD_Approval
-    condition: and(succeeded('DeployDev'), eq(variables['Build.SourceBranchName'], 'main'))
-  jobs:
-    - job: waitForValidation
-      displayName: Wait for external validation
-      pool: server
-      timeoutInMinutes: 4320 # job times out in 3 days
-      steps:
-        - task: ManualValidation@0
-          timeoutInMinutes: 1440 # task times out in 1 day
-          inputs:
-            instructions: 'Please validate the PROD build configuration and resume'
-            onTimeout: 'reject'
+  - stage: PROD_Approval
+      condition: and(succeeded('DeployDev'), eq(variables['Build.SourceBranchName'], 'main'))
+    jobs:
+      - job: waitForValidation
+        displayName: Wait for external validation
+        pool: server
+        timeoutInMinutes: 4320 # job times out in 3 days
+        steps:
+          - task: ManualValidation@0
+            timeoutInMinutes: 1440 # task times out in 1 day
+            inputs:
+              instructions: 'Please validate the PROD build configuration and resume'
+              onTimeout: 'reject'
 
 
   - stage: DeployProd
