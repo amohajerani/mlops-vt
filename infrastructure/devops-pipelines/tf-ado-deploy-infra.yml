@@ -38,7 +38,7 @@ stages:
               targetType: "inline"
               script: |
                 echo "Waiting for storage account provisioning..."
-                sleep 30
+                sleep 60
           - template: templates/create-storage-container.yml
   - stage: DeployAzureMachineLearningRG
     displayName: Deploy AML Workspace
