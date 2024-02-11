@@ -21,14 +21,14 @@ resource "azurerm_machine_learning_workspace" "mlw" {
 resource "azurerm_machine_learning_compute_cluster" "adl_aml_ws_compute_cluster" {
   name                          = "cpu-cluster"
   location                      = var.location
-  vm_priority                   = "LowPriority"
-  vm_size                       = "Standard_DS3_v2"
+  vm_priority                   = "dedicated"
+  vm_size                       = "Standard_F4s_v2"
   machine_learning_workspace_id = azurerm_machine_learning_workspace.mlw.id
   count                         = var.enable_aml_computecluster=="true" ? 1 : 0
 
   scale_settings {
     min_node_count                       = 0
-    max_node_count                       = 4
+    max_node_count                       = 1
     scale_down_nodes_after_idle_duration = "PT120S" # 120 seconds
   }
 }

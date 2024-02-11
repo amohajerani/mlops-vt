@@ -38,13 +38,6 @@ stages:
         steps:
           - checkout: self
             path: s/
-          - task: Bash@3
-            displayName: "Create checkout repository folder(s)"
-            inputs:
-              targetType: "inline"
-              script: |
-                set -e
-                mkdir "$(Build.Repository.Name)"
           - template: ../templates/install-az-ext.yml
           - template: ../templates/install-requirements.yml
           - template: ../templates/run-unit-tests.yml
