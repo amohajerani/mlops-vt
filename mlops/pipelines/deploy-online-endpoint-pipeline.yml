@@ -97,12 +97,12 @@ stages:
           runOnce:
             deploy:
               steps:
+                - checkout: self
+                  path: s/
                 - task: DownloadPipelineArtifact@2
                   inputs:
                     artifact: 'MyPipelineArtifact'
                     path: './models'
-                - checkout: self
-                  path: s/
                 - template: ../templates/connect-to-workspace.yml
                 - template: ../templates/install-az-ext.yml
                 - template: ../templates/install-requirements.yml
