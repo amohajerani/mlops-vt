@@ -15,7 +15,6 @@ from azure.ai.ml import Input, Output, command
 from azure.ai.ml.constants import AssetTypes, InputOutputModes
 
 import json
-import yaml
 import os
 
 
