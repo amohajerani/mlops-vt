@@ -84,7 +84,7 @@ stages:
 
   - stage: DeployProd
     displayName: Create/Update Online Endpoint in Prod
-    dependsOn: DeployDev
+    dependsOn: PROD_Approval
     variables:
       - group: vtpoc-vg
       - template: ../../config-infra-prod.yml
