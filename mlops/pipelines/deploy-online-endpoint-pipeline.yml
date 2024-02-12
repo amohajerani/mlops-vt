@@ -101,6 +101,8 @@ stages:
                   inputs:
                     artifact: 'MyPipelineArtifact'
                     path: './models'
+                - checkout: self
+                  path: s/
                 - template: ../templates/connect-to-workspace.yml
                 - template: ../templates/install-az-ext.yml
                 - template: ../templates/install-requirements.yml
