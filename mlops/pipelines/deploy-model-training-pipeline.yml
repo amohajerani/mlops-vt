@@ -71,14 +71,11 @@ stages:
               compute_name: cpu-cluster
               enable_monitoring: $(enable_monitoring)
               table_name: "vtmonitoring"
-          - task: PublishPipelineArtifact@1
-            inputs:
-              targetPath: '$(Build.SourcesDirectory)/s'
-              artifact: 'code'
           - script: |
               echo $(Build.SourceBranchName) > branch.txt
             displayName: 'Write git branch to file'
           - task: PublishPipelineArtifact@1
             inputs:
-              targetPath: '$(Build.SourcesDirectory)/branch.txt'
-              artifact: 'branch'
+              targetPath: '$(Build.SourcesDirectory)'
+              artifact: 'code'
+
