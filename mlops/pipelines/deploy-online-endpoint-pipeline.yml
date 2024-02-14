@@ -106,6 +106,12 @@ stages:
                 - template: ../templates/connect-to-workspace.yml
                 - template: ../templates/install-az-ext.yml
                 - template: ../templates/install-requirements.yml
+                - template: ../templates/register-environment.yml
+                  parameters:
+                    environment_name: vt-train-env
+                    environment_description: "Training and Deployment Environment for VT Pipeline"
+                    environment_path: data-science/environment/train-conda.yml
+                    build_type: conda
                 - template: ../templates/register_model.yml
                   parameters:
                     model_path: './models/vt-model/vt-model'
