@@ -4,6 +4,8 @@ import json
 import numpy
 import joblib
 
+# Set the logging level to INFO
+logging.basicConfig(level=logging.INFO)
 
 def init():
     """
