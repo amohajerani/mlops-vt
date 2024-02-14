@@ -2,14 +2,6 @@ name: deploy-online-endpoint-pipeline
 
 variables:
   - group: vtpoc-vg
-  - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
-      # 'main' branch: PRD environment
-      - template: ../../config-infra-prod.yml
-  - ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
-      # 'develop' or feature branches: DEV environment
-      - template: ../../config-infra-dev.yml
-  - name: endpoint_name
-    value: vt-online-$(namespace)$(postfix)$(environment)
 
 trigger: none
 
@@ -40,11 +32,11 @@ stages:
           runOnce:
             deploy:
               steps:
-                - checkout: self
-                  path: s/
-                  clean: true
-                - script: git checkout $(Build.SourceBranch)
-
+                - task: DownloadPipelineArtifact@2
+                  inputs:
+                    buildType: 'current'
+                    artifactName: 'code'
+                    targetPath: '$(Pipeline.Workspace)'
                 - template: ../templates/connect-to-workspace.yml
                 - template: ../templates/install-az-ext.yml
                 - template: ../templates/install-requirements.yml
@@ -66,15 +58,28 @@ stages:
                 - template: ../templates/store_model.yml
                 - task: PublishPipelineArtifact@1
                   inputs:
-                    targetPath: './models'
+                    targetPath: '.'
                     artifact: 'MyPipelineArtifact'
                     publishLocation: 'pipeline'
 
   - stage: PROD_Approval
-    condition: and(succeeded('DeployDev'), eq(variables['Build.SourceBranchName'], 'main'))
     jobs:
+      - job: CheckBranch
+        steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'current'
+              artifactName: 'branch'
+              targetPath: '$(Pipeline.Workspace)'
+          - script: |
+              branch=$(cat $(Pipeline.Workspace)/branch/branch.txt)
+              echo "##vso[task.setvariable variable=branch;isOutput=true]$branch"
+            displayName: 'Get branch name'
+            name: setvarStep
       - job: waitForValidation
         displayName: Wait for external validation
+        dependsOn: CheckBranch
+        condition: and(succeeded(), ne(dependencies.CheckBranch.outputs['setvarStep.branch'], 'dev'))
         pool: server
         timeoutInMinutes: 4320 # job times out in 3 days
         steps:
@@ -100,14 +105,15 @@ stages:
           runOnce:
             deploy:
               steps:
-                - checkout: self
-                  path: s/
-                  clean: true
-                - script: git checkout $(Build.SourceBranch)
                 - task: DownloadPipelineArtifact@2
                   inputs:
-                    artifact: 'MyPipelineArtifact'
-                    path: './models'
+                    buildType: 'current'
+                    artifactName: 'MyPipelineArtifact'
+                    targetPath: '$(Pipeline.Workspace)'
+                - script: |
+                    cd $(Pipeline.Workspace)/MyPipelineArtifact
+                  displayName: 'Change directory to code'
+                  displayName: 'Change directory to code'
                 - template: ../templates/connect-to-workspace.yml
                 - template: ../templates/install-az-ext.yml
                 - template: ../templates/install-requirements.yml
