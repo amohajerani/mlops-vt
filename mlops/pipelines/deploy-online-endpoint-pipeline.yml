@@ -113,7 +113,6 @@ stages:
                 - script: |
                     cd $(Pipeline.Workspace)/MyPipelineArtifact
                   displayName: 'Change directory to code'
-                  displayName: 'Change directory to code'
                 - template: ../templates/connect-to-workspace.yml
                 - template: ../templates/install-az-ext.yml
                 - template: ../templates/install-requirements.yml
