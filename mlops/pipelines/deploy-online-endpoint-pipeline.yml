@@ -3,11 +3,7 @@ name: deploy-online-endpoint-pipeline
 variables:
   - group: vtpoc-vg
 
-trigger:
-  branches:
-    exclude:
-    - '*'
-
+trigger: none
 resources:
   pipelines:
   - pipeline: MyBuildPipeline
@@ -31,14 +27,13 @@ stages:
     jobs:
       - job: DeployOnlineEndpointDev
         steps:
-          - checkout: none
           - task: DownloadPipelineArtifact@2
             inputs:
               buildType: 'current'
               artifactName: 'code'
               targetPath: '$(Pipeline.Workspace)'
           - script: |
-              cd $(Pipeline.Workspace)/MyPipelineArtifact
+              cd $(Pipeline.Workspace)/code
             displayName: 'Change directory to code'
           - template: ../templates/connect-to-workspace.yml
           - template: ../templates/install-az-ext.yml
@@ -105,7 +100,6 @@ stages:
     jobs:
       - job: DeployOnlineEndpointProd
         steps:
-          - checkout: none
           - task: DownloadPipelineArtifact@2
             inputs:
               buildType: 'current'
