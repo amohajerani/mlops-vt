@@ -4,10 +4,10 @@ variables:
   - group: vtpoc-vg
   - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
       # 'main' branch: PRD environment
-      - template: vt-ml-templates//vt-ml-templates/config-infra-prod.yml
+      - template: /vt-ml-templates/config-infra-prod.yml
   - ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
       # 'develop' or feature branches: DEV environment
-      - template: vt-ml-templates//vt-ml-templates/config-infra-dev.yml
+      - template: /vt-ml-templates/config-infra-dev.yml
 
 trigger:
   branches:
@@ -29,6 +29,12 @@ schedules:
 pool:
   vmImage: ubuntu-20.04
 
+resources:
+  repositories:
+  - repository: vt-ml-templates
+    type: git
+    name: vt-ml-templates
+
 stages:
   - stage: DeployTrainingPipeline
     displayName: Deploy Training Pipeline
@@ -36,8 +42,6 @@ stages:
       - job: DeployTrainingPipeline
         timeoutInMinutes: 120
         steps:
-          - checkout: vt-ml-templates
-            path: vt-ml-templates
           - checkout: self
             path: s/
           - template: ../templates/install-az-ext.yml
