@@ -3,7 +3,10 @@ name: deploy-online-endpoint-pipeline
 variables:
   - group: vtpoc-vg
 
-trigger: none
+trigger:
+  branches:
+    exclude:
+    - '*'
 
 resources:
   pipelines:
