@@ -4,10 +4,10 @@ variables:
   - group: vtpoc-vg
   - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
       # 'main' branch: PRD environment
-      - template: ../../config-infra-prod.yml
+      - template: /vt-ml-templates/config-infra-prod.yml
   - ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
       # 'develop' or feature branches: DEV environment
-      - template: ../../config-infra-dev.yml
+      - template: /vt-ml-templates/config-infra-dev.yml
 
 trigger:
   branches:
@@ -36,10 +36,10 @@ stages:
       - job: DeployTrainingPipeline
         timeoutInMinutes: 120
         steps:
+          - checkout: vt-ml-templates
+            path: vt-ml-templates
           - checkout: self
             path: s/
-          - checkout: vt-ml-templates
-            path: .
           - template: ../templates/install-az-ext.yml
           - template: ../templates/install-requirements.yml
           - template: ../templates/run-unit-tests.yml
