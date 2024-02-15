@@ -29,42 +29,41 @@ stages:
       - name: endpoint_name
         value: vt-online-$(namespace)$(postfix)$(environment)
     jobs:
-      - deployment: DeployOnlineEndpointDev
-        environment: 'dev'
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - checkout: none
-                - task: DownloadPipelineArtifact@2
-                  inputs:
-                    buildType: 'current'
-                    artifactName: 'code'
-                    targetPath: '$(Pipeline.Workspace)'
-                - template: ../templates/connect-to-workspace.yml
-                - template: ../templates/install-az-ext.yml
-                - template: ../templates/install-requirements.yml
-                - template: ../templates/create-online-endpoint.yml
-                  parameters:
-                    endpoint_name: "${{ variables.endpoint_name }}"
-                    endpoint_description: "VT Online Endpoint"
-                    auth_mode: "key"
-                - template: ../templates/create-online-deployment.yml
-                  parameters:
-                    deployment_name: vt-online-dp
-                    endpoint_name: "${{ variables.endpoint_name }}"
-                    model_path: "vt-model@latest"
-                    traffic_allocation: 100
-                - template: ../templates/test-online-endpoint.yml
-                  parameters:
-                    endpoint_name: "${{ variables.endpoint_name }}"
-                    sample_request: data/test-request.json
-                - template: ../templates/store_model.yml
-                - task: PublishPipelineArtifact@1
-                  inputs:
-                    targetPath: '.'
-                    artifact: 'MyPipelineArtifact'
-                    publishLocation: 'pipeline'
+      - job: DeployOnlineEndpointDev
+        steps:
+          - checkout: none
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'current'
+              artifactName: 'code'
+              targetPath: '$(Pipeline.Workspace)'
+          - script: |
+              cd $(Pipeline.Workspace)/MyPipelineArtifact
+            displayName: 'Change directory to code'
+          - template: ../templates/connect-to-workspace.yml
+          - template: ../templates/install-az-ext.yml
+          - template: ../templates/install-requirements.yml
+          - template: ../templates/create-online-endpoint.yml
+            parameters:
+              endpoint_name: "${{ variables.endpoint_name }}"
+              endpoint_description: "VT Online Endpoint"
+              auth_mode: "key"
+          - template: ../templates/create-online-deployment.yml
+            parameters:
+              deployment_name: vt-online-dp
+              endpoint_name: "${{ variables.endpoint_name }}"
+              model_path: "vt-model@latest"
+              traffic_allocation: 100
+          - template: ../templates/test-online-endpoint.yml
+            parameters:
+              endpoint_name: "${{ variables.endpoint_name }}"
+              sample_request: data/test-request.json
+          - template: ../templates/store_model.yml
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: '.'
+              artifact: 'MyPipelineArtifact'
+              publishLocation: 'pipeline'
 
   - stage: PROD_Approval
     jobs:
@@ -104,45 +103,41 @@ stages:
       - name: endpoint_name
         value: vt-online-$(namespace)$(postfix)$(environment)
     jobs:
-      - deployment: DeployOnlineEndpointProd
-        environment: 'prod'
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - checkout: none
-                - task: DownloadPipelineArtifact@2
-                  inputs:
-                    buildType: 'current'
-                    artifactName: 'MyPipelineArtifact'
-                    targetPath: '$(Pipeline.Workspace)'
-                - script: |
-                    cd $(Pipeline.Workspace)/MyPipelineArtifact
-                  displayName: 'Change directory to code'
-                - template: ../templates/connect-to-workspace.yml
-                - template: ../templates/install-az-ext.yml
-                - template: ../templates/install-requirements.yml
-                - template: ../templates/register-environment.yml
-                  parameters:
-                    environment_name: vt-train-env
-                    environment_description: "Training and Deployment Environment for VT Pipeline"
-                    environment_path: data-science/environment/train-conda.yml
-                    build_type: conda
-                - template: ../templates/register_model.yml
-                  parameters:
-                    model_path: './models/vt-model/vt-model'
-                - template: ../templates/create-online-endpoint.yml
-                  parameters:
-                    endpoint_name: "${{ variables.endpoint_name }}"
-                    endpoint_description: "VT Online Endpoint"
-                    auth_mode: "key"
-                - template: ../templates/create-online-deployment.yml
-                  parameters:
-                    deployment_name: vt-online-dp
-                    endpoint_name: "${{ variables.endpoint_name }}"
-                    model_path: "vt-model@latest"
-                    traffic_allocation: 100
-                - template: ../templates/test-online-endpoint.yml
-                  parameters:
-                    endpoint_name: "${{ variables.endpoint_name }}"
-                    sample_request: data/test-request.json
+      - job: DeployOnlineEndpointProd
+        steps:
+          - checkout: none
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'current'
+              artifactName: 'MyPipelineArtifact'
+              targetPath: '$(Pipeline.Workspace)'
+          - script: |
+              cd $(Pipeline.Workspace)/MyPipelineArtifact
+            displayName: 'Change directory to code'
+          - template: ../templates/connect-to-workspace.yml
+          - template: ../templates/install-az-ext.yml
+          - template: ../templates/install-requirements.yml
+          - template: ../templates/register-environment.yml
+            parameters:
+              environment_name: vt-train-env
+              environment_description: "Training and Deployment Environment for VT Pipeline"
+              environment_path: data-science/environment/train-conda.yml
+              build_type: conda
+          - template: ../templates/register_model.yml
+            parameters:
+              model_path: './models/vt-model/vt-model'
+          - template: ../templates/create-online-endpoint.yml
+            parameters:
+              endpoint_name: "${{ variables.endpoint_name }}"
+              endpoint_description: "VT Online Endpoint"
+              auth_mode: "key"
+          - template: ../templates/create-online-deployment.yml
+            parameters:
+              deployment_name: vt-online-dp
+              endpoint_name: "${{ variables.endpoint_name }}"
+              model_path: "vt-model@latest"
+              traffic_allocation: 100
+          - template: ../templates/test-online-endpoint.yml
+            parameters:
+              endpoint_name: "${{ variables.endpoint_name }}"
+              sample_request: data/test-request.json
