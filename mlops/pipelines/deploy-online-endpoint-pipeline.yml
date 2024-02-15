@@ -12,15 +12,14 @@ resources:
       branches:
       - main
       - dev
-
-pool:
-  vmImage: ubuntu-20.04
-
-resources:
   repositories:
   - repository: vt-ml-templates
     type: git
     name: vt-ml-templates
+
+pool:
+  vmImage: ubuntu-20.04
+
 
 stages:
   - stage: DeployDev
