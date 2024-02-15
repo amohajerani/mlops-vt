@@ -21,12 +21,15 @@ stages:
     displayName: Create/Update Online Endpoint in Dev
     variables:
       - group: vtpoc-vg
-      - template: ../../config-infra-dev.yml
+      - template: config-infra-dev.yml
       - name: endpoint_name
         value: vt-online-$(namespace)$(postfix)$(environment)
     jobs:
       - job: DeployOnlineEndpointDev
         steps:
+          - checkout: self
+            sparseCheckoutPaths:
+              - config-infra-dev.yml 
           - task: DownloadPipelineArtifact@2
             inputs:
               buildType: 'current'
@@ -94,12 +97,15 @@ stages:
     dependsOn: PROD_Approval
     variables:
       - group: vtpoc-vg
-      - template: ../../config-infra-prod.yml
+      - template: config-infra-prod.yml
       - name: endpoint_name
         value: vt-online-$(namespace)$(postfix)$(environment)
     jobs:
       - job: DeployOnlineEndpointProd
         steps:
+          - checkout: self
+            sparseCheckoutPaths:
+              - config-infra-prod.yml
           - task: DownloadPipelineArtifact@2
             inputs:
               buildType: 'current'
