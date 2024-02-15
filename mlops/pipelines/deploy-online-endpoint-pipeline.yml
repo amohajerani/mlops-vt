@@ -4,6 +4,7 @@ variables:
   - group: vtpoc-vg
 
 trigger: none
+
 resources:
   pipelines:
   - pipeline: MyBuildPipeline
@@ -32,6 +33,8 @@ stages:
     jobs:
       - job: DeployOnlineEndpointDev
         steps:
+          - script: echo $(ado_service_connection_aml_ws)
+            displayName: 'Print ado_service_connection_aml_ws variable' 
           - task: DownloadPipelineArtifact@2
             inputs:
               buildType: 'current'
