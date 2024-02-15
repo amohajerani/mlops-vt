@@ -4,10 +4,10 @@ variables:
   - group: vtpoc-vg
   - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
       # 'main' branch: PRD environment
-      - template: /vt-ml-templates/config-infra-prod.yml
+      - template: config-infra-prod.yml@vt-ml-templates
   - ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
       # 'develop' or feature branches: DEV environment
-      - template: /vt-ml-templates/config-infra-dev.yml
+      - template: config-infra-dev.yml@vt-ml-templates
 
 trigger:
   branches:
