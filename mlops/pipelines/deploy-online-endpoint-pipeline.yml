@@ -69,6 +69,8 @@ stages:
               endpoint_name: "${{ variables.endpoint_name }}"
               sample_request: data/test-request.json
           - template: ../templates/store_model.yml
+            parameters:
+              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
           - task: PublishPipelineArtifact@1
             inputs:
               targetPath: '.'
