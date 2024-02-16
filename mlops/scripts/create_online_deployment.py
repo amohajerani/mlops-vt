@@ -1,6 +1,6 @@
 import argparse
 
-from azure.ai.ml.entities import ManagedOnlineEndpoint, ManagedOnlineDeployment, CodeConfiguration, Code
+from azure.ai.ml.entities import ManagedOnlineEndpoint, ManagedOnlineDeployment, CodeConfiguration
 
 from azure.identity import DefaultAzureCredential
 from azure.ai.ml import MLClient
@@ -32,7 +32,7 @@ def main():
 
     # Create code configuration
     code_configuration = CodeConfiguration(
-        code=Code(local_path="./"),
+        code="./",
         scoring_script="score.py"
     )
     # Create online deployment
