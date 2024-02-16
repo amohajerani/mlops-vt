@@ -84,10 +84,7 @@ stages:
         steps:
           - task: DownloadPipelineArtifact@2
             inputs:
-              buildType: 'specific'
-              project: 'vtpoc'
-              pipeline: build
-              runVersion: latest
+              buildType: 'current'
               artifactName: 'code'
               targetPath: '$(Pipeline.Workspace)'
           - script: |
@@ -122,10 +119,7 @@ stages:
         steps:
           - task: DownloadPipelineArtifact@2
             inputs:
-              buildType: 'specific'
-              project: 'vtpoc'
-              pipeline: build
-              runVersion: latest
+              buildType: 'current'
               artifactName: 'code'
               targetPath: '$(Pipeline.Workspace)'
           - template: ../templates/connect-to-workspace.yml
