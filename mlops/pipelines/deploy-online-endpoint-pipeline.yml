@@ -42,29 +42,37 @@ stages:
               cd $(Pipeline.Workspace)/code
             displayName: 'Change directory to code'
           - template: ../templates/connect-to-workspace.yml
-#          - template: ../templates/install-az-ext.yml
-#          - template: ../templates/install-requirements.yml
-#          - template: ../templates/create-online-endpoint.yml
-#            parameters:
-#              endpoint_name: "${{ variables.endpoint_name }}"
-#              endpoint_description: "VT Online Endpoint"
-#              auth_mode: "key"
-#          - template: ../templates/create-online-deployment.yml
-#            parameters:
-#              deployment_name: vt-online-dp
-#              endpoint_name: "${{ variables.endpoint_name }}"
-#              model_path: "vt-model@latest"
-#              traffic_allocation: 100
-#          - template: ../templates/test-online-endpoint.yml
-#            parameters:
-#              endpoint_name: "${{ variables.endpoint_name }}"
-#              sample_request: data/test-request.json
-#          - template: ../templates/store_model.yml
-#          - task: PublishPipelineArtifact@1
-#            inputs:
-#              targetPath: '.'
-#              artifact: 'MyPipelineArtifact'
-#              publishLocation: 'pipeline'
+            parameters:
+              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
+              subscriptionId: ${{ variables.subscriptionId }}
+              resource_group: ${{ variables.resource_group }}
+              aml_workspace: ${{ variables.aml_workspace }}
+          - template: ../templates/install-az-ext.yml
+            parameters:
+              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
+          - template: ../templates/install-requirements.yml
+          - template: ../templates/create-online-endpoint.yml
+            parameters:
+              endpoint_name: "${{ variables.endpoint_name }}"
+              endpoint_description: "VT Online Endpoint"
+              auth_mode: "key"
+              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
+          - template: ../templates/create-online-deployment.yml
+            parameters:
+              deployment_name: vt-online-dp
+              endpoint_name: "${{ variables.endpoint_name }}"
+              model_path: "vt-model@latest"
+              traffic_allocation: 100
+          - template: ../templates/test-online-endpoint.yml
+            parameters:
+              endpoint_name: "${{ variables.endpoint_name }}"
+              sample_request: data/test-request.json
+          - template: ../templates/store_model.yml
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: '.'
+              artifact: 'MyPipelineArtifact'
+              publishLocation: 'pipeline'
 
 #  - stage: PROD_Approval
 #    jobs:
