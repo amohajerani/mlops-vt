@@ -32,7 +32,7 @@ def main():
 
     # Create code configuration
     code_configuration = CodeConfiguration(
-        scoring_script_path="score.py"
+        scoring_script="score.py"
     )
     # Create online deployment
     online_deployment = ManagedOnlineDeployment(
