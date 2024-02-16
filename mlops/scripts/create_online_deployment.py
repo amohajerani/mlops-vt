@@ -32,7 +32,7 @@ def main():
 
     # Create code configuration
     code_configuration = CodeConfiguration(
-        code="./",
+        code="./mlops/scripts/",
         scoring_script="score.py"
     )
     # Create online deployment
