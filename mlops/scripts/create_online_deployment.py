@@ -42,7 +42,7 @@ def main():
         model=args.model_path,
         instance_type=args.instance_type,
         instance_count=args.instance_count,
-        environment='vt-train-env:@latest',
+        environment='vt-train-env@latest',
         code_configuration = code_configuration,
     )
 
