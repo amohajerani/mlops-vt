@@ -4,9 +4,6 @@ import json
 import numpy
 import joblib
 
-# Set the logging level to INFO
-logging.basicConfig(level=logging.INFO)
-
 def init():
     """
     This function is called when the container is initialized/started, typically after create/update of the deployment.

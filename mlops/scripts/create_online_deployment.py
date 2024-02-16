@@ -1,6 +1,6 @@
 import argparse
 
-from azure.ai.ml.entities import ManagedOnlineEndpoint, Environment, ManagedOnlineDeployment
+from azure.ai.ml.entities import ManagedOnlineEndpoint, ManagedOnlineDeployment, CodeConfiguration
 
 from azure.identity import DefaultAzureCredential
 from azure.ai.ml import MLClient
@@ -30,6 +30,10 @@ def main():
         print("HERE IN THE EXCEPTION BLOCK")
         print(ex)
 
+    # Create code configuration
+    code_configuration = CodeConfiguration(
+        scoring_script_path="score.py"
+    )
     # Create online deployment
     online_deployment = ManagedOnlineDeployment(
         name=args.deployment_name,
@@ -37,8 +41,8 @@ def main():
         model=args.model_path,
         instance_type=args.instance_type,
         instance_count=args.instance_count,
-        scoring_script_path= "score.py",
         environment='vt-train-env',
+        code_configuration = code_configuration,
     )
 
     deployment_job = ml_client.online_deployments.begin_create_or_update(
