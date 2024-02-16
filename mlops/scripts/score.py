@@ -28,7 +28,7 @@ def run(raw_data):
     method and return the result back
     """
     logging.info("model 1: request received")
-    data = json.loads(raw_data)["data"]
+    data = json.loads(raw_data)["input_data"]
     data = numpy.array(data)
     result = model.predict(data)
     logging.info("Request processed")
