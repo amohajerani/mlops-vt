@@ -42,6 +42,9 @@ stages:
               artifactName: 'code'
               targetPath: '$(Pipeline.Workspace)'
           - script: |
+              ls -la $(Pipeline.Workspace)
+            displayName: 'List contents of workspace'
+          - script: |
               cd $(Pipeline.Workspace)/code
             displayName: 'Change directory to code'
           - template: ../templates/connect-to-workspace.yml
