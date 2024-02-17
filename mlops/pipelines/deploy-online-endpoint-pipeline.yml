@@ -44,10 +44,12 @@ stages:
           - script: |
               set -x
               pwd
+              
+              cd $(Pipeline.Workspace)/code/mlops/pipelines
               ls -la
               branch=$(cat branch.txt)
               echo "##vso[task.setvariable variable=branch;isOutput=true]$branch"
-              cd $(Pipeline.Workspace)/mlops/pipelines
+              
             displayName: 'Change directory'
           - template: ../templates/connect-to-workspace.yml
             parameters:
