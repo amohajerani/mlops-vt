@@ -41,7 +41,6 @@ stages:
               pipeline: build
               runVersion: latest
               artifactName: 'code'
-              targetPath: '$(Pipeline.Workspace)'
           - script: |
               ls -la
               cd $(Pipeline.Workspace)/code
