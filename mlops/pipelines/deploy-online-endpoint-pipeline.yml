@@ -126,6 +126,7 @@ stages:
               artifactName: 'code'
           - script: |
               set -x
+              pwd
               ls -la
           - template: ../templates/connect-to-workspace.yml
             parameters:
