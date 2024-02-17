@@ -45,8 +45,9 @@ stages:
               echo "Pipeline default directory: $(Pipeline.Workspace)"
               echo "Contents:"
               ls -la $(Pipeline.Workspace)
-              branch=$(cat branch.txt)
+              branch=$(cat $(Pipeline.Workspace)/branch.txt)
               echo "##vso[task.setvariable variable=branch;isOutput=true]$branch"
+              cd $(Pipeline.Workspace)/mlops/pipelines
               
             displayName: 'Change directory'
           - template: ../templates/connect-to-workspace.yml
