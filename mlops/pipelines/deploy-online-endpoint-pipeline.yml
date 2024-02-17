@@ -42,7 +42,9 @@ stages:
               runVersion: latest
               artifactName: 'code'
           - script: |
-              ls -la
+              set -x
+              pwd
+              ls -la $(Pipeline.Workspace)
               cd $(Pipeline.Workspace)/code
               ls -la
             displayName: 'Change directory to artifacts'
