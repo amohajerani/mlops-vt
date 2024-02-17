@@ -24,6 +24,6 @@ steps:
         --deployment_name "${{parameters.deployment_name}}" \
         --model_path "${{parameters.model_path}}" \
         --traffic_allocation "${{parameters.traffic_allocation}}" \
-        --scoring_script_dir "$(Pipeline.Workspace)/mlops/scripts/"
+        --scoring_script_dir "$(Pipeline.Workspace)/mlops/scripts/" \
 
 

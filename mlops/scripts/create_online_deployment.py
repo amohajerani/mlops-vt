@@ -33,7 +33,7 @@ def main():
 
     # Create code configuration
     code_configuration = CodeConfiguration(
-        code=scoring_script_dir,
+        code=args.scoring_script_dir,
         scoring_script="score.py"
     )
     # Create online deployment
