@@ -42,11 +42,10 @@ stages:
               runVersion: latest
               artifactName: 'code'
           - script: |
-              set -e
+              set -x
               pwd
               ls -la $(Pipeline.Workspace)
               cd $(Pipeline.Workspace)/mlops/pipelines
-              ls -la
             displayName: 'Change directory to artifacts'
           - template: ../templates/connect-to-workspace.yml
             parameters:
