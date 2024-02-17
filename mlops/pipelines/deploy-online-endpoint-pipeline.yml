@@ -45,7 +45,7 @@ stages:
               set -x
               pwd
               ls -la $(Pipeline.Workspace)
-              cd $(Pipeline.Workspace)/code
+              cd $(Pipeline.Workspace)/mlops/pipelines
               ls -la
             displayName: 'Change directory to artifacts'
           - template: ../templates/connect-to-workspace.yml
