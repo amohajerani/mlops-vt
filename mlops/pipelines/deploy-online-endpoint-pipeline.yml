@@ -122,11 +122,10 @@ stages:
           - task: DownloadPipelineArtifact@2
             inputs:
               buildType: 'current'
-              targetPath: '$(Pipeline.Workspace)'
               artifactName: 'code'
           - script: |
               set -x
-              pwd
+              cd $(Pipeline.Workspace)/code
               ls -la
           - template: ../templates/connect-to-workspace.yml
             parameters:
