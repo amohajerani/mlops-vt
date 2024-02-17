@@ -43,6 +43,8 @@ stages:
               artifactName: 'code'
           - script: |
               set -x
+              pwd
+              ls -la
               branch=$(cat branch.txt)
               echo "##vso[task.setvariable variable=branch;isOutput=true]$branch"
               cd $(Pipeline.Workspace)/mlops/pipelines
