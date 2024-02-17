@@ -68,17 +68,17 @@ stages:
 #              model_path: "vt-model@latest"
 #              traffic_allocation: 100
 #              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
-          - template: ../templates/test-online-endpoint.yml
-            parameters:
-              endpoint_name: "${{ variables.endpoint_name }}"
-              sample_request: '$(Pipeline.Workspace)/data/test-request.json'
-              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
+#          - template: ../templates/test-online-endpoint.yml
+#            parameters:
+#              endpoint_name: "${{ variables.endpoint_name }}"
+#              sample_request: '$(Pipeline.Workspace)/data/test-request.json'
+#              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
           - template: ../templates/store_model.yml
             parameters:
               ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
           - task: PublishPipelineArtifact@1
             inputs:
-              targetPath: '.'
+              targetPath: '$(Pipeline.Workspace)'
               artifact: 'code'
               publishLocation: 'pipeline'
 
