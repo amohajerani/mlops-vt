@@ -123,8 +123,9 @@ stages:
             inputs:
               buildType: 'current'
               targetPath: '$(Pipeline.Workspace)'
+              artifactName: 'code'
           - script: |
-              cd $(Pipeline.Workspace)/code
+              set -x
               ls -la
           - template: ../templates/connect-to-workspace.yml
             parameters:
