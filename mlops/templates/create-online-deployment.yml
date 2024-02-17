@@ -19,7 +19,7 @@ steps:
     scriptLocation: inlineScript
     inlineScript: |
 
-      python mlops/scripts/create_online_deployment.py \
+      python $(Pipeline.Workspace)/mlops/scripts/create_online_deployment.py \
         --endpoint_name "${{parameters.endpoint_name}}" \
         --deployment_name "${{parameters.deployment_name}}" \
         --model_path "${{parameters.model_path}}" \
