@@ -20,7 +20,7 @@ steps:
     scriptType: bash
     scriptLocation: inlineScript
     inlineScript: |
-      python mlops/scripts/register_environment.py \
+      python $(Pipeline.Workspace)/mlops/scripts/register_environment.py \
         --environment_name "${{parameters.environment_name}}" \
         --description "${{parameters.environment_description}}" \
         --env_path "${{parameters.environment_path}}" \
