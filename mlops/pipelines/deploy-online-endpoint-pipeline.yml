@@ -75,7 +75,7 @@ stages:
           - task: PublishPipelineArtifact@1
             inputs:
               targetPath: '.'
-              artifact: 'MyPipelineArtifact'
+              artifact: 'PipelineArtifact'
               publishLocation: 'pipeline'
 
   - stage: PROD_Approval
@@ -85,7 +85,6 @@ stages:
           - task: DownloadPipelineArtifact@2
             inputs:
               buildType: 'current'
-              artifactName: 'code'
               targetPath: '$(Pipeline.Workspace)'
           - script: |
               branch=$(cat $(Pipeline.Workspace)/branch.txt)
@@ -120,7 +119,6 @@ stages:
           - task: DownloadPipelineArtifact@2
             inputs:
               buildType: 'current'
-              artifactName: 'code'
               targetPath: '$(Pipeline.Workspace)'
           - template: ../templates/connect-to-workspace.yml
             parameters:
