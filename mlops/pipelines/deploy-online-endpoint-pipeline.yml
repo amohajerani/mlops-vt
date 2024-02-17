@@ -43,10 +43,8 @@ stages:
               artifactName: 'code'
           - script: |
               set -x
-              pwd
-              ls -la $(Pipeline.Workspace)/s
               cd $(Pipeline.Workspace)/mlops/pipelines
-            displayName: 'Change directory to artifacts'
+            displayName: 'Change directory'
           - template: ../templates/connect-to-workspace.yml
             parameters:
               ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}

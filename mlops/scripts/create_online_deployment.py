@@ -15,6 +15,7 @@ def parse_args():
     parser.add_argument("--instance_type", type=str, help="Instance type", default="Standard_F4s_v2")
     parser.add_argument("--instance_count", type=int, help="Instance count", default=1)
     parser.add_argument("--traffic_allocation", type=str, help="Deployment traffic allocation percentage")
+    parser.add_argument("--scoring_script_dir", type=str, help="Directory of the scoring script")
 
     return parser.parse_args()
 
@@ -32,7 +33,7 @@ def main():
 
     # Create code configuration
     code_configuration = CodeConfiguration(
-        code="./mlops/scripts/",
+        code=scoring_script_dir,
         scoring_script="score.py"
     )
     # Create online deployment

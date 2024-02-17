@@ -18,11 +18,12 @@ steps:
     scriptType: bash
     scriptLocation: inlineScript
     inlineScript: |
-
+      set -x
       python $(Pipeline.Workspace)/mlops/scripts/create_online_deployment.py \
         --endpoint_name "${{parameters.endpoint_name}}" \
         --deployment_name "${{parameters.deployment_name}}" \
         --model_path "${{parameters.model_path}}" \
         --traffic_allocation "${{parameters.traffic_allocation}}" \
+        --scoring_script_dir "$(Pipeline.Workspace)/mlops/scripts/"
 
 
