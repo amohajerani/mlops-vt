@@ -150,10 +150,10 @@ stages:
           - task: Bash@3
             inputs:
               targetType: 'inline'
-              script: 'ls -la $(Pipeline.Workspace)'
+              script: 'ls -la $(Pipeline.Workspace)/s'
           - template: ../templates/register_model.yml
             parameters:
-              model_path: '$(Pipeline.Workspace)/models/vt-model/vt-model'
+              model_path: 'models/vt-model/vt-model'
               ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
           - template: ../templates/create-online-endpoint.yml
             parameters:
