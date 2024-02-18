@@ -16,4 +16,4 @@ steps:
         echo "Latest model version: $latest_model_version"  # Debug output
         model_path=$(az ml model show -n vt-model --version $latest_model_version --query 'path')
         echo "Model show: $model_path"  # Debug output
-        az ml model download -n vt-model --version $latest_model_version  -p $(Pipeline.Workspace)/models
+        az ml model download -n vt-model --version $latest_model_version  -p $(Pipeline.Workspace)/s/models

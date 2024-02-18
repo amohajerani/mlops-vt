@@ -41,13 +41,13 @@ stages:
               pipeline: build
               runVersion: latest
               artifactName: 'code'
+              targetPath: $(Pipeline.Workspace)/s
           - script: |
-              echo "Pipeline default directory: $(Pipeline.Workspace)"
-              echo "Contents:"
-              ls -la $(Pipeline.Workspace)
-              branch=$(cat $(Pipeline.Workspace)/branch.txt)
+              echo "Contents of the s dir:"
+              ls -la $(Pipeline.Workspace)/s
+              branch=$(cat $(Pipeline.Workspace)/s/branch.txt)
               echo "##vso[task.setvariable variable=branch;isOutput=true]$branch"
-              cd $(Pipeline.Workspace)/mlops/pipelines
+              cd $(Pipeline.Workspace)/s/mlops/pipelines
               
             displayName: 'Change directory'
           - template: ../templates/connect-to-workspace.yml
@@ -83,7 +83,7 @@ stages:
               ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
           - task: PublishPipelineArtifact@1
             inputs:
-              targetPath: '$(Pipeline.Workspace)'
+              targetPath: '$(Pipeline.Workspace)/s'
               artifact: 'code'
               publishLocation: 'pipeline'
 
