@@ -76,7 +76,7 @@ stages:
           - template: ../templates/test-online-endpoint.yml
             parameters:
               endpoint_name: "${{ variables.endpoint_name }}"
-              sample_request: '$(Pipeline.Workspace)/data/test-request.json'
+              sample_request: 'data/test-request.json'
               ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
           - template: ../templates/store_model.yml
             parameters:
