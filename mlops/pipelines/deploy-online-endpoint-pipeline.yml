@@ -120,7 +120,7 @@ stages:
     jobs:
       - job: printBranch
         steps:
-          - script: echo $('branch')
+          - script: echo $(branch)
       - job: DeployOnlineEndpointProd
         condition: eq(variables.branch, 'main')
         steps:
