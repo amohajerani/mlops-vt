@@ -99,11 +99,11 @@ stages:
         steps:
           - script: |
               set -x
-              echo "$(dependencies.DeployDev.result)"
-              if [ "$(dependencies.DeployDev.result)" = "Succeeded" ]; then
-                echo "DeployDev stage was successful"
+              echo $(branch)
+              if [ "$(branch)" = "main" ]; then
+                echo "true"
               else
-                echo "DeployDev stage failed"
+                echo 'false'
               fi
       - job: waitForValidation
         displayName: Wait for external validation
