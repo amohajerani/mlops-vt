@@ -48,7 +48,7 @@ stages:
               branch=$(cat $(Pipeline.Workspace)/s/branch.txt)
               echo "##vso[task.setvariable variable=branch;isOutput=true]$branch"
               cd $(Pipeline.Workspace)/s/mlops/pipelines
-              
+            name: getBranch
             displayName: 'Change directory'
           - template: ../templates/connect-to-workspace.yml
             parameters:
@@ -88,14 +88,14 @@ stages:
               publishLocation: 'pipeline'
 
   - stage: PROD_Approval
+    dependsOn:
+    - DeployDev
+    variables:
+      branch: $[ stageDependencies.DeployDev.DeployOnlineEndpointDev.outputs['getBranch.branch'] ]
+    condition: and(succeeded(), eq($('branch'), 'main'))
     jobs:
-      - job: CheckBranch
-        steps:
-          - checkout: none
       - job: waitForValidation
         displayName: Wait for external validation
-        dependsOn: CheckBranch
-        condition: and(succeeded(), eq(variables['branch'], 'main'))
         pool: server
         timeoutInMinutes: 4320 # job times out in 3 days
         steps:
@@ -109,7 +109,9 @@ stages:
   - stage: DeployProd
     displayName: Create/Update Online Endpoint in Prod
     dependsOn: PROD_Approval
-    condition: and(succeeded(), eq(variables['branch'], 'main'))
+    variables:
+      branch: $[ stageDependencies.DeployDev.DeployOnlineEndpointDev.outputs['getBranch.branch'] ]
+    condition: and(succeeded(), eq($('branch'), 'main'))
     variables:
       - group: vtpoc-vg
       - template: config-infra-prod.yml@vt-ml-templates
@@ -126,9 +128,6 @@ stages:
               targetPath: '$(Pipeline.Workspace)/s'
           - script: |
               echo "Contents of s dir:"
-              ls -la $(Pipeline.Workspace)/s
-              branch=$(cat $(Pipeline.Workspace)/s/branch.txt)
-              echo "##vso[task.setvariable variable=branch;isOutput=true]$branch"
               cd $(Pipeline.Workspace)/s/mlops/pipelines
           - template: ../templates/connect-to-workspace.yml
             parameters:
