@@ -111,12 +111,12 @@ stages:
     displayName: Create/Update Online Endpoint in Prod
     dependsOn: PROD_Approval
     variables:
-      - name: branch
-        value: $[ stageDependencies.DeployDev.DeployOnlineEndpointDev.outputs['getBranch.branch'] ]
-      - group: vtpoc-vg
-      - template: config-infra-prod.yml@vt-ml-templates
-      - name: endpoint_name
-        value: vt-online-$(namespace)$(postfix)$(environment)
+    - name: branch
+      value: $[ stageDependencies.DeployDev.DeployOnlineEndpointDev.outputs['getBranch.branch'] ]
+    - group: vtpoc-vg
+    - template: config-infra-prod.yml@vt-ml-templates
+    - name: endpoint_name
+      value: vt-online-$(namespace)$(postfix)$(environment)
     jobs:
       - job: printBranch
         steps:
