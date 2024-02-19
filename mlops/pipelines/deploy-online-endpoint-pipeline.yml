@@ -98,18 +98,18 @@ stages:
       - job: confirmCondition
         steps:
           - script: |
-          set -x
-          echo $(branch)
-          if [ "$(branch)" = "main" ]; then
-            echo "true"
-          else
-            echo 'false'
-          fi
-          if [ "$(dependencies.DeployDev.result)" = "Succeeded" ]; then
-            echo "DeployDev stage was successful"
-          else
-            echo "DeployDev stage failed"
-          fi
+              set -x
+              echo $(branch)
+              if [ "$(branch)" = "main" ]; then
+                echo "true"
+              else
+                echo 'false'
+              fi
+              if [ "$(dependencies.DeployDev.result)" = "Succeeded" ]; then
+                echo "DeployDev stage was successful"
+              else
+                echo "DeployDev stage failed"
+              fi
       - job: waitForValidation
         displayName: Wait for external validation
         pool: server
