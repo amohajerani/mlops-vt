@@ -117,9 +117,9 @@ stages:
       - template: config-infra-prod.yml@vt-ml-templates
       - name: endpoint_name
         value: vt-online-$(namespace)$(postfix)$(environment)
-    condition:  eq(variables.branch, 'main')
     jobs:
       - job: DeployOnlineEndpointProd
+        condition:  eq(variables.branch, 'main')
         steps:
           - checkout: none
           - task: DownloadPipelineArtifact@2
