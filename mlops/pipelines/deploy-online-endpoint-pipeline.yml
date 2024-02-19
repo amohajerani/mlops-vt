@@ -97,7 +97,7 @@ stages:
     jobs:
       - job: confirmCondition
         steps:
-          - step: script: |
+          - script: |
           set -x
           echo $(branch)
           if [ "$(branch)" = "main" ]; then
