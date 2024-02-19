@@ -93,8 +93,12 @@ stages:
     variables:
     - name: branch
       value: $[ stageDependencies.DeployDev.DeployOnlineEndpointDev.outputs['getBranch.branch'] ]
-    condition: and(succeeded(), eq(variables['branch'], 'main'))
+    condition: and(succeeded(), eq(variables.branch, 'main'))
     jobs:
+      - job: getBranchJob
+        steps:
+        - script: echo $(branch)
+        displayName: 'Print branch variable'
       - job: waitForValidation
         displayName: Wait for external validation
         pool: server
@@ -117,7 +121,7 @@ stages:
       - template: config-infra-prod.yml@vt-ml-templates
       - name: endpoint_name
         value: vt-online-$(namespace)$(postfix)$(environment)
-    condition: and(succeeded(), eq(variables['branch'], 'main'))
+    condition: and(succeeded(), eq(variables.branch, 'main'))
     jobs:
       - job: DeployOnlineEndpointProd
         steps:
