@@ -93,13 +93,15 @@ stages:
     variables:
     - name: branch
       value: $[ stageDependencies.DeployDev.DeployOnlineEndpointDev.outputs['getBranch.branch'] ]
-    condition: and(succeeded(), eq(variables['branch'], 'main'))
+    #condition: and(succeeded(), eq(variables['branch'], 'main'))
     jobs:
       - job: waitForValidation
         displayName: Wait for external validation
         pool: server
         timeoutInMinutes: 4320 # job times out in 3 days
         steps:
+          - script: echo $(branch)
+            displayName: 'Print branch variable'
           - task: ManualValidation@0
             timeoutInMinutes: 1440 # task times out in 1 day
             inputs:
