@@ -108,6 +108,7 @@ stages:
       - job: waitForValidation
         displayName: Wait for external validation
         pool: server
+        dependsOn: confirmCondition
         timeoutInMinutes: 4320 # job times out in 3 days
         steps:
           - task: ManualValidation@0
