@@ -95,6 +95,10 @@ stages:
       value: $[ stageDependencies.DeployDev.DeployOnlineEndpointDev.outputs['getBranch.branch'] ]
     condition: and(succeeded(), eq(variables['branch'], 'main'))
     jobs:
+      - job: getBranchJob
+        steps:
+        - script: echo $(branch)
+        displayName: 'Print branch variable'
       - job: waitForValidation
         displayName: Wait for external validation
         pool: server
