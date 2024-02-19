@@ -17,6 +17,7 @@ resources:
   - repository: vt-ml-templates
     type: git
     name: vt-ml-templates
+    ref: refs/heads/main
 
 pool:
   vmImage: ubuntu-20.04
