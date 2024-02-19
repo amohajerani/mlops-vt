@@ -118,8 +118,11 @@ stages:
       - name: endpoint_name
         value: vt-online-$(namespace)$(postfix)$(environment)
     jobs:
+      - job: printBranch
+        steps:
+          - script: echo $('branch')
       - job: DeployOnlineEndpointProd
-        condition:  eq(variables.branch, 'main')
+        condition: eq(variables.branch, 'main')
         steps:
           - checkout: none
           - task: DownloadPipelineArtifact@2
