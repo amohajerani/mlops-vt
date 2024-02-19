@@ -93,22 +93,11 @@ stages:
     variables:
     - name: branch
       value: $[ stageDependencies.DeployDev.DeployOnlineEndpointDev.outputs['getBranch.branch'] ]
-    #condition: eq(variables.branch, 'main')
     jobs:
-      - job: confirmCondition
-        steps:
-          - script: |
-              set -x
-              echo $(branch)
-              if [ "$(branch)" = "main" ]; then
-                echo "true"
-              else
-                echo 'false'
-              fi
       - job: waitForValidation
         displayName: Wait for external validation
         pool: server
-        dependsOn: confirmCondition
+        condition: eq(variables.branch, 'main')
         timeoutInMinutes: 4320 # job times out in 3 days
         steps:
           - task: ManualValidation@0
