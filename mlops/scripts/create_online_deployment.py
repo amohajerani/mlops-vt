@@ -1,7 +1,6 @@
 import argparse
 
-from azure.ai.ml.entities import ManagedOnlineEndpoint
-from azure.ai.ml.entities import ManagedOnlineDeployment
+from azure.ai.ml.entities import ManagedOnlineEndpoint, ManagedOnlineDeployment, CodeConfiguration
 
 from azure.identity import DefaultAzureCredential
 from azure.ai.ml import MLClient
@@ -16,6 +15,7 @@ def parse_args():
     parser.add_argument("--instance_type", type=str, help="Instance type", default="Standard_F4s_v2")
     parser.add_argument("--instance_count", type=int, help="Instance count", default=1)
     parser.add_argument("--traffic_allocation", type=str, help="Deployment traffic allocation percentage")
+    parser.add_argument("--scoring_script_dir", type=str, help="Directory of the scoring script")
 
     return parser.parse_args()
 
@@ -31,6 +31,11 @@ def main():
         print("HERE IN THE EXCEPTION BLOCK")
         print(ex)
 
+    # Create code configuration
+    code_configuration = CodeConfiguration(
+        code=args.scoring_script_dir,
+        scoring_script="score.py"
+    )
     # Create online deployment
     online_deployment = ManagedOnlineDeployment(
         name=args.deployment_name,
@@ -38,6 +43,8 @@ def main():
         model=args.model_path,
         instance_type=args.instance_type,
         instance_count=args.instance_count,
+        environment='vt-train-env@latest',
+        code_configuration = code_configuration,
     )
 
     deployment_job = ml_client.online_deployments.begin_create_or_update(

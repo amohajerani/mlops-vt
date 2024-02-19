@@ -1,8 +1,12 @@
+parameters:
+  - name: ado_service_connection_aml_ws
+    type: string
+
 steps:
   - task: AzureCLI@2
     displayName: Install AZ ml extension
     inputs:
-      azureSubscription: $(ado_service_connection_aml_ws)
+      azureSubscription: ${{ parameters.ado_service_connection_aml_ws }}
       scriptType: bash
       scriptLocation: inlineScript
       workingDirectory: $(System.DefaultWorkingDirectory)

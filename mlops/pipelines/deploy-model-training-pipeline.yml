@@ -4,10 +4,10 @@ variables:
   - group: vtpoc-vg
   - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
       # 'main' branch: PRD environment
-      - template: ../../config-infra-prod.yml
+      - template: config-infra-prod.yml@vt-ml-templates
   - ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
       # 'develop' or feature branches: DEV environment
-      - template: ../../config-infra-dev.yml
+      - template: config-infra-dev.yml@vt-ml-templates
 
 trigger:
   branches:
@@ -18,8 +18,6 @@ trigger:
     include:
     - 'mlops/*'
     - 'data_science/*'
-    exclude:
-    - 'mlops/pipelines/deploy-online-endpoint-pipeline.yml'
 schedules:
 - cron: "0 1 * * 1"
   displayName: Weekly build
@@ -31,6 +29,12 @@ schedules:
 pool:
   vmImage: ubuntu-20.04
 
+resources:
+  repositories:
+  - repository: vt-ml-templates
+    type: git
+    name: vt-ml-templates
+
 stages:
   - stage: DeployTrainingPipeline
     displayName: Deploy Training Pipeline
@@ -41,9 +45,16 @@ stages:
           - checkout: self
             path: s/
           - template: ../templates/install-az-ext.yml
+            parameters:
+              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
           - template: ../templates/install-requirements.yml
           - template: ../templates/run-unit-tests.yml
           - template: ../templates/connect-to-workspace.yml
+            parameters:
+              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
+              subscriptionId: ${{ variables.subscriptionId }}
+              resource_group: ${{ variables.resource_group }}
+              aml_workspace: ${{ variables.aml_workspace }}
           - template: ../templates/import-data.yml
             parameters:
               snowflake_account: $(SNOWFLAKE_ACCOUNT)
@@ -63,6 +74,7 @@ stages:
               environment_description: "Training Environment for VT Pipeline"
               environment_path: data-science/environment/train-conda.yml
               build_type: conda
+              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
           - template: ../templates/run-pipeline.yml
             parameters:
               experiment_name: vt-train-pipeline
@@ -71,3 +83,11 @@ stages:
               compute_name: cpu-cluster
               enable_monitoring: $(enable_monitoring)
               table_name: "vtmonitoring"
+          - script: |
+              echo $(Build.SourceBranchName) > branch.txt
+            displayName: 'Write git branch to file'
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: '$(Build.SourcesDirectory)'
+              artifact: 'code'
+
