@@ -44,9 +44,9 @@ stages:
         steps:
           - checkout: self
             path: s/
-          - template: ../templates/install-az-ext.yml
-            parameters:
-              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
+#          - template: ../templates/install-az-ext.yml
+#            parameters:
+#              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
 #          - template: ../templates/install-requirements.yml
 #          - template: ../templates/run-unit-tests.yml
 #          - template: ../templates/connect-to-workspace.yml

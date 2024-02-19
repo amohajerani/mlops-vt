@@ -56,10 +56,10 @@ stages:
               subscriptionId: ${{ variables.subscriptionId }}
               resource_group: ${{ variables.resource_group }}
               aml_workspace: ${{ variables.aml_workspace }}
-          - template: ../templates/install-az-ext.yml
-            parameters:
-              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
-          - template: ../templates/install-requirements.yml
+#          - template: ../templates/install-az-ext.yml
+#            parameters:
+#              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
+#          - template: ../templates/install-requirements.yml
 #          - template: ../templates/create-online-endpoint.yml
 #            parameters:
 #              endpoint_name: "${{ variables.endpoint_name }}"
@@ -78,9 +78,9 @@ stages:
 #              endpoint_name: "${{ variables.endpoint_name }}"
 #              sample_request: 'data/test-request.json'
 #              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
-          - template: ../templates/store_model.yml
-            parameters:
-              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
+#          - template: ../templates/store_model.yml
+#            parameters:
+#              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
           - task: PublishPipelineArtifact@1
             inputs:
               targetPath: '$(Pipeline.Workspace)/s'
@@ -93,12 +93,23 @@ stages:
     variables:
     - name: branch
       value: $[ stageDependencies.DeployDev.DeployOnlineEndpointDev.outputs['getBranch.branch'] ]
-    #condition: and(succeeded(), eq(variables.branch, 'main'))
+    condition: and(succeeded(), eq(variables.branch, 'main'))
     jobs:
-      - job: getBranchJob
+      - job: confirmCondition
         steps:
-        - script: echo $(branch)
-        displayName: 'Print branch variable'
+          - step: script: |
+          set -x
+          echo $(branch)
+          if [ "$(branch)" = "main" ]; then
+            echo "true"
+          else
+            echo 'false'
+          fi
+          if [ "$(dependencies.DeployDev.result)" = "Succeeded" ]; then
+            echo "DeployDev stage was successful"
+          else
+            echo "DeployDev stage failed"
+          fi
       - job: waitForValidation
         displayName: Wait for external validation
         pool: server
