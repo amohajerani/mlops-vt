@@ -142,7 +142,26 @@ def main(args):
     train_data = pd.read_parquet(Path(args.train_data))
 
     # Reorder columns
-    column_order = numerical_features + categorical_features + [TARGET_COL]
+    column_order = [        
+        'PROVIDERSTATE', 
+        'PROVIDERAGE', 
+        'HIRINGDATE', 
+        'TENURE', 
+        'DEGREE', 
+        'EMPLOYEETYPENAME', 
+        'VISIT_TIME_MEAN', 
+        'VISIT_COUNT', 
+        'STATE', 
+        'SERVICE_DAY', 
+        'APPT_LAT', 
+        'APPT_LNG', 
+        'CLIENT', 
+        'LOB', 
+        'GENDERID', 
+        'DATEOFBIRTH',
+        'SERVICE_DAY',
+        'APPT_LAT',
+        'APPT_LNG'] + [TARGET_COL]
     train_data = train_data[column_order]
 
     # Split the data into input(X) and output(y)

@@ -16,5 +16,6 @@ dependencies:
       - xgboost
       - sklearn-pandas
       - azureml-inference-server-http
+      - pyodbc
       - git+https://github.com/microsoft/AzureML-Observability#subdirectory=aml-obs-client
       - git+https://github.com/microsoft/AzureML-Observability#subdirectory=aml-obs-collector
