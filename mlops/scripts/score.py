@@ -65,9 +65,6 @@ def run(raw_data):
         cursor.execute(f"SELECT \
                             PATIENTID, 
                             STATE, 
-                            SERVICE_DAY, 
-                            APPT_LAT, 
-                            APPT_LNG, 
                             CLIENT,
                             LOB, 
                             GENDERID, 
@@ -84,17 +81,14 @@ def run(raw_data):
         #   EMPLOYEETYPENAME, 
         #   VISIT_TIME_MEAN, 
         #   VISIT_COUNT, 
-        #   STATE, 
+        #   STATE,
+        #  CLIENT,
+        #   LOB,
+        #   GENDERID,
+        #   DATEOFBIRTH, 
         #   SERVICE_DAY, 
         #   APPT_LAT, 
         #   APPT_LNG, 
-        #   CLIENT, 
-        #   LOB, 
-        #   GENDERID, 
-        #   DATEOFBIRTH,
-        #   SERVICE_DAY,
-        #   APPT_LAT,
-        #   APPT_LNG
     # this order should be the same as the order of columns in the training data
     input_data = []
     for item in data:

@@ -143,25 +143,22 @@ def main(args):
 
     # Reorder columns
     column_order = [        
-        'PROVIDERSTATE', 
-        'PROVIDERAGE', 
-        'HIRINGDATE', 
-        'TENURE', 
-        'DEGREE', 
-        'EMPLOYEETYPENAME', 
-        'VISIT_TIME_MEAN', 
-        'VISIT_COUNT', 
-        'STATE', 
-        'SERVICE_DAY', 
-        'APPT_LAT', 
-        'APPT_LNG', 
-        'CLIENT', 
-        'LOB', 
-        'GENDERID', 
-        'DATEOFBIRTH',
-        'SERVICE_DAY',
-        'APPT_LAT',
-        'APPT_LNG'] + [TARGET_COL]
+           'PROVIDERSTATE', 
+           'PROVIDERAGE', 
+           'HIRINGDATE', 
+           'TENURE', 
+           'DEGREE', 
+           'EMPLOYEETYPENAME', 
+           'VISIT_TIME_MEAN', 
+           'VISIT_COUNT', 
+           'STATE',
+           'CLIENT',
+           'LOB',
+           'GENDERID',
+           'DATEOFBIRTH', 
+           'SERVICE_DAY', 
+           'APPT_LAT', 
+           'APPT_LNG',] + [TARGET_COL]
     train_data = train_data[column_order]
 
     # Split the data into input(X) and output(y)
