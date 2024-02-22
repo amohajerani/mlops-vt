@@ -24,7 +24,7 @@ pool:
 
 stages:
   - stage: DeployDev
-    displayName: Create/Update Online Endpoint in Dev
+    displayName: DeployDev
     variables:
       - group: vtpoc-vg
       - template: config-infra-dev.yml@vt-ml-templates
@@ -108,7 +108,7 @@ stages:
 
 
   - stage: DeployProd
-    displayName: Create/Update Online Endpoint in Prod
+    displayName: DeployProd
     dependsOn: PROD_Approval
     variables:
     - group: vtpoc-vg

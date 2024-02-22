@@ -30,10 +30,14 @@ def run(raw_data):
     In the example we extract the data from the json input and call the scikit-learn model's predict()
     method and return the result back
     """
-    logging.info("model 1: request received")
+    
+
     data = json.loads(raw_data)["input_data"]    
-    provider_ids = [item["providerId"] for item in data]
-    patient_ids = [item["patientId"] for item in data]
+    provider_ids = [item["PROVIDERID"] for item in data]
+    patient_ids = [item["PATIENTID"] for item in data]
+    service_days = [item["SERVICE_DAY"] for item in data]
+    appt_lats = [item["APPT_LAT"] for item in data]
+    appt_lngs = [item["APPT_LNG"] for item in data]
     # Convert lists to string format for SQL query
     provider_ids_str = ','.join(map(str, provider_ids))
     patient_ids_str = ','.join(map(str, patient_ids))
@@ -41,21 +45,64 @@ def run(raw_data):
     # Query provider database
     with pyodbc.connect(connection_string) as conn:
         cursor = conn.cursor()
-        cursor.execute(f"SELECT id, Age FROM Providers WHERE id IN ({provider_ids_str})")
+        cursor.execute(f"SELECT \
+                            PROVIDERID, 
+                            PROVIDERSTATE, 
+                            PROVIDERAGE, 
+                            HIRINGDATE, 
+                            TENURE,
+                            DEGREE, 
+                            EMPLOYEETYPENAME, 
+                            VISIT_TIME_MEAN, 
+                            VISIT_COUNT \
+                       FROM providers WHERE PROVIDERID IN ({provider_ids_str})")
         provider_data = {row[0]: row for row in cursor.fetchall()}
 
     # Query patient database
     with pyodbc.connect(connection_string) as conn:
         cursor = conn.cursor()
-        cursor.execute(f"SELECT id, Age FROM Patients WHERE id IN ({patient_ids_str})")
+        
+        cursor.execute(f"SELECT \
+                            PATIENTID, 
+                            STATE, 
+                            SERVICE_DAY, 
+                            APPT_LAT, 
+                            APPT_LNG, 
+                            CLIENT,
+                            LOB, 
+                            GENDERID, 
+                            DATEOFBIRTH \
+                       FROM patients WHERE id PATIENTID ({patient_ids_str})")
         patient_data = {row[0]: row for row in cursor.fetchall()}
 
-    # Concatenate provider and patient data and predict
+    # concatenate the values such that the order of columns is:
+        #   PROVIDERSTATE, 
+        #   PROVIDERAGE, 
+        #   HIRINGDATE, 
+        #   TENURE, 
+        #   DEGREE, 
+        #   EMPLOYEETYPENAME, 
+        #   VISIT_TIME_MEAN, 
+        #   VISIT_COUNT, 
+        #   STATE, 
+        #   SERVICE_DAY, 
+        #   APPT_LAT, 
+        #   APPT_LNG, 
+        #   CLIENT, 
+        #   LOB, 
+        #   GENDERID, 
+        #   DATEOFBIRTH,
+        #   SERVICE_DAY,
+        #   APPT_LAT,
+        #   APPT_LNG
+    # this order should be the same as the order of columns in the training data
     input_data = []
     for item in data:
-        provider = provider_data[item["providerId"]]
-        patient = patient_data[item["patientId"]]
-        input_data.append(numpy.concatenate((provider, patient)))
+        provider = provider_data[item["PROVIDERID"]]
+        patient = patient_data[item["PATIENTID"]]
+
+
+        input_data.append(numpy.concatenate((provider, patient, service_days, appt_lats, appt_lngs)))
 
     # Predict
     input_data = numpy.array(input_data)
