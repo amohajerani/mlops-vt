@@ -109,12 +109,15 @@ def run(raw_data):
         #   APPT_LNG, 
     # this order should be the same as the order of columns in the training data
     input_data = []
-    for item in data:
+    for i, item in enumerate(data):
         provider = provider_data[item["PROVIDERID"]]
         patient = patient_data[item["PATIENTID"]]
+        service_day = [service_days[i]]
+        appt_lat = [appt_lats[i]]
+        appt_lng = [appt_lngs[i]]
 
-
-        input_data.append(numpy.concatenate((provider, patient, service_days, appt_lats, appt_lngs)))
+        input_data.append(numpy.concatenate((provider, patient, service_day, appt_lat, appt_lng)))
+    
     logging.info("input_data: %s", input_data)
     # Predict
     input_data = numpy.array(input_data)
