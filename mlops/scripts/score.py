@@ -69,7 +69,7 @@ def run(raw_data):
                             LOB, 
                             GENDERID, 
                             DATEOFBIRTH \
-                       FROM patients WHERE id PATIENTID ({patient_ids_str})")
+                       FROM patients WHERE PATIENTID IN ({patient_ids_str})")
         patient_data = {row[0]: row for row in cursor.fetchall()}
 
     # concatenate the values such that the order of columns is:
