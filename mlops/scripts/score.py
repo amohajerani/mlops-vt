@@ -47,9 +47,9 @@ def run(raw_data):
     logging.info("appt_lngs: %s", appt_lngs)
 
     # Convert lists to string format for SQL query
-    provider_ids_str = ','.join(map(str, provider_ids))
+    provider_ids_str = ','.join(f"'{id}'" for id in provider_ids)
     logging.info("provider_ids_str: %s", provider_ids_str)
-    patient_ids_str = ','.join(map(str, patient_ids))
+    patient_ids_str = ','.join(f"'{id}'" for id in patient_ids)
     logging.info("patient_ids_str: %s", patient_ids_str)
     # in future, you can add other fields such as evaluation dy of the week.
     # Query provider database
