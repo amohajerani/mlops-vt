@@ -46,14 +46,14 @@ def run(raw_data):
     with pyodbc.connect(connection_string) as conn:
         cursor = conn.cursor()
         cursor.execute(f"SELECT \
-                            PROVIDERID, 
-                            PROVIDERSTATE, 
-                            PROVIDERAGE, 
-                            HIRINGDATE, 
-                            TENURE,
-                            DEGREE, 
-                            EMPLOYEETYPENAME, 
-                            VISIT_TIME_MEAN, 
+                            PROVIDERID, \
+                            PROVIDERSTATE, \
+                            PROVIDERAGE, \
+                            HIRINGDATE, \
+                            TENURE, \
+                            DEGREE, \
+                            EMPLOYEETYPENAME, \
+                            VISIT_TIME_MEAN, \
                             VISIT_COUNT \
                        FROM providers WHERE PROVIDERID IN ({provider_ids_str})")
         provider_data = {row[0]: row for row in cursor.fetchall()}
@@ -63,11 +63,11 @@ def run(raw_data):
         cursor = conn.cursor()
         
         cursor.execute(f"SELECT \
-                            PATIENTID, 
-                            STATE, 
-                            CLIENT,
-                            LOB, 
-                            GENDERID, 
+                            PATIENTID, \
+                            STATE, \
+                            CLIENT, \
+                            LOB, \
+                            GENDERID, \
                             DATEOFBIRTH \
                        FROM patients WHERE PATIENTID IN ({patient_ids_str})")
         patient_data = {row[0]: row for row in cursor.fetchall()}
