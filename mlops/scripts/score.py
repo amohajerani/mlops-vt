@@ -31,62 +31,80 @@ def run(raw_data):
     method and return the result back
     """
     
-
+    print("raw_data: ", raw_data)
     data = json.loads(raw_data)["input_data"]    
+    print("data: ", data)
     provider_ids = [item["PROVIDERID"] for item in data]
+    print("provider_ids: ", provider_ids)
     patient_ids = [item["PATIENTID"] for item in data]
+    print("patient_ids: ", patient_ids)
     service_days = [item["SERVICE_DAY"] for item in data]
+    print("service_days: ", service_days)
     appt_lats = [item["APPT_LAT"] for item in data]
+    print("appt_lats: ", appt_lats)
     appt_lngs = [item["APPT_LNG"] for item in data]
+    print("appt_lngs: ", appt_lngs)
+
     # Convert lists to string format for SQL query
     provider_ids_str = ','.join(map(str, provider_ids))
+    print("provider_ids_str: ", provider_ids_str)
     patient_ids_str = ','.join(map(str, patient_ids))
+    print("patient_ids_str: ", patient_ids_str)
     # in future, you can add other fields such as evaluation dy of the week.
     # Query provider database
+
+    
+    query = f"SELECT \
+                    PROVIDERID, \
+                    PROVIDERSTATE, \
+                    PROVIDERAGE, \
+                    HIRINGDATE, \
+                    TENURE, \
+                    DEGREE, \
+                    EMPLOYEETYPENAME, \
+                    VISIT_TIME_MEAN, \
+                    VISIT_COUNT \
+               FROM providers WHERE PROVIDERID IN ({provider_ids_str})"
+
+    print("Provider Query:", query)
+
     with pyodbc.connect(connection_string) as conn:
         cursor = conn.cursor()
-        cursor.execute(f"SELECT \
-                            PROVIDERID, \
-                            PROVIDERSTATE, \
-                            PROVIDERAGE, \
-                            HIRINGDATE, \
-                            TENURE, \
-                            DEGREE, \
-                            EMPLOYEETYPENAME, \
-                            VISIT_TIME_MEAN, \
-                            VISIT_COUNT \
-                       FROM providers WHERE PROVIDERID IN ({provider_ids_str})")
+        cursor.execute(query)
         provider_data = {row[0]: row for row in cursor.fetchall()}
 
     # Query patient database
+    patient_query = f"SELECT \
+                    PATIENTID, \
+                    STATE, \
+                    CLIENT, \
+                    LOB, \
+                    GENDERID, \
+                    DATEOFBIRTH \
+                FROM patients WHERE PATIENTID IN ({patient_ids_str})"
+
+    print("Patient Query:", patient_query)
+
     with pyodbc.connect(connection_string) as conn:
         cursor = conn.cursor()
-        
-        cursor.execute(f"SELECT \
-                            PATIENTID, \
-                            STATE, \
-                            CLIENT, \
-                            LOB, \
-                            GENDERID, \
-                            DATEOFBIRTH \
-                       FROM patients WHERE PATIENTID IN ({patient_ids_str})")
+        cursor.execute(patient_query)
         patient_data = {row[0]: row for row in cursor.fetchall()}
 
     # concatenate the values such that the order of columns is:
-        #   PROVIDERSTATE, 
-        #   PROVIDERAGE, 
-        #   HIRINGDATE, 
-        #   TENURE, 
-        #   DEGREE, 
-        #   EMPLOYEETYPENAME, 
-        #   VISIT_TIME_MEAN, 
-        #   VISIT_COUNT, 
-        #   STATE,
-        #  CLIENT,
-        #   LOB,
-        #   GENDERID,
-        #   DATEOFBIRTH, 
-        #   SERVICE_DAY, 
+    #   PROVIDERSTATE, 
+    #   PROVIDERAGE, 
+    #   HIRINGDATE, 
+    #   TENURE, 
+    #   DEGREE, 
+    #   EMPLOYEETYPENAME, 
+    #   VISIT_TIME_MEAN, 
+    #   VISIT_COUNT, 
+    #   STATE,
+    #   CLIENT,
+    #   LOB,
+    #   GENDERID,
+    #   DATEOFBIRTH, 
+    #   SERVICE_DAY, 
         #   APPT_LAT, 
         #   APPT_LNG, 
     # this order should be the same as the order of columns in the training data
@@ -97,9 +115,10 @@ def run(raw_data):
 
 
         input_data.append(numpy.concatenate((provider, patient, service_days, appt_lats, appt_lngs)))
-
+    print("input_data: ", input_data)
     # Predict
     input_data = numpy.array(input_data)
+    print("input_data numpy: ", input_data)
     results = model.predict(input_data)
     logging.info("Request processed")
     return results.tolist()
