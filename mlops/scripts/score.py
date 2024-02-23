@@ -6,7 +6,7 @@ import joblib
 import pyodbc
 import sys
 
-connection_string='Driver={ODBC Driver 17 for SQL Server};Server=tcp:vt-ml-srvr.database.windows.net,1433;Database=vt-ml-db;Uid=vt-sql-admin-login;Pwd=College1//;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;'  
+connection_string='Driver={ODBC Driver 17 for SQL Server};Server=tcp:vt-ml-srvr.database.windows.net,1433;Database=vt-ml-db;Uid=vt-sql-admin-login;Pwd=College1//;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=60;'  
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 def init():
     """
@@ -69,10 +69,10 @@ def run(raw_data):
 
     logging.info("Provider Query: %s", query)
 
-    with pyodbc.connect(connection_string) as conn:
-        cursor = conn.cursor()
-        cursor.execute(query)
-        provider_data = {row[0]: row for row in cursor.fetchall()}
+    conn = pyodbc.connect(connection_string)
+    cursor = conn.cursor()
+    cursor.execute(query)
+    provider_data = {row[0]: row for row in cursor.fetchall()}
 
     # Query patient database
     patient_query = f"SELECT \
@@ -86,10 +86,9 @@ def run(raw_data):
 
     logging.info("Patient Query: %s", patient_query)
 
-    with pyodbc.connect(connection_string) as conn:
-        cursor = conn.cursor()
-        cursor.execute(patient_query)
-        patient_data = {row[0]: row for row in cursor.fetchall()}
+    cursor.execute(patient_query)
+    patient_data = {row[0]: row for row in cursor.fetchall()}
+    conn.close()
 
     # concatenate the values such that the order of columns is:
     #   PROVIDERSTATE, 
