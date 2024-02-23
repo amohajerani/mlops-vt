@@ -110,8 +110,8 @@ def run(raw_data):
     # this order should be the same as the order of columns in the training data
     input_data = []
     for i, item in enumerate(data):
-        provider = provider_data[item["PROVIDERID"]]
-        patient = patient_data[item["PATIENTID"]]
+        provider = provider_data[item["PROVIDERID"]][1:]
+        patient = patient_data[item["PATIENTID"]][1:]
         service_day = [service_days[i]]
         appt_lat = [appt_lats[i]]
         appt_lng = [appt_lngs[i]]
