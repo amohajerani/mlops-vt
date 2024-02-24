@@ -137,6 +137,13 @@ stages:
             parameters:
               ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
           - template: ../templates/install-requirements.yml
+          # run a simple python file to test the environment
+          - task: PythonScript@0
+            inputs:
+              scriptSource: 'filePath'
+              scriptPath: 'mlops/scripts/test_db_conn.py'
+              pythonInterpreter: 'python'
+
           - template: ../templates/register-environment.yml
             parameters:
               environment_name: vt-train-env
