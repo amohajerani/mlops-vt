@@ -38,7 +38,7 @@ endpoint = ManagedOnlineEndpoint(
 model = Model(path="vt-model/model.pkl")
 env = Environment(
     conda_file="../data-science/environment/train-conda.yml",
-    image="local_deploy_img:latest",
+    image="crvtpoc9dev.azurecr.io/local_deploy_img:v1",
 )
 
 blue_deployment = ManagedOnlineDeployment(
