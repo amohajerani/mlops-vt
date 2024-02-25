@@ -75,14 +75,14 @@ stages:
               environment_path: data-science/environment/train-conda.yml
               build_type: conda
               ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
-#          - template: ../templates/run-pipeline.yml
-#            parameters:
-#              experiment_name: vt-train-pipeline
-#              data_name: train
-#              environment_name: vt-train-env
-#              compute_name: cpu-cluster
-#              enable_monitoring: $(enable_monitoring)
-#              table_name: "vtmonitoring"
+          - template: ../templates/run-pipeline.yml
+            parameters:
+              experiment_name: vt-train-pipeline
+              data_name: train
+              environment_name: vt-train-env
+              compute_name: cpu-cluster
+              enable_monitoring: $(enable_monitoring)
+              table_name: "vtmonitoring"
           - script: |
               echo $(Build.SourceBranchName) > branch.txt
             displayName: 'Write git branch to file'

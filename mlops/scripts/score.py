@@ -5,9 +5,10 @@ import numpy
 import joblib
 import pyodbc
 import sys
+logger = logging.getLogger('azure.mgmt.resource')
 
 connection_string='Driver={ODBC Driver 17 for SQL Server};Server=tcp:vt-ml-srvr.database.windows.net,1433;Database=vt-ml-db;Uid=vt-sql-admin-login;Pwd=College1//;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=60;'  
-logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+logger.setLevel(logging.DEBUG)
 def init():
     """
     This function is called when the container is initialized/started, typically after create/update of the deployment.
@@ -18,7 +19,7 @@ def init():
     # It is the path to the model folder (./azureml-models/$MODEL_NAME/$VERSION)
     # Please provide your model's folder name if there is one
     model_path = os.path.join(
-        os.getenv("AZUREML_MODEL_DIR"), "vt-model/model.pkl"
+        os.getenv("AZUREML_MODEL_DIR"), "model.pkl"
     )
     # deserialize the model file back into a sklearn model
     model = joblib.load(model_path)
