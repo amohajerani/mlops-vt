@@ -154,7 +154,6 @@ def main(args):
            'CLIENT',
            'LOB',
            'GENDERID',
-           'DATEOFBIRTH', 
            'APPT_LAT', 
            'APPT_LNG',] + [TARGET_COL]
     train_data = train_data[column_order]

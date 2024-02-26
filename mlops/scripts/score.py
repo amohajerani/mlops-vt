@@ -78,8 +78,7 @@ def run(raw_data):
                     STATE, \
                     CLIENT, \
                     LOB, \
-                    GENDERID, \
-                    DATEOFBIRTH \
+                    GENDERID \
                 FROM patients WHERE PATIENTID IN ({patient_ids_str})"
 
     logging.info("Patient Query: %s", patient_query)
@@ -100,9 +99,8 @@ def run(raw_data):
     #   CLIENT,
     #   LOB,
     #   GENDERID,
-    #   DATEOFBIRTH, 
-        #   APPT_LAT, 
-        #   APPT_LNG, 
+    #   APPT_LAT, 
+    #   APPT_LNG, 
     # this order should be the same as the order of columns in the training data
     input_data = []
     for i, item in enumerate(data):
