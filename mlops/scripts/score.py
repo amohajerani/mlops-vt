@@ -5,7 +5,7 @@ import numpy
 import joblib
 import pyodbc
 import sys
-
+import pandas as pd
 connection_string='Driver={ODBC Driver 17 for SQL Server};Server=tcp:vt-ml-srvr.database.windows.net,1433;Database=vt-ml-db;Uid=vt-sql-admin-login;Pwd=College1//;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=60;'  
 logging.basicConfig(level=logging.INFO)
 
@@ -112,9 +112,27 @@ def run(raw_data):
         input_data.append(numpy.concatenate((provider, patient, appt_lat, appt_lng)))
     
     logging.info("input_data: %s", input_data)
+
+    column_names = [
+    "PROVIDERSTATE", 
+    "PROVIDERAGE", 
+    "TENURE", 
+    "DEGREE", 
+    "EMPLOYEETYPENAME", 
+    "VISIT_TIME_MEAN", 
+    "VISIT_COUNT", 
+    "STATE",
+    "CLIENT",
+    "LOB",
+    "GENDERID",
+    "APPT_LAT", 
+    "APPT_LNG"
+    ]
+
+    # Convert the input data to a DataFrame
+    input_data = pd.DataFrame(input_data, columns=column_names)
+
     # Predict
-    input_data = numpy.array(input_data)
-    logging.info("input_data numpy: %s", input_data)
     results = model.predict(input_data)
     logging.info("Request processed")
     return results.tolist()
