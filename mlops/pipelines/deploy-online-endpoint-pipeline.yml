@@ -110,7 +110,7 @@ stages:
   - stage: DeployProd
     displayName: DeployProd
     dependsOn: PROD_Approval
-    condition: succeeded('PROD_Approval')
+    condition: succeeded('PROD_Approval.waitForValidation')
     variables:
     - group: vtpoc-vg
     - template: config-infra-prod.yml@vt-ml-templates

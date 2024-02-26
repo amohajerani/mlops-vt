@@ -21,7 +21,7 @@ from mlflow.tracking import MlflowClient
 TARGET_COL = "VISIT_TIME"
 # Define your categorical and numerical columns
 categorical_features = ['STATE', 'CLIENT', 'LOB', 'EMPLOYEETYPENAME', 'PROVIDERSTATE', 'DEGREE']
-numerical_features = ['PROD_CKD', 'PROD_PAD', 'VISIT_TIME_MEAN', 'PROD_HHRA', 'GENDERID', 'PROD_MHC', 'PROVIDERAGE', 'PROD_DEE', 'TENURE', 'VISIT_COUNT', 'PROD_DSNP', 'PROD_SPIROMETRY', 'PROD_OMW', 'PROD_FOBT', 'PROD_HBA1C', 'APPT_LNG', 'APPT_LAT', 'PROD_MTM']
+numerical_features = ['VISIT_TIME_MEAN', 'GENDERID', 'PROVIDERAGE', 'TENURE', 'VISIT_COUNT',  'APPT_LNG', 'APPT_LAT']
 
 
 def parse_args():
@@ -47,7 +47,6 @@ def main(args):
     column_order = [        
             'PROVIDERSTATE', 
            'PROVIDERAGE', 
-           'HIRINGDATE', 
            'TENURE', 
            'DEGREE', 
            'EMPLOYEETYPENAME', 
@@ -57,8 +56,6 @@ def main(args):
            'CLIENT',
            'LOB',
            'GENDERID',
-           'DATEOFBIRTH', 
-           'SERVICE_DAY', 
            'APPT_LAT', 
            'APPT_LNG',] + [TARGET_COL]
     test_data = test_data[column_order]
