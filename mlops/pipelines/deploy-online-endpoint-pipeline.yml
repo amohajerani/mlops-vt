@@ -90,14 +90,11 @@ stages:
   - stage: PROD_Approval
     dependsOn:
     - DeployDev
-    variables:
-    - name: branch
-      value: $[ stageDependencies.DeployDev.DeployOnlineEndpointDev.outputs['getBranch.branch'] ]
+    condition: and(succeeded('DeployDev'), eq($[ stageDependencies.DeployDev.DeployOnlineEndpointDev.outputs['getBranch.branch'] ], 'main'))
     jobs:
       - job: waitForValidation
         displayName: Wait for external validation
         pool: server
-        condition: eq(variables.branch, 'main')
         timeoutInMinutes: 4320 # job times out in 3 days
         steps:
           - task: ManualValidation@0
@@ -110,7 +107,7 @@ stages:
   - stage: DeployProd
     displayName: DeployProd
     dependsOn: PROD_Approval
-    condition: succeeded('PROD_Approval.waitForValidation')
+    condition: succeeded('PROD_Approval')
     variables:
     - group: vtpoc-vg
     - template: config-infra-prod.yml@vt-ml-templates
