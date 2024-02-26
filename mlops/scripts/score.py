@@ -5,10 +5,10 @@ import numpy
 import joblib
 import pyodbc
 import sys
-logger = logging.getLogger('azure.mgmt.resource')
 
 connection_string='Driver={ODBC Driver 17 for SQL Server};Server=tcp:vt-ml-srvr.database.windows.net,1433;Database=vt-ml-db;Uid=vt-sql-admin-login;Pwd=College1//;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=60;'  
-logger.setLevel(logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
+
 def init():
     """
     This function is called when the container is initialized/started, typically after create/update of the deployment.
@@ -40,8 +40,6 @@ def run(raw_data):
     logging.info("provider_ids: %s", provider_ids)
     patient_ids = [item["PATIENTID"] for item in data]
     logging.info("patient_ids: %s", patient_ids)
-    service_days = [item["SERVICE_DAY"] for item in data]
-    logging.info("service_days: %s", service_days)
     appt_lats = [item["APPT_LAT"] for item in data]
     logging.info("appt_lats: %s", appt_lats)
     appt_lngs = [item["APPT_LNG"] for item in data]
@@ -60,7 +58,6 @@ def run(raw_data):
                     PROVIDERID, \
                     PROVIDERSTATE, \
                     PROVIDERAGE, \
-                    HIRINGDATE, \
                     TENURE, \
                     DEGREE, \
                     EMPLOYEETYPENAME, \
@@ -94,7 +91,6 @@ def run(raw_data):
     # concatenate the values such that the order of columns is:
     #   PROVIDERSTATE, 
     #   PROVIDERAGE, 
-    #   HIRINGDATE, 
     #   TENURE, 
     #   DEGREE, 
     #   EMPLOYEETYPENAME, 
@@ -105,7 +101,6 @@ def run(raw_data):
     #   LOB,
     #   GENDERID,
     #   DATEOFBIRTH, 
-    #   SERVICE_DAY, 
         #   APPT_LAT, 
         #   APPT_LNG, 
     # this order should be the same as the order of columns in the training data
@@ -113,11 +108,10 @@ def run(raw_data):
     for i, item in enumerate(data):
         provider = provider_data[item["PROVIDERID"]][1:]
         patient = patient_data[item["PATIENTID"]][1:]
-        service_day = [service_days[i]]
         appt_lat = [appt_lats[i]]
         appt_lng = [appt_lngs[i]]
 
-        input_data.append(numpy.concatenate((provider, patient, service_day, appt_lat, appt_lng)))
+        input_data.append(numpy.concatenate((provider, patient, appt_lat, appt_lng)))
     
     logging.info("input_data: %s", input_data)
     # Predict

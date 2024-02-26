@@ -144,8 +144,7 @@ def main(args):
     # Reorder columns
     column_order = [        
            'PROVIDERSTATE', 
-           'PROVIDERAGE', 
-           'HIRINGDATE', 
+           'PROVIDERAGE',  
            'TENURE', 
            'DEGREE', 
            'EMPLOYEETYPENAME', 
@@ -156,7 +155,6 @@ def main(args):
            'LOB',
            'GENDERID',
            'DATEOFBIRTH', 
-           'SERVICE_DAY', 
            'APPT_LAT', 
            'APPT_LNG',] + [TARGET_COL]
     train_data = train_data[column_order]
