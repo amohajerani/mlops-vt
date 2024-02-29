@@ -60,13 +60,13 @@ stages:
             parameters:
               ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
           - template: ../templates/install-requirements.yml
-  #        - template: ../templates/create-online-endpoint.yml
-  #          parameters:
-  #            endpoint_name: "${{ variables.endpoint_name }}"
-  #            endpoint_description: "VT Online Endpoint"
-  #            auth_mode: "key"
-  #            ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
-  #            deployment_compute_target: "${{ variables.deployment_compute_target }}"
+          - template: ../templates/create-online-endpoint.yml
+            parameters:
+              endpoint_name: "${{ variables.endpoint_name }}"
+              endpoint_description: "VT Online Endpoint"
+              auth_mode: "key"
+              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
+              deployment_compute_target: "${{ variables.deployment_compute_target }}"
           - template: ../templates/create-online-deployment.yml
             parameters:
               deployment_name: vt-online-dp
