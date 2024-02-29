@@ -12,6 +12,8 @@ from azure.ai.ml.entities._deployment.container_resource_settings import (
     ResourceSettings,
 )
 
+import datetime
+
 import json
 
 def parse_args():
