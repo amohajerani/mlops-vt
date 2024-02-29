@@ -72,7 +72,7 @@ def main():
     # allocate traffic
     online_endpoint = ml_client.online_endpoints.get(args.endpoint_name)
     online_endpoint.traffic = {args.deployment_name: args.traffic_allocation}
-    endpoint_update_job = ml_client.online_endpoints.begin_update(online_endpoint)
+    endpoint_update_job = ml_client.online_endpoints.create_or_update(online_endpoint)
     endpoint_update_job.wait()
 
 if __name__ == "__main__":
