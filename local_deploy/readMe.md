@@ -10,3 +10,5 @@ Follow these steps:
 - ensure the reference to the docker image in your python script env definition is correct.
 - In the scoring script, revise the path to the model.pkl
 - Run the python script. 
+
+to see the logs, find the container name and then run docker logs on that container. alternatively use the get_logs command
