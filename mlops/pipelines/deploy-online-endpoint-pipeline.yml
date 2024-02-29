@@ -2,6 +2,8 @@ name: deploy-online-endpoint-pipeline
 
 variables:
   - group: vtpoc-vg
+  - name: deployment_name
+    value: vt-online-dp-$(CurrentTime)
 
 trigger: none
 
@@ -30,6 +32,8 @@ stages:
       - template: config-infra-dev.yml@vt-ml-templates
       - name: endpoint_name
         value: vt-online-$(namespace)$(postfix)$(environment)
+
+
     jobs:
       - job: DeployOnlineEndpointDev
         steps:
@@ -69,7 +73,7 @@ stages:
               deployment_compute_target: "${{ variables.deployment_compute_target }}"
           - template: ../templates/create-online-deployment.yml
             parameters:
-              deployment_name: vt-online-dp
+              deployment_name: "${{ variables.deployment_name }}"
               endpoint_name: "${{ variables.endpoint_name }}"
               model_path: "vt-model@latest"
               traffic_allocation: 100
@@ -164,7 +168,7 @@ stages:
               deployment_compute_target: "${{ variables.deployment_compute_target }}"
           - template: ../templates/create-online-deployment.yml
             parameters:
-              deployment_name: vt-online-dp
+              deployment_name: "${{ variables.deployment_name }}"
               endpoint_name: "${{ variables.endpoint_name }}"
               model_path: "vt-model@latest"
               traffic_allocation: 100
