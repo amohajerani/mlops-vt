@@ -1,0 +1,10 @@
+This document explains k8 setup.
+- Create a k8 cluster is you don't have one already
+- install ml extension:
+    az k8s-extension create --name k8-ext-ml --extension-type Microsoft.AzureML.Kubernetes --config enableTraining=False enableInference=True inferenceRouterServiceType=LoadBalancer allowInsecureConnections=True InferenceRouterHA=False --cluster-type managedClusters --cluster-name aks-dev --resource-group rg-vtpoc-9dev --scope cluster
+
+- verify the extension
+az k8s-extension show --name k8-ext-ml --cluster-type managedClusters --cluster-name aks-dev --resource-group rg-vtpoc-9dev
+
+- go the azure ml workspace -> compute -> kubernetes cluster -> new kubernets -> select the existing cluster and gave the compute a name
+- when you create the endpoint, you specify the compute. When you deploy the model, you specify the resource limits.

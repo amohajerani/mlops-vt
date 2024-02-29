@@ -7,6 +7,8 @@ parameters:
   type: string
 - name: ado_service_connection_aml_ws
   type: string
+- name: deployment_compute_target
+  type: string
 
 steps:
 
@@ -22,3 +24,4 @@ steps:
         --endpoint_name "${{parameters.endpoint_name}}" \
         --description "${{parameters.endpoint_description}}" \
         --auth_mode "${{parameters.auth_mode}}" \
+        --compute "${{parameters.deployment_compute_target}}"

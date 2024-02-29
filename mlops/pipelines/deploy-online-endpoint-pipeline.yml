@@ -66,6 +66,7 @@ stages:
               endpoint_description: "VT Online Endpoint"
               auth_mode: "key"
               ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
+              deployment_compute_target: "${{ variables.deployment_compute_target }}"
           - template: ../templates/create-online-deployment.yml
             parameters:
               deployment_name: vt-online-dp
@@ -73,6 +74,10 @@ stages:
               model_path: "vt-model@latest"
               traffic_allocation: 100
               ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
+              instance_type: "${{ variables.deploymeny_instance_type }}"
+              instance_count: "${{ variables.deployment_instance_count }}"
+              resource_limit_cpu: "${{ variables.resource_limit_cpu }}"
+              resource_limit_memory: "${{ variables.resource_limit_memory }}"
           - template: ../templates/test-online-endpoint.yml
             parameters:
               endpoint_name: "${{ variables.endpoint_name }}"

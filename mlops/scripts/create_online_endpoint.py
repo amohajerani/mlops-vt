@@ -1,5 +1,5 @@
 import argparse
-from azure.ai.ml.entities import ManagedOnlineEndpoint
+from azure.ai.ml.entities import KubernetesOnlineEndpoint
 from azure.identity import DefaultAzureCredential
 from azure.ai.ml import MLClient
 
@@ -10,6 +10,7 @@ def parse_args():
     parser.add_argument("--endpoint_name", type=str, help="Name of online endpoint")
     parser.add_argument("--description", type=str, help="Description of the online endpoint")
     parser.add_argument("--auth_mode", type=str, help="endpoint authentication mode", default="aml_token")
+    parser.add_argument("--compute_target", type=str, help="Name of the compute target for deployment")
     return parser.parse_args()
 
 def main():
@@ -25,10 +26,11 @@ def main():
         print(ex)
 
     # create an online endpoint
-    online_endpoint = ManagedOnlineEndpoint(
+    online_endpoint = KubernetesOnlineEndpoint(
         name=args.endpoint_name, 
         description=args.description,
         auth_mode=args.auth_mode,
+        compute=args.compute
     )
     
     endpoint_job = ml_client.online_endpoints.begin_create_or_update(
