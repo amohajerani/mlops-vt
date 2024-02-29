@@ -11,7 +11,7 @@ parameters:
 - name: instance_type
   type: string
 - name: instance_count
-  type: int
+  type: string
 - name: resource_limit_cpu
   type: string
 - name: resource_limit_memory
