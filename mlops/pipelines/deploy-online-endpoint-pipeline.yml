@@ -30,8 +30,6 @@ stages:
       - template: config-infra-dev.yml@vt-ml-templates
       - name: endpoint_name
         value: vt-online-$(namespace)$(postfix)$(environment)
-
-
     jobs:
       - job: DeployOnlineEndpointDev
         steps:
@@ -50,12 +48,10 @@ stages:
               branch=$(cat $(Pipeline.Workspace)/s/branch.txt)
               echo "##vso[task.setvariable variable=branch;isOutput=true]$branch"
               cd $(Pipeline.Workspace)/s/mlops/pipelines
-            name: getBranch
-            displayName: 'Change directory'
-          - script: |
               echo "##vso[task.setvariable variable=deployment_name;isOutput=true]vt-online-dp-$(date +%Y%m%d%H%M%S)"
-            name: setvarStep
-            displayName: 'Set deployment name'
+              echo "Deployment name: $(deployment_name)"
+            name: runBash
+            displayName: 'Change directory'
           - template: ../templates/connect-to-workspace.yml
             parameters:
               ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
@@ -75,7 +71,7 @@ stages:
               deployment_compute_target: "${{ variables.deployment_compute_target }}"
           - template: ../templates/create-online-deployment.yml
             parameters:
-              deployment_name: $(deployment_name)
+              deployment_name: ${{ variables.endpoint_name }}"
               endpoint_name: "${{ variables.endpoint_name }}"
               model_path: "vt-model@latest"
               traffic_allocation: 100
@@ -172,7 +168,7 @@ stages:
               deployment_compute_target: "${{ variables.deployment_compute_target }}"
           - template: ../templates/create-online-deployment.yml
             parameters:
-              deployment_name: $[stageDependencies.DeployDev.SetDeploymentName.outputs['setvarStep.deployment_name']]
+              deployment_name: $[stageDependencies.DeployDev.DeployOnlineEndpointDev.outputs['runBash.deployment_name']]
               endpoint_name: "${{ variables.endpoint_name }}"
               model_path: "vt-model@latest"
               traffic_allocation: 100
