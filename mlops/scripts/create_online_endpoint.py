@@ -30,7 +30,7 @@ def main():
         name=args.endpoint_name, 
         description=args.description,
         auth_mode=args.auth_mode,
-        compute=args.eployment_compute_target
+        compute=args.deployment_compute_target
     )
     
     endpoint_job = ml_client.online_endpoints.begin_create_or_update(
