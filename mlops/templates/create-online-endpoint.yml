@@ -24,4 +24,4 @@ steps:
         --endpoint_name "${{parameters.endpoint_name}}" \
         --description "${{parameters.endpoint_description}}" \
         --auth_mode "${{parameters.auth_mode}}" \
-        --compute "${{parameters.deployment_compute_target}}"
+        --deployment_compute_target "${{parameters.deployment_compute_target}}"
