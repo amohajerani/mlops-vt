@@ -10,7 +10,7 @@ def parse_args():
     parser.add_argument("--endpoint_name", type=str, help="Name of online endpoint")
     parser.add_argument("--description", type=str, help="Description of the online endpoint")
     parser.add_argument("--auth_mode", type=str, help="endpoint authentication mode", default="aml_token")
-    parser.add_argument("--compute_target", type=str, help="Name of the compute target for deployment")
+    parser.add_argument("--deployment_compute_target", type=str, help="Name of the compute target for deployment")
     return parser.parse_args()
 
 def main():
@@ -30,7 +30,7 @@ def main():
         name=args.endpoint_name, 
         description=args.description,
         auth_mode=args.auth_mode,
-        compute=args.compute
+        compute=args.eployment_compute_target
     )
     
     endpoint_job = ml_client.online_endpoints.begin_create_or_update(
