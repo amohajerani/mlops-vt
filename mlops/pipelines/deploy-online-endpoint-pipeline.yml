@@ -170,7 +170,7 @@ stages:
               deployment_compute_target: "${{ variables.deployment_compute_target }}"
           - template: ../templates/create-online-deployment.yml
             parameters:
-              deployment_name: $[stageDependencies.DeployDev.DeployOnlineEndpointDev.outputs['runBash.deployment_name']]
+              deployment_name: $([stageDependencies.DeployDev.DeployOnlineEndpointDev.outputs['runBash.deployment_name'])
               endpoint_name: "${{ variables.endpoint_name }}"
               model_path: "vt-model@latest"
               traffic_allocation: 100
