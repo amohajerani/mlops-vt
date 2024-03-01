@@ -99,7 +99,7 @@ stages:
   - stage: PROD_Approval
     dependsOn:
     - DeployDev
-    condition: and(succeeded('DeployDev'), eq(dependencies.DeployDev.outputs['DeployOnlineEndpointDev.getBranch.branch'], 'main'))
+    condition: and(succeeded('DeployDev'), eq(dependencies.DeployDev.outputs['DeployOnlineEndpointDev.runBash.branch'], 'main'))
     jobs:
       - job: waitForValidation
         displayName: Wait for external validation
