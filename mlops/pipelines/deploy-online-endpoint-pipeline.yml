@@ -48,8 +48,12 @@ stages:
               branch=$(cat $(Pipeline.Workspace)/s/branch.txt)
               echo "##vso[task.setvariable variable=branch;isOutput=true]$branch"
               cd $(Pipeline.Workspace)/s/mlops/pipelines
-            name: getBranch
+              echo "##vso[task.setvariable variable=deployment_name;isOutput=true]vt-online-dp-$(date +%Y%m%d%H%M%S)"
+            name: runBash
             displayName: 'Change directory'
+          - script: |
+              echo "Deployment name: $(runBash.deployment_name)"
+            displayName: 'Print deployment name'
           - template: ../templates/connect-to-workspace.yml
             parameters:
               ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
@@ -66,13 +70,18 @@ stages:
               endpoint_description: "VT Online Endpoint"
               auth_mode: "key"
               ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
+              deployment_compute_target: "${{ variables.deployment_compute_target }}"
           - template: ../templates/create-online-deployment.yml
             parameters:
-              deployment_name: vt-online-dp
+              deployment_name: $(runBash.deployment_name)
               endpoint_name: "${{ variables.endpoint_name }}"
               model_path: "vt-model@latest"
               traffic_allocation: 100
               ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
+              instance_type: "${{ variables.deploymeny_instance_type }}"
+              instance_count: "${{ variables.deployment_instance_count }}"
+              resource_limit_cpu: "${{ variables.resource_limit_cpu }}"
+              resource_limit_memory: "${{ variables.resource_limit_memory }}"
           - template: ../templates/test-online-endpoint.yml
             parameters:
               endpoint_name: "${{ variables.endpoint_name }}"
@@ -106,7 +115,9 @@ stages:
 
   - stage: DeployProd
     displayName: DeployProd
-    dependsOn: PROD_Approval
+    dependsOn: 
+      - PROD_Approval
+      - DeployDev
     condition: succeeded('PROD_Approval')
     variables:
     - group: vtpoc-vg
@@ -156,13 +167,18 @@ stages:
               endpoint_description: "VT Online Endpoint"
               auth_mode: "key"
               ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
+              deployment_compute_target: "${{ variables.deployment_compute_target }}"
           - template: ../templates/create-online-deployment.yml
             parameters:
-              deployment_name: vt-online-dp
+              deployment_name: $[stageDependencies.DeployDev.DeployOnlineEndpointDev.outputs['runBash.deployment_name']]
               endpoint_name: "${{ variables.endpoint_name }}"
               model_path: "vt-model@latest"
               traffic_allocation: 100
               ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
+              instance_type: "${{ variables.deploymeny_instance_type }}"
+              instance_count: "${{ variables.deployment_instance_count }}"
+              resource_limit_cpu: "${{ variables.resource_limit_cpu }}"
+              resource_limit_memory: "${{ variables.resource_limit_memory }}"
           - template: ../templates/test-online-endpoint.yml
             parameters:
               endpoint_name: "${{ variables.endpoint_name }}"

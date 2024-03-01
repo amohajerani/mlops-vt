@@ -7,7 +7,6 @@ import pyodbc
 import sys
 import pandas as pd
 connection_string='Driver={ODBC Driver 17 for SQL Server};Server=tcp:vt-ml-srvr.database.windows.net,1433;Database=vt-ml-db;Uid=vt-sql-admin-login;Pwd=College1//;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=60;'  
-logging.basicConfig(level=logging.INFO)
 
 def init():
     """
@@ -23,7 +22,6 @@ def init():
     )
     # deserialize the model file back into a sklearn model
     model = joblib.load(model_path)
-    logging.info("Init complete")
 
 
 def run(raw_data):
@@ -33,23 +31,15 @@ def run(raw_data):
     method and return the result back
     """
     
-    logging.info("raw_data: %s", raw_data)
     data = json.loads(raw_data)["input_data"]    
-    logging.info("data: %s", data)
     provider_ids = [item["PROVIDERID"] for item in data]
-    logging.info("provider_ids: %s", provider_ids)
     patient_ids = [item["PATIENTID"] for item in data]
-    logging.info("patient_ids: %s", patient_ids)
     appt_lats = [item["APPT_LAT"] for item in data]
-    logging.info("appt_lats: %s", appt_lats)
     appt_lngs = [item["APPT_LNG"] for item in data]
-    logging.info("appt_lngs: %s", appt_lngs)
 
     # Convert lists to string format for SQL query
     provider_ids_str = ','.join(f"'{id}'" for id in provider_ids)
-    logging.info("provider_ids_str: %s", provider_ids_str)
     patient_ids_str = ','.join(f"'{id}'" for id in patient_ids)
-    logging.info("patient_ids_str: %s", patient_ids_str)
     # in future, you can add other fields such as evaluation dy of the week.
     # Query provider database
 
@@ -81,7 +71,6 @@ def run(raw_data):
                     GENDERID \
                 FROM patients WHERE PATIENTID IN ({patient_ids_str})"
 
-    logging.info("Patient Query: %s", patient_query)
 
     cursor.execute(patient_query)
     patient_data = {row[0]: row for row in cursor.fetchall()}
@@ -111,7 +100,6 @@ def run(raw_data):
 
         input_data.append(numpy.concatenate((provider, patient, appt_lat, appt_lng)))
     
-    logging.info("input_data: %s", input_data)
 
     column_names = [
     "PROVIDERSTATE", 
@@ -134,5 +122,4 @@ def run(raw_data):
 
     # Predict
     results = model.predict(input_data)
-    logging.info("Request processed")
     return results.tolist()

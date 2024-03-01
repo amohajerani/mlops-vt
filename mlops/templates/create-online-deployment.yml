@@ -8,6 +8,14 @@ parameters:
 - name: traffic_allocation
 - name: ado_service_connection_aml_ws
   type: string
+- name: instance_type
+  type: string
+- name: instance_count
+  type: string
+- name: resource_limit_cpu
+  type: string
+- name: resource_limit_memory
+  type: string
 
 steps:
     
@@ -23,7 +31,11 @@ steps:
         --endpoint_name "${{parameters.endpoint_name}}" \
         --deployment_name "${{parameters.deployment_name}}" \
         --model_path "${{parameters.model_path}}" \
+        --instance_type "${{parameters.instance_type}}" \
+        --instance_count "${{parameters.instance_count}}" \
         --traffic_allocation "${{parameters.traffic_allocation}}" \
         --scoring_script_dir "mlops/scripts/" \
+        --resource_limit_cpu "${{parameters.resource_limit_cpu}}" \
+        --resource_limit_memory "${{parameters.resource_limit_memory}}"
 
 
