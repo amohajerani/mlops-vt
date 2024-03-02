@@ -125,7 +125,7 @@ stages:
     - name: endpoint_name
       value: vt-online-$(namespace)$(postfix)$(environment)
     - name: deployment_name
-      value: "$[stageDependencies.DeployDev.DeployOnlineEndpointDev.outputs['runBash.deployment_name']]"
+      value: $[stageDependencies.DeployDev.DeployOnlineEndpointDev.outputs['runBash.deployment_name']]
     jobs:
       - job: DeployOnlineEndpointProd
         steps:
@@ -136,6 +136,8 @@ stages:
               artifactName: 'code'
               targetPath: '$(Pipeline.Workspace)/s'
           - script: |
+              echo "the value of deployment_name:"
+              echo $(deployment_name)
               echo "Contents of s dir:"
               cd $(Pipeline.Workspace)/s/mlops/pipelines
           - template: ../templates/connect-to-workspace.yml
