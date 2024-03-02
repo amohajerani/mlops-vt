@@ -141,6 +141,7 @@ stages:
           - template: ../templates/tmp.yml
             parameters:
               deployment_name: ${{ variables.deployment_name }}
+              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
           - template: ../templates/connect-to-workspace.yml
             parameters:
               ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}

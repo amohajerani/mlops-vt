@@ -1,7 +1,9 @@
 parameters:
-
 - name: deployment_name
   type: string
+- name: ado_service_connection_aml_ws
+  type: string
+
 
 steps:
     
@@ -13,5 +15,4 @@ steps:
     scriptLocation: inlineScript
     inlineScript: |
       set -x
-      echo 'deployment name:' "${{parameters.deployment_name}}" 
-
+      echo 'deployment_name: ' "${{parameters.deployment_name}}" 
