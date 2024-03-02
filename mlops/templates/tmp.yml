@@ -8,7 +8,7 @@ parameters:
 steps:
     
 - task: AzureCLI@2
-  displayName: Creating online deployment
+  displayName: running tmp
   inputs:
     azureSubscription: ${{ parameters.ado_service_connection_aml_ws }}
     scriptType: bash
