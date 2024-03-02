@@ -1,0 +1,17 @@
+parameters:
+
+- name: deployment_name
+  type: string
+
+steps:
+    
+- task: AzureCLI@2
+  displayName: Creating online deployment
+  inputs:
+    azureSubscription: ${{ parameters.ado_service_connection_aml_ws }}
+    scriptType: bash
+    scriptLocation: inlineScript
+    inlineScript: |
+      set -x
+      echo 'deployment name:' "${{parameters.deployment_name}}" 
+

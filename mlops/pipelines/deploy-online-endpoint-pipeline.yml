@@ -48,7 +48,7 @@ stages:
               branch=$(cat $(Pipeline.Workspace)/s/branch.txt)
               echo "##vso[task.setvariable variable=branch;isOutput=true]$branch"
               cd $(Pipeline.Workspace)/s/mlops/pipelines
-              echo "##vso[task.setvariable variable=deployment_name;isOutput=true]vt-online-dp_$(date +%Y%m%d%H%M%S)"
+              echo "##vso[task.setvariable variable=deployment_name;isOutput=true]vt-online-dp-$(date +%Y%m%d%H%M%S)"
             name: runBash
             displayName: 'Change directory'
           - script: |
@@ -125,7 +125,7 @@ stages:
     - name: endpoint_name
       value: vt-online-$(namespace)$(postfix)$(environment)
     - name: deployment_name
-      value: $(stageDependencies.DeployDev.DeployOnlineEndpointDev.outputs['runBash.deployment_name'])
+      value: $[stageDependencies.DeployDev.DeployOnlineEndpointDev.outputs['runBash.deployment_name']]
     jobs:
       - job: DeployOnlineEndpointProd
         steps:
@@ -138,6 +138,9 @@ stages:
           - script: |
               echo "Contents of s dir:"
               cd $(Pipeline.Workspace)/s/mlops/pipelines
+          - template: ../templates/tmp.yml
+            parameters:
+              deployment_name: ${{ variables.deployment_name }}
           - template: ../templates/connect-to-workspace.yml
             parameters:
               ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
@@ -172,7 +175,7 @@ stages:
               deployment_compute_target: "${{ variables.deployment_compute_target }}"
           - template: ../templates/create-online-deployment.yml
             parameters:
-              deployment_name: "${{ variables.deployment_name }}"
+              deployment_name: ${{ variables.deployment_name }}
               endpoint_name: "${{ variables.endpoint_name }}"
               model_path: "vt-model@latest"
               traffic_allocation: 100
