@@ -48,7 +48,7 @@ stages:
               branch=$(cat $(Pipeline.Workspace)/s/branch.txt)
               echo "##vso[task.setvariable variable=branch;isOutput=true]$branch"
               cd $(Pipeline.Workspace)/s/mlops/pipelines
-              echo "##vso[task.setvariable variable=deployment_name;isOutput=true]vt-online-dp-$(date +%Y%m%d%H%M%S)"
+              echo "##vso[task.setvariable variable=deployment_name;isOutput=true]vt-online-dp_$(date +%Y%m%d%H%M%S)"
             name: runBash
             displayName: 'Change directory'
           - script: |
