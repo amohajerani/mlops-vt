@@ -124,7 +124,7 @@ def run(input_data):
     for i in range(cnt):
         provider_info = provider_data[PROVIDERIDS[i]][1:]
         patient_info = patient_data[PATIENTIDS[i]][1:]
-        input_data.append(numpy.concatenate((provider_info, patient_info, APPT_LATS[i], APPT_LNGS[i])))
+        input_data.append(numpy.concatenate((provider_info, patient_info, [APPT_LATS[i]], [APPT_LNGS[i]])))
     
 
     column_names = [
