@@ -90,10 +90,10 @@ stages:
             inputs:
               targetPath: '$(Build.SourcesDirectory)'
               artifact: 'code'
-          - template: ../templates/delete-old-artifacts.yml
-            parameters:
-              model_name: "vt-model"
-              workspace_name: ${{ variables.aml_workspace }}
-              resource_group: ${{ variables.resource_group }}
-              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
+#          - template: ../templates/delete-old-artifacts.yml
+#            parameters:
+#              model_name: "vt-model"
+#              workspace_name: ${{ variables.aml_workspace }}
+#              resource_group: ${{ variables.resource_group }}
+#              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
 
