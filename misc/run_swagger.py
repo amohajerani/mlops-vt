@@ -7,7 +7,7 @@ The script takes two command-line arguments:
 --auth_code: The authorization code for the API.
 
 Example usage:
-python run_swagger.py --url http://4.149.66.177/api/v1/endpoint/vt-online-vtpoc9dev --auth_code HlgJpiRPHT0D72hPBXUN0aaykLVdegA3
+python3 run_swagger.py --url http://4.149.66.177/api/v1/endpoint/vt-online-vtpoc9dev --auth_code HlgJpiRPHT0D72hPBXUN0aaykLVdegA3
 """
 
 import argparse

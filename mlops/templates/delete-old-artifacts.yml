@@ -1,0 +1,23 @@
+parameters:
+- name: model_name
+  type: string
+- name: workspace_name
+  type: string
+- name: resource_group
+  type: string
+- name: ado_service_connection_aml_ws
+  type: string
+
+steps:
+- task: AzureCLI@2
+  displayName: Delete old artifacts
+  inputs:
+    azureSubscription: ${{ parameters.ado_service_connection_aml_ws }}
+    scriptType: bash
+    scriptLocation: inlineScript
+    inlineScript: |
+      set -x
+      # get a list of all model versions
+      az ml model list --name "${{parameters.model_name}}" --workspace-name "${{parameters.workspace_name}}" --resource-group "${{parameters.resource_group}}" --query "[].id" -o tsv > model_ids.txt
+      # delete all model versions except for the most recent two
+      tail -n +3 model_ids.txt | xargs -I {} az ml model delete --model-id {} --workspace-name "${{parameters.workspace_name}}" --resource-group "${{parameters.resource_group}}"

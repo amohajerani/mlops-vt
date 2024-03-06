@@ -1,0 +1,17 @@
+parameters:
+- name: endpoint_name
+  type: string
+- name: ado_service_connection_aml_ws
+  type: string
+
+steps:
+- task: AzureCLI@2
+  displayName: Delete old deployments
+  inputs:
+    azureSubscription: ${{ parameters.ado_service_connection_aml_ws }}
+    scriptType: bash
+    scriptLocation: inlineScript
+    inlineScript: |
+      set -x
+      python mlops/scripts/delete_old_deployments.py \
+        --endpoint_name "${{parameters.endpoint_name}}" \
