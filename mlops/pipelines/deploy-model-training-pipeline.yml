@@ -61,13 +61,6 @@ stages:
               snowflake_user: $(SNOWFLAKE_USER)
               snowflake_password: $(SNOWFLAKE_PASSWORD)
               subscription_id: $(SUBSCRIPTION_ID)
-          - template: ../templates/create-compute.yml
-            parameters:
-              cluster_name: cpu-cluster
-              size: Standard_F4s_v2
-              min_instances: 0
-              max_instances: 1
-              cluster_tier: dedicated
           - template: ../templates/register-environment.yml
             parameters:
               environment_name: vt-train-env
@@ -80,7 +73,7 @@ stages:
               experiment_name: vt-train-pipeline
               data_name: train
               environment_name: vt-train-env
-              compute_name: cpu-cluster
+              compute_name: aks-devs
               enable_monitoring: $(enable_monitoring)
               table_name: "vtmonitoring"
           - script: |
