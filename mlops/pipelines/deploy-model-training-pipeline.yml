@@ -4,10 +4,10 @@ variables:
   - group: vtpoc-vg
   - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
       # 'main' branch: PRD environment
-      - template: config-infra-prod.yml@vt-ml-templates
+      - template: config-infra-prod.yml
   - ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
       # 'develop' or feature branches: DEV environment
-      - template: config-infra-dev.yml@vt-ml-templates
+      - template: config-infra-dev.yml
 
 trigger:
   branches:
@@ -28,12 +28,6 @@ schedules:
 
 pool:
   vmImage: ubuntu-22.04
-
-resources:
-  repositories:
-  - repository: vt-ml-templates
-    type: git
-    name: vt-ml-templates
 
 stages:
   - stage: DeployTrainingPipeline
@@ -73,7 +67,7 @@ stages:
               experiment_name: vt-train-pipeline
               data_name: train
               environment_name: vt-train-env
-              compute_name: aks-devs
+              compute_name: cpu-cluster
               enable_monitoring: $(enable_monitoring)
               table_name: "vtmonitoring"
           - script: |
