@@ -24,7 +24,7 @@ stages:
     displayName: DeployDev
     variables:
       - group: vtpoc-vg
-      - template: config-infra-dev.yml
+      - template: ../../config-infra-dev.yml
       - name: endpoint_name
         value: vt-online-$(namespace)$(postfix)$(environment)
     jobs:
@@ -122,7 +122,7 @@ stages:
     condition: succeeded('PROD_Approval')
     variables:
     - group: vtpoc-vg
-    - template: config-infra-prod.yml
+    - template: ../../config-infra-prod.yml
     - name: endpoint_name
       value: vt-online-$(namespace)$(postfix)$(environment)
     jobs:
