@@ -14,7 +14,6 @@ resources:
       - main
       - dev
 
-
 pool:
   vmImage: ubuntu-22.04
 
@@ -52,9 +51,6 @@ stages:
           - script: |
               echo "Contents of the s dir:"
               ls -la $(Pipeline.Workspace)/s
-              branch=$(cat $(Pipeline.Workspace)/s/branch.txt)
-              echo "##vso[task.setvariable variable=branch;isOutput=true]$branch"
-
               echo "vt-online-dp-$(date +%Y%m%d%H%M%S)" > $(Pipeline.Workspace)/s/deployment_name.txt
               deployment_name=$(cat $(Pipeline.Workspace)/s/deployment_name.txt)
               echo "##vso[task.setvariable variable=deployment_name;isOutput=true]$deployment_name"
@@ -110,7 +106,7 @@ stages:
   - stage: PROD_Approval
     dependsOn:
     - DeployDev
-    condition: and(succeeded('DeployDev'), eq(dependencies.DeployDev.outputs['DeployOnlineEndpointDev.runBash.branch'], 'main'))
+    condition: and(succeeded('DeployDev'), eq( variables['Build.SourceBranch'], 'main'))
     jobs:
       - job: waitForValidation
         displayName: Wait for external validation
