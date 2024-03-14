@@ -23,6 +23,13 @@ pool:
 
 
 stages:
+  - stage: PrintBranchName
+    displayName: Print Branch Name
+    jobs:
+      - job: PrintBranch
+        steps:
+          - script: echo "Branch name: $(Build.SourceBranchName)"
+            displayName: 'Print branch name'
   - stage: DeployDev
     displayName: DeployDev
     variables:
