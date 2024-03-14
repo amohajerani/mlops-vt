@@ -47,13 +47,13 @@ stages:
               ls -la $(Pipeline.Workspace)/s
               branch=$(cat $(Pipeline.Workspace)/s/branch.txt)
               echo "##vso[task.setvariable variable=branch;isOutput=true]$branch"
+
+              echo "vt-online-dp-$(date +%Y%m%d%H%M%S)" > $(Pipeline.Workspace)/s/deployment_name.txt
+              deployment_name=$(cat $(Pipeline.Workspace)/s/deployment_name.txt)
+              echo "##vso[task.setvariable variable=deployment_name;isOutput=true]$deployment_name"
               cd $(Pipeline.Workspace)/s/mlops/pipelines
-              echo "##vso[task.setvariable variable=deployment_name;isOutput=true]vt-online-dp-$(date +%Y%m%d%H%M%S)"
             name: runBash
             displayName: 'Change directory'
-          - script: |
-              echo "Deployment name: $(runBash.deployment_name)"
-            displayName: 'Print deployment name'
           - template: ../templates/connect-to-workspace.yml
             parameters:
               ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
@@ -134,8 +134,12 @@ stages:
               artifactName: 'code'
               targetPath: '$(Pipeline.Workspace)/s'
           - script: |
-              echo "Contents of s dir:"
+              set -x
+              deployment_name=$(cat $(Pipeline.Workspace)/s/deployment_name.txt)
+              echo "##vso[task.setvariable variable=deployment_name;isOutput=true]$deployment_name"
               cd $(Pipeline.Workspace)/s/mlops/pipelines
+            name: runBash
+            displayName: 'Run bash'
           - template: ../templates/connect-to-workspace.yml
             parameters:
               ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
@@ -170,7 +174,7 @@ stages:
               deployment_compute_target: "${{ variables.deployment_compute_target }}"
           - template: ../templates/create-online-deployment.yml
             parameters:
-              deployment_name: $[stageDependencies.DeployDev.DeployOnlineEndpointDev.outputs['runBash.deployment_name']]
+              deployment_name: $(runBash.deployment_name)
               endpoint_name: "${{ variables.endpoint_name }}"
               model_path: "vt-model@latest"
               traffic_allocation: 100
