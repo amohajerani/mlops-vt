@@ -1,11 +1,15 @@
 import os
-import logging
 import json
 import numpy
 import joblib
 import pyodbc
-import sys
 import pandas as pd
+from inference_schema.schema_decorators import input_schema, output_schema
+from inference_schema.parameter_types.pandas_parameter_type import PandasParameterType
+from inference_schema.parameter_types.standard_py_parameter_type import (
+    StandardPythonParameterType,
+)
+
 connection_string='Driver={ODBC Driver 17 for SQL Server};Server=tcp:vt-ml-srvr.database.windows.net,1433;Database=vt-ml-db;Uid=vt-sql-admin-login;Pwd=College1//;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=60;'  
 
 def init():
@@ -23,26 +27,52 @@ def init():
     # deserialize the model file back into a sklearn model
     model = joblib.load(model_path)
 
+@input_schema(
+    param_name="input_data",
+    param_type=PandasParameterType(
+        pd.DataFrame(
+            {
+                "PROVIDERIDS": [
+                  "000fa702-904f-47dd-b365-f67494102055",
+                  "000fa702-904f-47dd-b365-f67494102055"
+                ],
+                "PATIENTIDS": [
+                  "0021E536-383A-48E2-BC76-EA5C7EAC24F9",
+                  "0021E536-383A-48E2-BC76-EA5C7EAC24F9"
+                ],
+                "APPT_LATS": [
+                  37.7749,
+                  34.0522
+                ],
+                "APPT_LNGS": [
+                  -102.4194,
+                  -118.2437
+                ]
+              }
+        )
+    ),
+)
+@output_schema(output_type=StandardPythonParameterType([45.00]))
 
-def run(raw_data):
+def run(input_data):
     """
     This function is called for every invocation of the endpoint to perform the actual scoring/prediction.
     In the example we extract the data from the json input and call the scikit-learn model's predict()
     method and return the result back
     """
-    
-    data = json.loads(raw_data)["input_data"]    
-    provider_ids = [item["PROVIDERID"] for item in data]
-    patient_ids = [item["PATIENTID"] for item in data]
-    appt_lats = [item["APPT_LAT"] for item in data]
-    appt_lngs = [item["APPT_LNG"] for item in data]
-
+    PROVIDERIDS = input_data["PROVIDERIDS"]
+    PATIENTIDS = input_data["PATIENTIDS"]
+    APPT_LATS = input_data["APPT_LATS"]
+    APPT_LNGS = input_data["APPT_LNGS"]
     # Convert lists to string format for SQL query
-    provider_ids_str = ','.join(f"'{id}'" for id in provider_ids)
-    patient_ids_str = ','.join(f"'{id}'" for id in patient_ids)
+    provider_ids_str = ','.join(f"'{id}'" for id in PROVIDERIDS)
+    patient_ids_str = ','.join(f"'{id}'" for id in PATIENTIDS)
     # in future, you can add other fields such as evaluation dy of the week.
     # Query provider database
 
+    cnt = len(PROVIDERIDS)
+    if cnt != len(PATIENTIDS) or cnt != len(APPT_LATS) or cnt != len(APPT_LNGS):
+        raise ValueError("Length of PROVIDERIDS, PATIENTIDS, APPT_LATS, and APPT_LNGS must be the same")
     
     query = f"SELECT \
                     PROVIDERID, \
@@ -55,7 +85,6 @@ def run(raw_data):
                     VISIT_COUNT \
                FROM providers WHERE PROVIDERID IN ({provider_ids_str})"
 
-    logging.info("Provider Query: %s", query)
 
     conn = pyodbc.connect(connection_string)
     cursor = conn.cursor()
@@ -92,13 +121,10 @@ def run(raw_data):
     #   APPT_LNG, 
     # this order should be the same as the order of columns in the training data
     input_data = []
-    for i, item in enumerate(data):
-        provider = provider_data[item["PROVIDERID"]][1:]
-        patient = patient_data[item["PATIENTID"]][1:]
-        appt_lat = [appt_lats[i]]
-        appt_lng = [appt_lngs[i]]
-
-        input_data.append(numpy.concatenate((provider, patient, appt_lat, appt_lng)))
+    for i in range(cnt):
+        provider_info = provider_data[PROVIDERIDS[i]][1:]
+        patient_info = patient_data[PATIENTIDS[i]][1:]
+        input_data.append(numpy.concatenate((provider_info, patient_info, [APPT_LATS[i]], [APPT_LNGS[i]])))
     
 
     column_names = [

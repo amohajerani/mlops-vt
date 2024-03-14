@@ -15,8 +15,7 @@ resources:
       - dev
 
 pool:
-  vmImage: ubuntu-20.04
-
+  vmImage: ubuntu-22.04
 
 stages:
   - stage: DeployDev
@@ -88,11 +87,15 @@ stages:
               targetPath: '$(Pipeline.Workspace)/s'
               artifact: 'code'
               publishLocation: 'pipeline'
+          - template: ../templates/delete-old-deployments.yml
+            parameters:
+              endpoint_name: "${{ variables.endpoint_name }}"
+              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
 
   - stage: PROD_Approval
     dependsOn:
     - DeployDev
-    condition: and(succeeded('DeployDev'), eq( variables['Build.SourceBranch'], 'main'))
+    condition: and(succeeded('DeployDev'), eq( variables['Build.SourceBranch'], 'refs/heads/main'))
     jobs:
       - job: waitForValidation
         displayName: Wait for external validation
@@ -180,4 +183,8 @@ stages:
             parameters:
               endpoint_name: "${{ variables.endpoint_name }}"
               sample_request: data/test-request.json
+              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
+          - template: ../templates/delete-old-deployments.yml
+            parameters:
+              endpoint_name: "${{ variables.endpoint_name }}"
               ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}

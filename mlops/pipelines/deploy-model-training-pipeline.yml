@@ -4,10 +4,10 @@ variables:
   - group: vtpoc-vg
   - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
       # 'main' branch: PRD environment
-      - template: config-infra-prod.yml@vt-ml-templates
+      - template: ../../config-infra-prod.yml
   - ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
       # 'develop' or feature branches: DEV environment
-      - template: config-infra-dev.yml@vt-ml-templates
+      - template: ../../config-infra-dev.yml
 
 trigger:
   branches:
@@ -27,13 +27,7 @@ schedules:
   always: true
 
 pool:
-  vmImage: ubuntu-20.04
-
-resources:
-  repositories:
-  - repository: vt-ml-templates
-    type: git
-    name: vt-ml-templates
+  vmImage: ubuntu-22.04
 
 stages:
   - stage: DeployTrainingPipeline
@@ -61,13 +55,6 @@ stages:
 #              snowflake_user: $(SNOWFLAKE_USER)
 #              snowflake_password: $(SNOWFLAKE_PASSWORD)
 #              subscription_id: $(SUBSCRIPTION_ID)
-#          - template: ../templates/create-compute.yml
-#            parameters:
-#              cluster_name: cpu-cluster
-#              size: Standard_F4s_v2
-#              min_instances: 0
-#              max_instances: 1
-#              cluster_tier: dedicated
 #          - template: ../templates/register-environment.yml
 #            parameters:
 #              environment_name: vt-train-env
@@ -90,4 +77,3 @@ stages:
             inputs:
               targetPath: '$(Build.SourcesDirectory)'
               artifact: 'code'
-

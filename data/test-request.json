@@ -1,19 +1,20 @@
-
 {
-    "input_data": [
-      {
-        "PROVIDERID": "000fa702-904f-47dd-b365-f67494102055",
-        "PATIENTID": "0021E536-383A-48E2-BC76-EA5C7EAC24F9",
-        "SERVICE_DAY": "2022-01-01",
-        "APPT_LAT": 37.7749,
-        "APPT_LNG": -102.4194
-      },
-      {
-        "PROVIDERID": "000fa702-904f-47dd-b365-f67494102055",
-        "PATIENTID": "0021E536-383A-48E2-BC76-EA5C7EAC24F9",
-        "SERVICE_DAY": "2022-01-02",
-        "APPT_LAT": 34.0522,
-        "APPT_LNG": -118.2437
-      }
+  "input_data": {
+    "PROVIDERIDS": [
+      "000fa702-904f-47dd-b365-f67494102055",
+      "000fa702-904f-47dd-b365-f67494102055"
+    ],
+    "PATIENTIDS": [
+      "0021E536-383A-48E2-BC76-EA5C7EAC24F9",
+      "0021E536-383A-48E2-BC76-EA5C7EAC24F9"
+    ],
+    "APPT_LATS": [
+      37.7749,
+      34.0522
+    ],
+    "APPT_LNGS": [
+      -102.4194,
+      -118.2437
     ]
   }
+}
