@@ -17,18 +17,7 @@ resources:
 pool:
   vmImage: ubuntu-22.04
 
-
 stages:
-  - stage: printBranch
-    displayName: 'Print Branch'
-    jobs:
-      - job: printBranchName
-        displayName: 'Print Branch Name'
-        steps:
-          - script: echo "The branch name is $(Build.SourceBranchName)"
-            displayName: 'Print Branch Name'
-
-
   - stage: DeployDev
     displayName: DeployDev
     variables:
