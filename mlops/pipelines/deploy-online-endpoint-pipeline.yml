@@ -13,10 +13,6 @@ resources:
       branches:
       - main
       - dev
-  repositories:
-  - repository: vt-ml-templates
-    type: git
-    name: vt-ml-templates
 
 pool:
   vmImage: ubuntu-20.04
@@ -27,7 +23,7 @@ stages:
     displayName: DeployDev
     variables:
       - group: vtpoc-vg
-      - template: config-infra-dev.yml@vt-ml-templates
+      - template: ../../config-infra-dev.yml
       - name: endpoint_name
         value: vt-online-$(namespace)$(postfix)$(environment)
     jobs:
@@ -118,7 +114,7 @@ stages:
     condition: succeeded('PROD_Approval')
     variables:
     - group: vtpoc-vg
-    - template: config-infra-prod.yml@vt-ml-templates
+    - template: ../../config-infra-prod.yml
     - name: endpoint_name
       value: vt-online-$(namespace)$(postfix)$(environment)
     jobs:
