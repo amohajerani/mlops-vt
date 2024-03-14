@@ -28,7 +28,7 @@ stages:
     jobs:
       - job: PrintBranch
         steps:
-          - script: echo "Branch name: $(Build.SourceBranchName)"
+          - script: echo "Branch name $(Build.SourceBranchName)"
             displayName: 'Print branch name'
   - stage: DeployDev
     displayName: DeployDev
