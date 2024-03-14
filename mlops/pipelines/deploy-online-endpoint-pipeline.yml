@@ -96,7 +96,7 @@ stages:
   - stage: PROD_Approval
     dependsOn:
     - DeployDev
-    condition: and(succeeded('DeployDev'), eq( $(Build.SourceBranchName), 'main'))
+    condition: and(succeeded('DeployDev'), eq( variables['Build.SourceBranch'], 'main'))
     jobs:
       - job: waitForValidation
         displayName: Wait for external validation
