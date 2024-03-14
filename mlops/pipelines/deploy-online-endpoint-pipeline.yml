@@ -23,13 +23,6 @@ pool:
 
 
 stages:
-  - stage: PrintBranchName
-    displayName: Print Branch Name
-    jobs:
-      - job: PrintBranch
-        steps:
-          - script: echo "Branch name $(Build.SourceBranchName)"
-            displayName: 'Print branch name'
   - stage: DeployDev
     displayName: DeployDev
     variables:
@@ -52,9 +45,6 @@ stages:
           - script: |
               echo "Contents of the s dir:"
               ls -la $(Pipeline.Workspace)/s
-              branch=$(cat $(Pipeline.Workspace)/s/branch.txt)
-              echo "##vso[task.setvariable variable=branch;isOutput=true]$branch"
-
               echo "vt-online-dp-$(date +%Y%m%d%H%M%S)" > $(Pipeline.Workspace)/s/deployment_name.txt
               deployment_name=$(cat $(Pipeline.Workspace)/s/deployment_name.txt)
               echo "##vso[task.setvariable variable=deployment_name;isOutput=true]$deployment_name"
@@ -71,29 +61,29 @@ stages:
             parameters:
               ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
           - template: ../templates/install-requirements.yml
-#          - template: ../templates/create-online-endpoint.yml
-#            parameters:
-#              endpoint_name: "${{ variables.endpoint_name }}"
-#              endpoint_description: "VT Online Endpoint"
-#              auth_mode: "key"
-#              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
-#              deployment_compute_target: "${{ variables.deployment_compute_target }}"
-#          - template: ../templates/create-online-deployment.yml
-#            parameters:
-#              deployment_name: $(runBash.deployment_name)
-#              endpoint_name: "${{ variables.endpoint_name }}"
-#              model_path: "vt-model@latest"
-#              traffic_allocation: 100
-#              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
-#              instance_type: "${{ variables.deploymeny_instance_type }}"
-#              instance_count: "${{ variables.deployment_instance_count }}"
-#              resource_limit_cpu: "${{ variables.resource_limit_cpu }}"
-#              resource_limit_memory: "${{ variables.resource_limit_memory }}"
-#          - template: ../templates/test-online-endpoint.yml
-#            parameters:
-#              endpoint_name: "${{ variables.endpoint_name }}"
-#              sample_request: 'data/test-request.json'
-#              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
+          - template: ../templates/create-online-endpoint.yml
+            parameters:
+              endpoint_name: "${{ variables.endpoint_name }}"
+              endpoint_description: "VT Online Endpoint"
+              auth_mode: "key"
+              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
+              deployment_compute_target: "${{ variables.deployment_compute_target }}"
+          - template: ../templates/create-online-deployment.yml
+            parameters:
+              deployment_name: $(runBash.deployment_name)
+              endpoint_name: "${{ variables.endpoint_name }}"
+              model_path: "vt-model@latest"
+              traffic_allocation: 100
+              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
+              instance_type: "${{ variables.deploymeny_instance_type }}"
+              instance_count: "${{ variables.deployment_instance_count }}"
+              resource_limit_cpu: "${{ variables.resource_limit_cpu }}"
+              resource_limit_memory: "${{ variables.resource_limit_memory }}"
+          - template: ../templates/test-online-endpoint.yml
+            parameters:
+              endpoint_name: "${{ variables.endpoint_name }}"
+              sample_request: 'data/test-request.json'
+              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
           - template: ../templates/store_model.yml
             parameters:
               ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
@@ -106,7 +96,7 @@ stages:
   - stage: PROD_Approval
     dependsOn:
     - DeployDev
-    condition: and(succeeded('DeployDev'), eq(dependencies.DeployDev.outputs['DeployOnlineEndpointDev.runBash.branch'], 'main'))
+    condition: and(succeeded('DeployDev'), eq( $(Build.SourceBranchName), 'main'))
     jobs:
       - job: waitForValidation
         displayName: Wait for external validation
