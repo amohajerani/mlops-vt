@@ -13,6 +13,7 @@ from azure.ai.ml.entities import Environment
 from azure.ai.ml.dsl import pipeline
 from azure.ai.ml import Input, Output, command
 from azure.ai.ml.constants import AssetTypes, InputOutputModes
+import time
 
 import json
 import os
@@ -145,6 +146,25 @@ def main():
             enable_monitoring=enable_monitoring,
             table_name=table_name,
         )
+
+        # Register the datasets
+        version = "v" + time.strftime("%Y.%m.%d.%H%M%S", time.gmtime())
+        train_data = Data(
+            name="TrainData",
+            description="Training data",
+            path=prep.outputs.train_data,
+            type=AssetTypes.MLTABLE,
+            version=version,
+        )
+        ml_client.data.create_or_update(train_data)
+        test_data = Data(
+            name="TestData",
+            description="Test data",
+            path=prep.outputs.test_data,
+            type=AssetTypes.MLTABLE,
+            version=version,
+        )
+        ml_client.data.create_or_update(test_data)
 
         train = train_model(train_data=prep.outputs.train_data)
 

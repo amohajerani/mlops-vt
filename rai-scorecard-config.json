@@ -1,0 +1,13 @@
+{
+    "Model": {
+        "ModelName": "Visit Time Prediction",
+        "ModelType": "Regression",
+        "ModelSummary": "This model provides a prediction of visit time"
+    },
+    "Metrics": {
+        "mean_absolute_error": {
+            "threshold": "<=5"
+        },
+        "mean_squared_error": {}
+    }
+}

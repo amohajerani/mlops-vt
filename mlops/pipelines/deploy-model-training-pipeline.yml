@@ -49,27 +49,31 @@ stages:
               subscriptionId: ${{ variables.subscriptionId }}
               resource_group: ${{ variables.resource_group }}
               aml_workspace: ${{ variables.aml_workspace }}
-#          - template: ../templates/import-data.yml
-#            parameters:
-#              snowflake_account: $(SNOWFLAKE_ACCOUNT)
-#              snowflake_user: $(SNOWFLAKE_USER)
-#              snowflake_password: $(SNOWFLAKE_PASSWORD)
-#              subscription_id: $(SUBSCRIPTION_ID)
-#          - template: ../templates/register-environment.yml
-#            parameters:
-#              environment_name: vt-train-env
-#              environment_description: "Training Environment for VT Pipeline"
-#              environment_path: data-science/environment/train-conda.yml
-#              build_type: conda
-#              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
-#          - template: ../templates/run-pipeline.yml
-#            parameters:
-#              experiment_name: vt-train-pipeline
-#              data_name: train
-#              environment_name: vt-train-env
-#              compute_name: cpu-cluster
-#              enable_monitoring: $(enable_monitoring)
-#              table_name: "vtmonitoring"
+          - template: ../templates/import-data.yml
+            parameters:
+              snowflake_account: $(SNOWFLAKE_ACCOUNT)
+              snowflake_user: $(SNOWFLAKE_USER)
+              snowflake_password: $(SNOWFLAKE_PASSWORD)
+              subscription_id: $(SUBSCRIPTION_ID)
+          - template: ../templates/register-environment.yml
+            parameters:
+              environment_name: vt-train-env
+              environment_description: "Training Environment for VT Pipeline"
+              environment_path: data-science/environment/train-conda.yml
+              build_type: conda
+              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
+          - template: ../templates/run-pipeline.yml
+            parameters:
+              experiment_name: vt-train-pipeline
+              data_name: train
+              environment_name: vt-train-env
+              compute_name: cpu-cluster
+              enable_monitoring: $(enable_monitoring)
+              table_name: "vtmonitoring"
+          - template: ../templates/rai.yml
+            parameters:
+              experiment_name: vt-rai-pipeline
+              compute_name: cpu-cluster
           - script: |
               echo $(Build.Reason) > trigger.txt
             displayName: 'Write git branch to file'
