@@ -7,7 +7,7 @@ from azure.identity import DefaultAzureCredential
 import sys
 
 # Terminate the script. Our Snowflake account is not free tier anymore.
-# Therefore, we cannot run this script. Instead, we will use the data from the data folder.
+# Therefore, we cannot run this script. Instead, we will use the latest data
 sys.exit()
 
 # Set up logging

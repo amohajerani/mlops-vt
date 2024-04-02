@@ -146,7 +146,7 @@ def main():
             enable_monitoring=enable_monitoring,
             table_name=table_name,
         )
-
+        print("prep.outputs.train_data: ", prep.outputs.train_data)
         # Register the datasets
         version = "v" + time.strftime("%Y.%m.%d.%H%M%S", time.gmtime())
         train_data = Data(
