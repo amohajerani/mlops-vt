@@ -166,9 +166,11 @@ def parse_args():
     parser = argparse.ArgumentParser("Deploy Training Pipeline")
     parser.add_argument("--experiment_name", type=str, help="Experiment Name")
     parser.add_argument("--compute_name", type=str, help="Compute Cluster Name")
-    parser.add_argument("--data_name", type=str, help="Data Asset Name")
     parser.add_argument(
-        "--environment_name", type=str, help="Registered Environment Name"
+        "--environment_name",
+        type=str,
+        help="Registered Environment Name",
+        default="mcr.microsoft.com/azureml/curated/responsibleai-ubuntu20.04-py38-cpu:47",
     )
     parser.add_argument(
         "--enable_monitoring", type=str, help="Enable Monitoring", default="false"

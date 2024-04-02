@@ -28,8 +28,8 @@ def parse_args():
         "--base_image",
         type=str,
         help="base image path",
-        default="mcr.microsoft.com/azureml/environments/responsibleai-ubuntu20.04-py38-cpu/versions/43",
-    )  # the environment was chosen to match the RAI components
+        default="mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04:20240304.v1",
+    )
     return parser.parse_args()
 
 
