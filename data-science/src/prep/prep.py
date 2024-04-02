@@ -73,34 +73,6 @@ def main(args):
     train.to_parquet((Path(args.train_data) / "train.parquet"))
     test.to_parquet((Path(args.test_data) / "test.parquet"))
 
-    # ------------- Register Datasets ------------- #
-    # -------------------------------------- #
-    version = "v" + time.strftime("%Y.%m.%d.%H%M%S", time.gmtime())
-    dataset = Data(
-        name="train",
-        description="train dataset",
-        version=version,
-        path="train.csv",
-        type=AssetTypes.URI_FILE,
-    )
-
-    # create data asset on Azure ML
-    ml_client.data.create_or_update(dataset)
-
-    # verify the dataset is registered
-    datasets = ml_client.data.list()
-    for d in datasets:
-        if d.name == "train":
-            logging.info("Dataset registered in Azure ML workspace")
-            break
-
-    if (
-        args.enable_monitoring.lower == "true"
-        or args.enable_monitoring == "1"
-        or args.enable_monitoring.lower == "yes"
-    ):
-        log_training_data(data, args.table_name)
-
 
 if __name__ == "__main__":
 

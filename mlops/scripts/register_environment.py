@@ -28,7 +28,7 @@ def parse_args():
         "--base_image",
         type=str,
         help="base image path",
-        default="azureml://registries/azureml/environments/responsibleai-ubuntu20.04-py38-cpu/versions/43",
+        default="mcr.microsoft.com/azureml/environments/responsibleai-ubuntu20.04-py38-cpu/versions/43",
     )  # the environment was chosen to match the RAI components
     return parser.parse_args()
 
