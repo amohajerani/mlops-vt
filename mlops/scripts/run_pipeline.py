@@ -187,8 +187,8 @@ def main():
     ml_client.jobs.stream(pipeline_job.name)
 
     # register the train and test datasets
-    train_data_path = pipeline_job.outputs.pipeline_job_train_data
-    test_data_path = pipeline_job.outputs.pipeline_job_test_data
+    train_data_path = str(pipeline_job.outputs.pipeline_job_train_data)
+    test_data_path = str(pipeline_job.outputs.pipeline_job_test_data)
     version = "v" + time.strftime("%Y.%m.%d.%H%M%S", time.gmtime())
     train_data = Data(
         name="TrainData",
