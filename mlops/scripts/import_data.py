@@ -4,7 +4,11 @@ import pandas as pd
 import logging
 from azure.ai.ml import MLClient
 from azure.identity import DefaultAzureCredential
+import sys
 
+# Terminate the script. Our Snowflake account is not free tier anymore.
+# Therefore, we cannot run this script. Instead, we will use the data from the data folder.
+sys.exit()
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -67,4 +71,4 @@ df = pd.DataFrame(rows, columns=[x[0] for x in cur.description])
 logging.info("Converted data to pandas DataFrame")
 
 # store the file as a csv file
-df.to_csv("train.csv", index=False)
+df.to_csv("../../data/train.csv", index=False)
