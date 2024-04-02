@@ -89,6 +89,20 @@ def main():
         },
     )
 
+    register_datasets = command(
+        name="register_datasets",
+        display_name="register-datasets",
+        code=os.path.join(parent_dir, "register_datasets"),
+        command="python register_datasets.py \
+                --train_data ${{inputs.train_data}} \
+                --test_data ${{inputs.test_data}}",
+        environment=args.environment_name + "@latest",
+        inputs={
+            "train_data": Input(type="uri_folder"),
+            "test_data": Input(type="uri_folder"),
+        },
+    )
+
     train_model = command(
         name="train_model",
         display_name="train-model",
@@ -146,7 +160,10 @@ def main():
             enable_monitoring=enable_monitoring,
             table_name=table_name,
         )
-
+        register = register_datasets(
+            train_data=prep.outputs.train_data,
+            test_data=prep.outputs.test_data,
+        )
         train = train_model(train_data=prep.outputs.train_data)
 
         evaluate = evaluate_model(
