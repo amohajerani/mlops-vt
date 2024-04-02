@@ -6,7 +6,7 @@ dependencies:
   - python=3.10
   - pip
   - pip:
-      - mlflow
+      - azureml-mlflow
       - azure-ai-ml
       - pyarrow
       - scikit-learn
