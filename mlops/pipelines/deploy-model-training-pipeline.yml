@@ -72,8 +72,10 @@ stages:
 #              table_name: "vtmonitoring"
           - template: ../templates/rai.yml
             parameters:
-              experiment_name: vt-rai-pipeline
-              compute_name: cpu-cluster
+              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
+              subscriptionId: ${{ variables.subscriptionId }}
+              resource_group: ${{ variables.resource_group }}
+              aml_workspace: ${{ variables.aml_workspace }}
           - script: |
               echo $(Build.Reason) > trigger.txt
             displayName: 'Write git branch to file'
