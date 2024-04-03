@@ -221,7 +221,7 @@ def main():
         registry_name="azureml",
     )
     print(ml_client_registry)
-    dataset_df = pd.read_csv("train.csv")
+    dataset_df = pd.read_csv("../../train.csv")
 
     # Split the dataset_df into train and test dataframes. The test should be no more than 5000 rows
     test_size = 5000
