@@ -4,7 +4,6 @@ parameters:
 - name: compute_name
   type: string
 
-
 steps:
 - task: AzureCLI@2
   displayName: Get latest dataset version
@@ -27,4 +26,4 @@ steps:
     inlineScript: |
       set -e 
       python mlops/scripts/rai.py \
-      --dataset-version $(dataset_version)
+      --dataset_version $(dataset_version)
