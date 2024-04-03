@@ -220,7 +220,7 @@ def main():
         registry_name="azureml",
     )
     print(ml_client_registry)
-
+    print("dateset version: ", args.dataset_version)
     dataset = ml_client.data.get(name="train", version=args.dataset_version)
     # convert dataset to pandas dataframe
     dataset_df = dataset.to_pandas_dataframe()
