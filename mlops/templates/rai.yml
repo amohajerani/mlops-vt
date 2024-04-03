@@ -17,6 +17,7 @@ steps:
     scriptLocation: inlineScript
     inlineScript: |
       set -e
+      ls
       dataset_version=$(az ml data list --name train --resource-group ${{ parameters.resource_group }} --workspace-name ${{ parameters.aml_workspace }} --query "[].version" -o tsv | sort -n | tail -n 1)
       echo "Latest dataset version: $dataset_version"
       python mlops/scripts/rai.py \
