@@ -29,8 +29,6 @@ experiment_name = "rai-visit-time-prediction"
 label = "latest"
 
 from azure.ai.ml.entities import PipelineJob
-from IPython.core.display import HTML
-from IPython.display import display
 
 
 def submit_and_wait(ml_client, pipeline_job) -> PipelineJob:
