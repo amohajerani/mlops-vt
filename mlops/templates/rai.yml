@@ -31,4 +31,4 @@ steps:
     inlineScript: |
       set -e 
       python mlops/scripts/rai.py \
-      --dataset_version $get_dataset_version.dataset_version
+      --dataset_version ($dataset_version)
