@@ -17,11 +17,14 @@ from azure.ai.ml.constants import AssetTypes, InputOutputModes
 from azure.ai.ml import Input
 from azure.ai.ml.constants import AssetTypes
 from azure.ai.ml import dsl, Input
+from azureml.core import Dataset, Workspace
 
 import uuid
 from azure.ai.ml import Output
 import time
 
+compute_name = "cpu-cluster"
+experiment_name = "rai-visit-time"
 model_name = "vt-model:latest"
 rai_scorecard_config_path = "../../rai_scorecard_config.json"
 
@@ -158,8 +161,6 @@ def rai_regression_pipeline(
 
 def parse_args():
     parser = argparse.ArgumentParser("Deploy Training Pipeline")
-    parser.add_argument("--experiment_name", type=str, help="Experiment Name")
-    parser.add_argument("--compute_name", type=str, help="Compute Cluster Name")
     parser.add_argument(
         "--environment_name",
         type=str,
@@ -216,7 +217,8 @@ def main():
     )
     print(ml_client_registry)
 
-    dataset = ml_client.data.get(name="train", version="latest")
+    ws = Workspace.from_config(path="config.json")
+    dataset = Dataset.get_by_name(ws, name="train")
     # convert dataset to pandas dataframe
     dataset_df = dataset.to_pandas_dataframe()
 
