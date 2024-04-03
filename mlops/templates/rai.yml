@@ -14,7 +14,7 @@ steps:
     scriptLocation: inlineScript
     inlineScript: |
       set -e
-      dataset_version=$(az ml data list --name train --resource-group $(resource_group) --workspace-name $(workspace) --query "[].version" -o tsv | sort -n | tail -n 1)
+      dataset_version=$(az ml data list --name train --resource-group $(resource_group) --workspace-name $(workspace_name) --query "[].version" -o tsv | sort -n | tail -n 1)
       echo "Latest dataset version: $dataset_version"
       echo "##vso[task.setvariable variable=dataset_version]$dataset_version"
 
