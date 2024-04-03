@@ -206,6 +206,12 @@ def main():
     print("current", os.listdir())
 
     # Get handle to azureml registry for the RAI built in components
+    # get subscription_id from config.json
+    with open("config.json") as f:
+        config = json.load(f)
+    args.subscription_id = config["subscription_id"]
+    args.resource_group = config["resource_group"]
+
     ml_client_registry = MLClient(
         credential=credential,
         subscription_id=args.subscription_id,
