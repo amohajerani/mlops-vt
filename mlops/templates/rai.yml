@@ -7,6 +7,7 @@ parameters:
 steps:
 - task: AzureCLI@2
   displayName: Get latest dataset version
+  name: get_dataset_version
   inputs:
     azureSubscription: $(ado_service_connection_aml_ws)
     scriptType: bash
@@ -23,9 +24,7 @@ steps:
     azureSubscription: $(ado_service_connection_aml_ws)
     scriptType: bash
     scriptLocation: inlineScript
-    env:
-      dataset_version: $(dataset_version)
     inlineScript: |
       set -e 
       python mlops/scripts/rai.py \
-      --dataset_version $dataset_version
+      --dataset_version ($get_dataset_version.dataset_version)
