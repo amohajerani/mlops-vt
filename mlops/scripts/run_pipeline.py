@@ -186,27 +186,6 @@ def main():
     pipeline_job
     ml_client.jobs.stream(pipeline_job.name)
 
-    # register the train and test datasets
-    train_data_path = str(pipeline_job.outputs.pipeline_job_train_data)
-    test_data_path = str(pipeline_job.outputs.pipeline_job_test_data)
-    version = "v" + time.strftime("%Y.%m.%d.%H%M%S", time.gmtime())
-    train_data = Data(
-        name="TrainData",
-        description="Training data",
-        path=train_data_path,
-        type=AssetTypes.MLTABLE,
-        version=version,
-    )
-    ml_client.data.create_or_update(train_data)
-    test_data = Data(
-        name="TestData",
-        description="Test data",
-        path=test_data_path,
-        type=AssetTypes.MLTABLE,
-        version=version,
-    )
-    ml_client.data.create_or_update(test_data)
-
 
 if __name__ == "__main__":
     main()
