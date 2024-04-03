@@ -216,8 +216,36 @@ def main():
     )
     print(ml_client_registry)
 
-    train_dataset = ml_client.datasets.get_latest_version("TrainData")
-    test_dataset = ml_client.datasets.get_latest_version("TestData")
+    dataset = ml_client.datasets.get_latest_version("train")
+    # convert dataset to pandas dataframe
+    dataset_df = dataset.to_pandas_dataframe()
+
+    # Split the dataset_df into train and test dataframes. The test should be no more than 5000 rows
+    test_size = 5000
+    train_size = len(dataset_df) - test_size
+    if train_size < 1:
+        raise ValueError("Dataset is too small to split into train and test sets")
+    # shuffle the dataset before splitting
+    dataset_df = dataset_df.sample(frac=1).reset_index(drop=True)
+    train_df = dataset_df.iloc[:train_size]
+    test_df = dataset_df.iloc[train_size:]
+
+    # Convert the train and test dataframes back to AzureML datasets
+    train_dataset = Data(
+        description="RAI train dataset for visit time prediction",
+        data=train_df,
+        type=AssetTypes.MLTABLE,
+        name="RAI-train",
+    )
+    ml_client.data.create_or_update(train_dataset)
+    test_dataset = Data(
+        description="RAI test dataset for visit time prediction",
+        data=test_df,
+        type=AssetTypes.MLTABLE,
+        name="RAI-test",
+    )
+    ml_client.data.create_or_update(test_dataset)
+
     model_id = ml_client.models.get_latest_version(model_name)
 
     # Pipeline to construct the RAI Insights
