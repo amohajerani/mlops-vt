@@ -1,7 +1,7 @@
 import json
 import argparse
 import os
-from azure.ai.ml.entities import Data
+
 from azure.ai.ml.constants import AssetTypes
 
 from azure.identity import DefaultAzureCredential
@@ -24,9 +24,6 @@ import time
 
 model_name = "vt-model:latest"
 rai_scorecard_config_path = "../../rai_scorecard_config.json"
-compute_name = "cpu-cluster"
-experiment_name = "rai-visit-time-prediction"
-label = "latest"
 
 from azure.ai.ml.entities import PipelineJob
 
@@ -36,7 +33,6 @@ def submit_and_wait(ml_client, pipeline_job) -> PipelineJob:
     assert created_job is not None
 
     print("Pipeline job can be accessed in the following URL:")
-    display(HTML('<a href="{0}">{0}</a>'.format(created_job.studio_url)))
 
     while created_job.status not in [
         "Completed",
@@ -220,7 +216,7 @@ def main():
     )
     print(ml_client_registry)
 
-    dataset = ml_client.datasets.get_latest_version("train")
+    dataset = ml_client.data.get(name="train", version="latest")
     # convert dataset to pandas dataframe
     dataset_df = dataset.to_pandas_dataframe()
 
