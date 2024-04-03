@@ -17,7 +17,6 @@ from azure.ai.ml.constants import AssetTypes, InputOutputModes
 from azure.ai.ml import Input
 from azure.ai.ml.constants import AssetTypes
 from azure.ai.ml import dsl, Input
-from azureml.core import Dataset, Workspace
 
 import uuid
 from azure.ai.ml import Output
@@ -176,6 +175,11 @@ def parse_args():
         help="ADX Monitoring Table Name",
         default="vtmonitoring",
     )
+    parser.add_argument(
+        "--dataset_version",
+        type=str,
+        help="Latest version of the dataset",
+    )
 
     args = parser.parse_args()
 
@@ -217,8 +221,7 @@ def main():
     )
     print(ml_client_registry)
 
-    ws = Workspace.from_config(path="config.json")
-    dataset = Dataset.get_by_name(ws, name="train")
+    dataset = ml_client.data.get(name="train", version=args.dataset_version)
     # convert dataset to pandas dataframe
     dataset_df = dataset.to_pandas_dataframe()
 
