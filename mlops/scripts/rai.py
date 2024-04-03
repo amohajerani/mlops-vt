@@ -232,18 +232,21 @@ def main():
     dataset_df = dataset_df.sample(frac=1).reset_index(drop=True)
     train_df = dataset_df.iloc[:train_size]
     test_df = dataset_df.iloc[train_size:]
+    # store the train and test dataframes as csv files
+    train_df.to_csv("rai_train.csv", index=False)
+    test_df.to_csv("rai_test.csv", index=False)
 
     # Convert the train and test dataframes back to AzureML datasets
     train_dataset = Data(
         description="RAI train dataset for visit time prediction",
-        data=train_df,
+        path="rai_train.csv",
         type=AssetTypes.MLTABLE,
         name="RAI-train",
     )
     ml_client.data.create_or_update(train_dataset)
     test_dataset = Data(
         description="RAI test dataset for visit time prediction",
-        data=test_df,
+        path="rai_test.csv",
         type=AssetTypes.MLTABLE,
         name="RAI-test",
     )
