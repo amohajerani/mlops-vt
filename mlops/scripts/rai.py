@@ -17,6 +17,7 @@ from azure.ai.ml.constants import AssetTypes, InputOutputModes
 from azure.ai.ml import Input
 from azure.ai.ml.constants import AssetTypes
 from azure.ai.ml import dsl, Input
+import pandas as pd
 
 import uuid
 from azure.ai.ml import Output
@@ -220,10 +221,7 @@ def main():
         registry_name="azureml",
     )
     print(ml_client_registry)
-    print("dateset version: ", args.dataset_version)
-    dataset = ml_client.data.get(name="train", version=args.dataset_version)
-    # convert dataset to pandas dataframe
-    dataset_df = dataset.to_pandas_dataframe()
+    dataset_df = pd.read_csv("train.csv")
 
     # Split the dataset_df into train and test dataframes. The test should be no more than 5000 rows
     test_size = 5000
