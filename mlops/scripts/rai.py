@@ -99,7 +99,10 @@ def rai_regression_pipeline(
         title="RAI Dashboard for Visit Time Prediction",
         task_type="regression",
         model_info=model_id,
-        model_input=Input(type="mlflow_model", path=model_path),
+        model_input=Input(
+            type="mlflow_model",
+            # path=model_path
+        ),
         train_dataset=train_data,
         test_dataset=test_data,
         target_column_name=target_column_name,
