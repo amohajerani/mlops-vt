@@ -6,7 +6,7 @@ steps:
     architecture: 'x64'
 
 - script: |
-    pip install azure-ai-ml
+    pip install azure-ai-ml==0.13.0
     pip install azure-identity
     pip install azure-core
     pip install azure-cli
