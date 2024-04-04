@@ -188,40 +188,10 @@ def parse_args():
     return parser.parse_args()
 
 
-def main():
-    args = parse_args()
-    print(args)
-
-    credential = DefaultAzureCredential()
-    try:
-        ml_client = MLClient.from_config(credential, path="config.json")
-
-    except Exception as ex:
-        print("HERE IN THE EXCEPTION BLOCK")
-        print(ex)
-
-    try:
-        print(ml_client.compute.get(args.compute_name))
-    except:
-        print("No compute found")
-
-    print(os.getcwd())
-    print("current", os.listdir())
-
-    # Get handle to azureml registry for the RAI built in components
-    # get subscription_id from config.json
-    with open("config.json") as f:
-        config = json.load(f)
-    args.subscription_id = config["subscription_id"]
-    args.resource_group = config["resource_group"]
-
-    ml_client_registry = MLClient(
-        credential=credential,
-        subscription_id=args.subscription_id,
-        resource_group_name=args.resource_group,
-        registry_name="azureml",
-    )
-    print(ml_client_registry)
+def create_rai_datasets(ml_client):
+    """
+    create a train and a test dataset for the RAI pipeline
+    """
     dataset_df = pd.read_csv("train.csv")
 
     # Split the dataset_df into train and test dataframes. The test should be no more than 5000 rows
@@ -260,6 +230,46 @@ def main():
         name="RAI-test",
     )
     ml_client.data.create_or_update(test_dataset)
+
+    return train_dataset, test_dataset
+
+
+def main():
+    args = parse_args()
+    print(args)
+
+    credential = DefaultAzureCredential()
+    try:
+        ml_client = MLClient.from_config(credential, path="config.json")
+
+    except Exception as ex:
+        print("HERE IN THE EXCEPTION BLOCK")
+        print(ex)
+
+    try:
+        print(ml_client.compute.get(args.compute_name))
+    except:
+        print("No compute found")
+
+    print(os.getcwd())
+    print("current", os.listdir())
+
+    # Get handle to azureml registry for the RAI built in components
+    # get subscription_id from config.json
+    with open("config.json") as f:
+        config = json.load(f)
+    args.subscription_id = config["subscription_id"]
+    args.resource_group = config["resource_group"]
+
+    ml_client_registry = MLClient(
+        credential=credential,
+        subscription_id=args.subscription_id,
+        resource_group_name=args.resource_group,
+        registry_name="azureml",
+    )
+    print(ml_client_registry)
+
+    train_dataset, test_dataset = create_rai_datasets(ml_client=ml_client)
 
     model_id = ml_client.models.get_latest_version(model_name)
 

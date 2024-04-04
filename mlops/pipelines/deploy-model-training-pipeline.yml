@@ -55,13 +55,13 @@ stages:
 #              snowflake_user: $(SNOWFLAKE_USER)
 #              snowflake_password: $(SNOWFLAKE_PASSWORD)
 #              subscription_id: $(SUBSCRIPTION_ID)
-#          - template: ../templates/register-environment.yml
-#            parameters:
-#              environment_name: vt-train-env
-#              environment_description: "Training Environment for VT Pipeline"
-#              environment_path: data-science/environment/train-conda.yml
-#              build_type: conda
-#              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
+          - template: ../templates/register-environment.yml
+            parameters:
+              environment_name: vt-train-env
+              environment_description: "Training Environment for VT Pipeline"
+              environment_path: data-science/environment/train-conda.yml
+              build_type: conda
+              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
 #          - template: ../templates/run-pipeline.yml
 #            parameters:
 #              experiment_name: vt-train-pipeline
