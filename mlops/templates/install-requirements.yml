@@ -18,5 +18,6 @@ steps:
     pip install pytest
     pip install pandas
     pip install pyodbc
+    pip install mltable
     pip install snowflake-connector-python
   displayName: 'Install python dependencies'
