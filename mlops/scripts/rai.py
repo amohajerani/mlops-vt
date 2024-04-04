@@ -96,7 +96,7 @@ def rai_regression_pipeline(
     )
     # Initiate the RAIInsights
     model_path = f"azureml:{model_id}"
-    print(f"Model path: {model_path}")
+    print("Model path: ", model_path)
     create_rai_job = rai_constructor_component(
         title="RAI Dashboard for Visit Time Prediction",
         task_type="regression",
