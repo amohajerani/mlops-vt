@@ -95,11 +95,13 @@ def rai_regression_pipeline(
         name="microsoft_azureml_rai_tabular_score_card", version=version
     )
     # Initiate the RAIInsights
+    model_path = f"azureml:{model_id}"
+    print(f"Model path: {model_path}")
     create_rai_job = rai_constructor_component(
         title="RAI Dashboard for Visit Time Prediction",
         task_type="regression",
         model_info=model_id,
-        model_input=Input(type=AssetTypes.MLFLOW_MODEL, path=f"azureml:{model_id}"),
+        model_input=Input(type=AssetTypes.MLFLOW_MODEL, path=model_path),
         train_dataset=train_data,
         test_dataset=test_data,
         target_column_name=target_column_name,
