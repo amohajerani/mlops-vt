@@ -101,6 +101,7 @@ def rai_regression_pipeline(
         model_info=model_id,
         model_input=Input(
             type="mlflow_model",
+            path=model_path,
         ),
         train_dataset=train_data,
         test_dataset=test_data,
@@ -220,12 +221,18 @@ def create_rai_datasets(ml_client):
     train_table.save("rai_train")
     test_table.save("rai_test")
 
+    # create data version based on current time
+    import datetime
+
+    data_version = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+
     # Convert the train and test dataframes back to AzureML datasets
     train_dataset = Data(
         description="RAI train dataset for visit time prediction",
         path="rai_train",
         type=AssetTypes.MLTABLE,
         name="RAI-train",
+        version=data_version,
     )
     ml_client.data.create_or_update(train_dataset)
     test_dataset = Data(
@@ -233,12 +240,13 @@ def create_rai_datasets(ml_client):
         path="rai_test",
         type=AssetTypes.MLTABLE,
         name="RAI-test",
+        version=data_version,
     )
     ml_client.data.create_or_update(test_dataset)
 
     # Retrieve the latest version of the datasets
-    train_dataset = ml_client.data.get("RAI-train")
-    test_dataset = ml_client.data.get("RAI-test")
+    train_dataset = ml_client.data.get("RAI-train", version=data_version)
+    test_dataset = ml_client.data.get("RAI-test", version=data_version)
 
     return train_dataset, test_dataset
 
