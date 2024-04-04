@@ -101,7 +101,7 @@ def rai_regression_pipeline(
         model_info=model_id,
         model_input=Input(
             type="mlflow_model",
-            path=model_path,
+            # path=model_path,
         ),
         train_dataset=train_data,
         test_dataset=test_data,
