@@ -26,7 +26,7 @@ import time
 
 compute_name = "cpu-cluster"
 experiment_name = "rai-visit-time"
-model_name = "vt-model:latest"
+model_name = "vt-model"
 rai_scorecard_config_path = "../../rai_scorecard_config.json"
 
 from azure.ai.ml.entities import PipelineJob
@@ -276,8 +276,10 @@ def main():
     print(ml_client_registry)
 
     train_dataset, test_dataset = create_rai_datasets(ml_client=ml_client)
-
-    model_id = ml_client.models.get_latest_version(model_name)
+    # Get the latest version of the model
+    versions = [int(m._version) for m in ml_client.models.list(name=model_name)]
+    versions.sort(reverse=True)
+    model_id = f"{model_name}:{versions[0]}"
 
     # Pipeline to construct the RAI Insights
     insights_pipeline_job = rai_regression_pipeline(
