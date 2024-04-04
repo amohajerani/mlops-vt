@@ -18,6 +18,7 @@ from azure.ai.ml import Input
 from azure.ai.ml.constants import AssetTypes
 from azure.ai.ml import dsl, Input
 import pandas as pd
+import mltable
 
 import uuid
 from azure.ai.ml import Output
@@ -232,21 +233,29 @@ def main():
     dataset_df = dataset_df.sample(frac=1).reset_index(drop=True)
     train_df = dataset_df.iloc[:train_size]
     test_df = dataset_df.iloc[train_size:]
-    # store the train and test dataframes as csv files
-    train_df.to_csv("rai_train.csv", index=False)
-    test_df.to_csv("rai_test.csv", index=False)
+
+    # Store the train dataframe as a parquet file
+    train_df.to_parquet("rai_train/train.parquet")
+    # Store the test dataframe as a parquet file
+    test_df.to_parquet("rai_test/test.parquet")
+
+    # store the train and test parquet files as mltable
+    train_table = mltable.from_parquet_files("rai_train/train.parquet")
+    test_table = mltable.from_parquet_files("rai_test/test.parquet")
+    train_table.save("rai_train")
+    test_table.save("rai_test")
 
     # Convert the train and test dataframes back to AzureML datasets
     train_dataset = Data(
         description="RAI train dataset for visit time prediction",
-        path="rai_train.csv",
+        path="rai_train",
         type=AssetTypes.MLTABLE,
         name="RAI-train",
     )
     ml_client.data.create_or_update(train_dataset)
     test_dataset = Data(
         description="RAI test dataset for visit time prediction",
-        path="rai_test.csv",
+        path="rai_test",
         type=AssetTypes.MLTABLE,
         name="RAI-test",
     )
