@@ -205,8 +205,10 @@ def create_rai_datasets(ml_client):
     test_df = dataset_df.iloc[train_size:]
 
     # Store the train dataframe as a parquet file
+    os.makedirs("rai_train", exist_ok=True)
     train_df.to_parquet("rai_train/train.parquet")
     # Store the test dataframe as a parquet file
+    os.makedirs("rai_test", exist_ok=True)
     test_df.to_parquet("rai_test/test.parquet")
 
     # store the train and test parquet files as mltable
