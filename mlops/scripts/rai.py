@@ -212,8 +212,12 @@ def create_rai_datasets(ml_client):
     test_df.to_parquet("rai_test/test.parquet")
 
     # store the train and test parquet files as mltable
-    train_table = mltable.from_parquet_files(["rai_train/train.parquet"])
-    test_table = mltable.from_parquet_files(["rai_test/test.parquet"])
+    train_table = mltable.from_parquet_files(
+        [{"file": "rai_train/train.parquet"}], include_path_column=False
+    )
+    test_table = mltable.from_parquet_files(
+        [{"file": "rai_test/test.parquet"}], include_path_column=False
+    )
     train_table.save("rai_train")
     test_table.save("rai_test")
 
