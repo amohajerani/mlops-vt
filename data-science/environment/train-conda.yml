@@ -7,7 +7,7 @@ dependencies:
   - pip
   - pip:
       - azureml-mlflow
-      - azure-ai-ml=0.13.0
+      - azure-ai-ml
       - pyarrow
       - scikit-learn
       - pandas
