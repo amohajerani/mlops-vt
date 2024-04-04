@@ -69,15 +69,11 @@ def rai_regression_pipeline(
     ################################
     # Get the RAI components  needed for the RAI pipeline
     ################################
-    label = "0.13.0"
+    version = "0.13.0"
 
     rai_constructor_component = ml_client_registry.components.get(
-        name="microsoft_azureml_rai_tabular_insight_constructor", label=label
+        name="microsoft_azureml_rai_tabular_insight_constructor", version=version
     )
-
-    # We get latest version and use the same version for all components
-    version = rai_constructor_component.version
-    print("The current version of RAI built-in components is: " + version)
 
     rai_explanation_component = ml_client_registry.components.get(
         name="microsoft_azureml_rai_tabular_explanation", version=version
