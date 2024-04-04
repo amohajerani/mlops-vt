@@ -101,7 +101,6 @@ def rai_regression_pipeline(
         model_info=model_id,
         model_input=Input(
             type="mlflow_model",
-            # path=model_path
         ),
         train_dataset=train_data,
         test_dataset=test_data,
@@ -236,6 +235,10 @@ def create_rai_datasets(ml_client):
         name="RAI-test",
     )
     ml_client.data.create_or_update(test_dataset)
+
+    # Retrieve the latest version of the datasets
+    train_dataset = ml_client.data.get("RAI-train")
+    test_dataset = ml_client.data.get("RAI-test")
 
     return train_dataset, test_dataset
 
