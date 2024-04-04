@@ -12,9 +12,7 @@ from azure.ai.ml.entities import Data
 from azure.ai.ml.constants import AssetTypes
 from azure.ai.ml.entities import Environment
 from azure.ai.ml.dsl import pipeline
-from azure.ai.ml import Input, Output, command
 from azure.ai.ml.constants import AssetTypes, InputOutputModes
-from azure.ai.ml import Input
 from azure.ai.ml.constants import AssetTypes
 from azure.ai.ml import dsl, Input
 import pandas as pd
@@ -29,6 +27,7 @@ experiment_name = "rai-visit-time"
 model_name = "vt-model"
 rai_scorecard_config_path = "../../rai_scorecard_config.json"
 ml_client_registry = None
+model_id = None
 
 
 from azure.ai.ml.entities import PipelineJob
@@ -63,7 +62,6 @@ def rai_regression_pipeline(
     train_data,
     test_data,
     score_card_config_path,
-    model_id,
 ):
 
     ################################
@@ -277,6 +275,7 @@ def main():
     # Get the latest version of the model
     versions = [int(m._version) for m in ml_client.models.list(name=model_name)]
     versions.sort(reverse=True)
+    global model_id
     model_id = f"{model_name}:{versions[0]}"
     print(f"Using model {model_id}")
 
@@ -286,7 +285,6 @@ def main():
         train_data=train_dataset,
         test_data=test_dataset,
         score_card_config_path=rai_scorecard_config_path,
-        model_id=model_id,
     )
 
     insights_job = submit_and_wait(ml_client, insights_pipeline_job)
