@@ -28,6 +28,8 @@ compute_name = "cpu-cluster"
 experiment_name = "rai-visit-time"
 model_name = "vt-model"
 rai_scorecard_config_path = "../../rai_scorecard_config.json"
+ml_client_registry = None
+
 
 from azure.ai.ml.entities import PipelineJob
 
@@ -61,7 +63,6 @@ def rai_regression_pipeline(
     train_data,
     test_data,
     score_card_config_path,
-    ml_client_registry,
     model_id,
 ):
 
@@ -266,14 +267,13 @@ def main():
         config = json.load(f)
     args.subscription_id = config["subscription_id"]
     args.resource_group = config["resource_group"]
-
+    global ml_client_registry
     ml_client_registry = MLClient(
         credential=credential,
         subscription_id=args.subscription_id,
         resource_group_name=args.resource_group,
         registry_name="azureml",
     )
-    print(ml_client_registry)
 
     train_dataset, test_dataset = create_rai_datasets(ml_client=ml_client)
     # Get the latest version of the model
@@ -287,7 +287,6 @@ def main():
         train_data=train_dataset,
         test_data=test_dataset,
         score_card_config_path=rai_scorecard_config_path,
-        ml_client_registry=ml_client_registry,
         model_id=model_id,
     )
 
