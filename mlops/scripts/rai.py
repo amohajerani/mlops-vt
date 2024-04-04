@@ -276,6 +276,7 @@ def main():
     versions = [int(m._version) for m in ml_client.models.list(name=model_name)]
     versions.sort(reverse=True)
     model_id = f"{model_name}:{versions[0]}"
+    print(f"Using model {model_id}")
 
     # Pipeline to construct the RAI Insights
     insights_pipeline_job = rai_regression_pipeline(
