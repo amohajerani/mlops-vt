@@ -13,6 +13,7 @@ import os
 
 model_name = "vt-model"
 compute_name = "cpu-cluster"
+scorecard_config = "../../rai_scorecard_config.json"
 
 with open("config.json") as f:
     config = json.load(f)
@@ -246,9 +247,7 @@ def create_rai_datasets(ml_client):
 
 
 train_pq, test_pq = create_rai_datasets(ml_client)
-score_card_config_path = Input(
-    type="uri_file", path="../rai_scorecard_config.json", mode="download"
-)
+score_card_config_path = Input(type="uri_file", path=score_card_config, mode="download")
 # Pipeline to construct the RAI Insights
 insights_pipeline_job = rai_regression_pipeline(
     target_column_name="VISIT_TIME",
