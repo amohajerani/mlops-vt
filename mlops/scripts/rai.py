@@ -12,6 +12,7 @@ import os
 
 
 model_name = "vt-model"
+compute_name = "cpu-cluster"
 
 with open("config.json") as f:
     config = json.load(f)
