@@ -7,30 +7,21 @@ from azure.ai.ml.constants import AssetTypes
 from azure.identity import DefaultAzureCredential
 from azure.ai.ml import MLClient
 
-from azure.ai.ml.entities import AmlCompute
-from azure.ai.ml.entities import Data
-from azure.ai.ml.constants import AssetTypes
-from azure.ai.ml.entities import Environment
-from azure.ai.ml.dsl import pipeline
-from azure.ai.ml.constants import AssetTypes, InputOutputModes
+from azure.ai.ml.entities import Data, PipelineJob
 from azure.ai.ml.constants import AssetTypes
 from azure.ai.ml import dsl, Input
 import pandas as pd
 import mltable
 
-import uuid
-from azure.ai.ml import Output
+
 import time
 
-compute_name = "cpu-cluster"
+compute_name = "rai-instance"
 experiment_name = "rai-visit-time"
 model_name = "vt-model"
 rai_scorecard_config_path = "../../rai_scorecard_config.json"
 ml_client_registry = None
 model_id = None
-
-
-from azure.ai.ml.entities import PipelineJob
 
 
 def submit_and_wait(ml_client, pipeline_job) -> PipelineJob:
@@ -160,34 +151,6 @@ def rai_regression_pipeline(
     }
 
 
-def parse_args():
-    parser = argparse.ArgumentParser("Deploy Training Pipeline")
-    parser.add_argument(
-        "--environment_name",
-        type=str,
-        help="Registered Environment Name",
-        default="mcr.microsoft.com/azureml/curated/responsibleai-ubuntu20.04-py38-cpu:47",
-    )
-    parser.add_argument(
-        "--enable_monitoring", type=str, help="Enable Monitoring", default="false"
-    )
-    parser.add_argument(
-        "--table_name",
-        type=str,
-        help="ADX Monitoring Table Name",
-        default="vtmonitoring",
-    )
-    parser.add_argument(
-        "--dataset_version",
-        type=str,
-        help="Latest version of the dataset",
-    )
-
-    args = parser.parse_args()
-
-    return parser.parse_args()
-
-
 def create_rai_datasets(ml_client):
     """
     create a train and a test dataset for the RAI pipeline
@@ -252,8 +215,6 @@ def create_rai_datasets(ml_client):
 
 
 def main():
-    args = parse_args()
-    print(args)
 
     credential = DefaultAzureCredential()
     try:
@@ -264,7 +225,7 @@ def main():
         print(ex)
 
     try:
-        print(ml_client.compute.get(args.compute_name))
+        print(ml_client.compute.get(compute_name))
     except:
         print("No compute found")
 
@@ -275,13 +236,14 @@ def main():
     # get subscription_id from config.json
     with open("config.json") as f:
         config = json.load(f)
-    args.subscription_id = config["subscription_id"]
-    args.resource_group = config["resource_group"]
+    subscription_id = config["subscription_id"]
+    resource_group = config["resource_group"]
+    workspace_name = config["workspace_name"]
     global ml_client_registry
     ml_client_registry = MLClient(
         credential=credential,
-        subscription_id=args.subscription_id,
-        resource_group_name=args.resource_group,
+        subscription_id=subscription_id,
+        resource_group_name=resource_group,
         registry_name="azureml",
     )
 
@@ -304,11 +266,8 @@ def main():
     insights_job = submit_and_wait(ml_client, insights_pipeline_job)
 
     # The dashboard should appear in the AzureML portal in the registered model view. The following cell computes the expected URI:
-    sub_id = ml_client._operation_scope.subscription_id
-    rg_name = ml_client._operation_scope.resource_group_name
-    ws_name = ml_client.workspace_name
 
-    expected_uri = f"https://ml.azure.com/model/{model_id}/model_analysis?wsid=/subscriptions/{sub_id}/resourcegroups/{rg_name}/workspaces/{ws_name}"
+    expected_uri = f"https://ml.azure.com/model/{model_id}/model_analysis?wsid=/subscriptions/{subscription_id}/resourcegroups/{resource_group}/workspaces/{workspace_name}"
 
     print(f"Please visit {expected_uri} to see your analysis")
 
