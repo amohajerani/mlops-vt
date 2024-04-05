@@ -1,0 +1,337 @@
+compute: azureml:rai-instance
+description: RAI Pipeline for Visit Time Prediction
+display_name: rai_regression_pipeline
+experiment_name: rai-visit-time
+inputs:
+  target_column_name: VISIT_TIME
+  test_data:
+    path: azureml:/subscriptions/ea6d544d-2425-4667-8d38-51f050d9d69e/resourceGroups/rg-vtpoc-9dev/providers/Microsoft.MachineLearningServices/workspaces/mlw-vtpoc-9dev/data/RAI-test/versions/20240405142722
+    type: mltable
+  train_data:
+    path: azureml:/subscriptions/ea6d544d-2425-4667-8d38-51f050d9d69e/resourceGroups/rg-vtpoc-9dev/providers/Microsoft.MachineLearningServices/workspaces/mlw-vtpoc-9dev/data/RAI-train/versions/20240405142722
+    type: mltable
+jobs:
+  counterfactual_job:
+    component:
+      $schema: http://azureml/sdk-2-0/CommandComponent.json
+      code: azureml://registries/azureml/codes/a5a2fa4f-5694-42c3-b6c2-70ce8397687f/versions/1
+      command: python create_counterfactual.py --rai_insights_dashboard ${{inputs.rai_insights_dashboard}}
+        --total_CFs ${{inputs.total_CFs}} --method ${{inputs.method}} $[[--desired_class
+        ${{inputs.desired_class}}]] $[[--desired_range '${{inputs.desired_range}}']]
+        $[[--permitted_range '${{inputs.permitted_range}}']] --features_to_vary '${{inputs.features_to_vary}}'
+        --feature_importance '${{inputs.feature_importance}}' --counterfactual_path
+        ${{outputs.counterfactual}}
+      creation_context:
+        created_at: '2024-02-22T01:20:24.892240+00:00'
+        created_by: Microsoft
+        created_by_type: User
+        last_modified_at: '2024-02-22T01:20:24.892240+00:00'
+        last_modified_by: Microsoft
+        last_modified_by_type: User
+      description: Add Counterfactuals to RAI Insights Dashboard [Learn More](https://aka.ms/RAIComponents)
+      display_name: Add Counterfactuals to RAI Insights Dashboard
+      environment: azureml://registries/azureml/environments/responsibleai-ubuntu20.04-py38-cpu/versions/43
+      id: azureml://registries/azureml/components/microsoft_azureml_rai_tabular_counterfactual/versions/0.13.0
+      inputs:
+        desired_class:
+          optional: true
+          type: string
+        desired_range:
+          optional: true
+          type: string
+        feature_importance:
+          default: 'True'
+          optional: false
+          type: boolean
+        features_to_vary:
+          default: all
+          optional: false
+          type: string
+        method:
+          default: random
+          enum:
+          - random
+          - genetic
+          - kdtree
+          optional: false
+          type: string
+        permitted_range:
+          optional: true
+          type: string
+        rai_insights_dashboard:
+          optional: false
+          type: path
+        total_CFs:
+          default: '10'
+          optional: false
+          type: integer
+      is_deterministic: true
+      name: microsoft_azureml_rai_tabular_counterfactual
+      outputs:
+        counterfactual:
+          type: path
+      resources:
+        instance_count: 1
+      type: command
+      version: 0.13.0
+    inputs:
+      desired_range: '[50, 120]'
+      rai_insights_dashboard:
+        path: ${{parent.jobs.create_rai_job.outputs.rai_insights_dashboard}}
+      total_CFs: 20
+    limits:
+      timeout: 7200
+    resources:
+      instance_count: 1
+    type: command
+  create_rai_job:
+    component:
+      $schema: http://azureml/sdk-2-0/CommandComponent.json
+      code: azureml://registries/azureml/codes/353c83bb-3d20-434c-ac77-3affdfab6c7a/versions/1
+      command: python create_rai_insights.py --title '${{inputs.title}}' --task_type
+        ${{inputs.task_type}} $[[--model_info_path '${{inputs.model_info_path}}']]
+        $[[--model_input '${{inputs.model_input}}']] $[[--model_info '${{inputs.model_info}}']]
+        --train_dataset ${{inputs.train_dataset}} --test_dataset ${{inputs.test_dataset}}
+        --target_column_name ${{inputs.target_column_name}} --maximum_rows_for_test_dataset
+        ${{inputs.maximum_rows_for_test_dataset}} --categorical_column_names '${{inputs.categorical_column_names}}'
+        --classes '${{inputs.classes}}' --feature_metadata '${{inputs.feature_metadata}}'
+        --use_model_dependency ${{inputs.use_model_dependency}} --output_path ${{outputs.rai_insights_dashboard}}
+      creation_context:
+        created_at: '2024-02-22T01:25:33.657995+00:00'
+        created_by: Microsoft
+        created_by_type: User
+        last_modified_at: '2024-02-22T01:25:33.657995+00:00'
+        last_modified_by: Microsoft
+        last_modified_by_type: User
+      description: RAI Insights Dashboard Constructor [Learn More](https://aka.ms/RAIComponents)
+      display_name: RAI Insights Dashboard Constructor
+      environment: azureml://registries/azureml/environments/responsibleai-ubuntu20.04-py38-cpu/versions/43
+      id: azureml://registries/azureml/components/microsoft_azureml_rai_tabular_insight_constructor/versions/0.13.0
+      inputs:
+        categorical_column_names:
+          default: '[]'
+          optional: false
+          type: string
+        classes:
+          default: '[]'
+          optional: false
+          type: string
+        feature_metadata:
+          default: '{}'
+          optional: false
+          type: string
+        maximum_rows_for_test_dataset:
+          default: '5000'
+          optional: false
+          type: integer
+        model_info:
+          optional: true
+          type: string
+        model_info_path:
+          optional: true
+          type: path
+        model_input:
+          optional: true
+          type: mlflow_model
+        target_column_name:
+          optional: false
+          type: string
+        task_type:
+          enum:
+          - classification
+          - regression
+          - forecasting
+          optional: false
+          type: string
+        test_dataset:
+          optional: false
+          type: path
+        title:
+          optional: false
+          type: string
+        train_dataset:
+          optional: false
+          type: path
+        use_model_dependency:
+          default: 'False'
+          optional: false
+          type: boolean
+      is_deterministic: true
+      name: microsoft_azureml_rai_tabular_insight_constructor
+      outputs:
+        rai_insights_dashboard:
+          type: path
+      resources:
+        instance_count: 1
+      type: command
+      version: 0.13.0
+    inputs:
+      model_info: vt-model:50
+      model_input:
+        path: azureml:vt-model:50
+        type: mlflow_model
+      target_column_name:
+        path: ${{parent.inputs.target_column_name}}
+      task_type: regression
+      test_dataset:
+        path: ${{parent.inputs.test_data}}
+      title: RAI Dashboard for Visit Time Prediction
+      train_dataset:
+        path: ${{parent.inputs.train_data}}
+      use_model_dependency: 1
+    limits:
+      timeout: 7200
+    resources:
+      instance_count: 1
+    type: command
+  erroranalysis_job:
+    component:
+      $schema: http://azureml/sdk-2-0/CommandComponent.json
+      code: azureml://registries/azureml/codes/b9572dd9-50e7-4746-8255-784bf3b0d62d/versions/1
+      command: python create_error_analysis.py --rai_insights_dashboard ${{inputs.rai_insights_dashboard}}
+        --max_depth ${{inputs.max_depth}} --num_leaves ${{inputs.num_leaves}} --min_child_samples
+        ${{inputs.min_child_samples}} --filter_features '${{inputs.filter_features}}'
+        --error_analysis_path ${{outputs.error_analysis}}
+      creation_context:
+        created_at: '2024-02-22T01:22:08.212363+00:00'
+        created_by: Microsoft
+        created_by_type: User
+        last_modified_at: '2024-02-22T01:22:08.212363+00:00'
+        last_modified_by: Microsoft
+        last_modified_by_type: User
+      description: Add Error Analysis to RAI Insights Dashboard [Learn More](https://aka.ms/RAIComponents)
+      display_name: Add Error Analysis to RAI Insights Dashboard
+      environment: azureml://registries/azureml/environments/responsibleai-ubuntu20.04-py38-cpu/versions/43
+      id: azureml://registries/azureml/components/microsoft_azureml_rai_tabular_erroranalysis/versions/0.13.0
+      inputs:
+        filter_features:
+          default: 'null'
+          optional: false
+          type: string
+        max_depth:
+          default: '3'
+          optional: false
+          type: integer
+        min_child_samples:
+          default: '20'
+          optional: false
+          type: integer
+        num_leaves:
+          default: '31'
+          optional: false
+          type: integer
+        rai_insights_dashboard:
+          optional: false
+          type: path
+      is_deterministic: true
+      name: microsoft_azureml_rai_tabular_erroranalysis
+      outputs:
+        error_analysis:
+          type: path
+      resources:
+        instance_count: 1
+      type: command
+      version: 0.13.0
+    inputs:
+      rai_insights_dashboard:
+        path: ${{parent.jobs.create_rai_job.outputs.rai_insights_dashboard}}
+    limits:
+      timeout: 7200
+    resources:
+      instance_count: 1
+    type: command
+  explain_job:
+    component:
+      $schema: http://azureml/sdk-2-0/CommandComponent.json
+      code: azureml://registries/azureml/codes/d76a9abb-ee20-465a-9e00-38395e4c7a51/versions/1
+      command: python create_explanation.py --comment '${{inputs.comment}}' --rai_insights_dashboard
+        ${{inputs.rai_insights_dashboard}} --explanation_path ${{outputs.explanation}}
+      creation_context:
+        created_at: '2024-02-22T01:23:51.106973+00:00'
+        created_by: Microsoft
+        created_by_type: User
+        last_modified_at: '2024-02-22T01:23:51.106973+00:00'
+        last_modified_by: Microsoft
+        last_modified_by_type: User
+      description: Add Explanation to RAI Insights Dashboard [Learn More](https://aka.ms/RAIComponents)
+      display_name: Add Explanation to RAI Insights Dashboard
+      environment: azureml://registries/azureml/environments/responsibleai-ubuntu20.04-py38-cpu/versions/43
+      id: azureml://registries/azureml/components/microsoft_azureml_rai_tabular_explanation/versions/0.13.0
+      inputs:
+        comment:
+          optional: false
+          type: string
+        rai_insights_dashboard:
+          optional: false
+          type: path
+      is_deterministic: true
+      name: microsoft_azureml_rai_tabular_explanation
+      outputs:
+        explanation:
+          type: path
+      resources:
+        instance_count: 1
+      type: command
+      version: 0.13.0
+    inputs:
+      comment: Explanation for the diabetes regression dataset
+      rai_insights_dashboard:
+        path: ${{parent.jobs.create_rai_job.outputs.rai_insights_dashboard}}
+    limits:
+      timeout: 7200
+    resources:
+      instance_count: 1
+    type: command
+  rai_gather_job:
+    component:
+      $schema: http://azureml/sdk-2-0/CommandComponent.json
+      code: azureml://registries/azureml/codes/c7a2041b-841b-4742-a6c8-71c6761c4e30/versions/1
+      command: python gather_rai_insights.py --constructor ${{inputs.constructor}}
+        $[[--insight_1 '${{inputs.insight_1}}']] $[[--insight_2 '${{inputs.insight_2}}']]
+        $[[--insight_3 '${{inputs.insight_3}}']] $[[--insight_4 '${{inputs.insight_4}}']]
+        --dashboard ${{outputs.dashboard}} --ux_json ${{outputs.ux_json}}
+      creation_context:
+        created_at: '2024-02-22T01:27:17.401958+00:00'
+        created_by: Microsoft
+        created_by_type: User
+        last_modified_at: '2024-02-22T01:27:17.401958+00:00'
+        last_modified_by: Microsoft
+        last_modified_by_type: User
+      description: Gather RAI Insights Dashboard [Learn More](https://aka.ms/RAIComponents)
+      display_name: Gather RAI Insights Dashboard
+      environment: azureml://registries/azureml/environments/responsibleai-ubuntu20.04-py38-cpu/versions/43
+      id: azureml://registries/azureml/components/microsoft_azureml_rai_tabular_insight_gather/versions/0.13.0
+      inputs:
+        constructor:
+          optional: false
+          type: path
+        insight_1:
+          optional: true
+          type: path
+        insight_2:
+          optional: true
+          type: path
+        insight_3:
+          optional: true
+          type: path
+        insight_4:
+          optional: true
+          type: path
+      is_deterministic: true
+      name: microsoft_azureml_rai_tabular_insight_gather
+      outputs:
+        dashboard:
+          type: path
+        ux_json:
+          type: path
+      resources:
+        instance_count: 1
+      type: command
+      version: 0.13.0
+    inputs:
+      constructor:
+        path: ${{parent.jobs.create_rai_job.outputs.rai_insights_dashboard}}
+    resources:
+      instance_count: 1
+    type: command
+type: pipeline

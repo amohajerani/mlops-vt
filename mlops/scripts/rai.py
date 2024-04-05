@@ -1,34 +1,32 @@
 import json
-import argparse
-import os
-
-from azure.ai.ml.constants import AssetTypes
-
 from azure.identity import DefaultAzureCredential
-from azure.ai.ml import MLClient
-
-from azure.ai.ml.entities import Data, PipelineJob
-from azure.ai.ml.constants import AssetTypes
-from azure.ai.ml import dsl, Input
-import pandas as pd
-import mltable
-
-
+from azure.ai.ml.entities import PipelineJob, Data
 import time
 
-compute_name = "rai-instance"
-experiment_name = "rai-visit-time"
+from azure.ai.ml.constants import AssetTypes
+from azure.ai.ml import dsl, Input, MLClient, Output
+import uuid
+import pandas as pd
+import mltable
+import os
+
+
 model_name = "vt-model"
-rai_scorecard_config_path = "../../rai_scorecard_config.json"
-ml_client_registry = None
-model_id = None
+
+with open("config.json") as f:
+    config = json.load(f)
+subscription_id = config["subscription_id"]
+resource_group = config["resource_group"]
+workspace = config["workspace_name"]
 
 
 def submit_and_wait(ml_client, pipeline_job) -> PipelineJob:
     created_job = ml_client.jobs.create_or_update(pipeline_job)
     assert created_job is not None
 
-    print("Pipeline job can be accessed in the following URL:")
+    print(
+        f"Pipeline job can be accessed in the following URL: {created_job.studio_url}"
+    )
 
     while created_job.status not in [
         "Completed",
@@ -43,10 +41,69 @@ def submit_and_wait(ml_client, pipeline_job) -> PipelineJob:
     return created_job
 
 
+credential = DefaultAzureCredential()
+ml_client = MLClient(
+    credential=credential,
+    subscription_id=subscription_id,
+    resource_group_name=resource_group,
+    workspace_name=workspace,
+)
+print(ml_client)
+
+
+# Get handle to azureml registry for the RAI built in components
+registry_name = "azureml"
+ml_client_registry = MLClient(
+    credential=credential,
+    subscription_id=subscription_id,
+    resource_group_name=resource_group,
+    registry_name=registry_name,
+)
+print(ml_client_registry)
+
+# get the latest version of the model
+versions = [int(m._version) for m in ml_client.models.list(name=model_name)]
+versions.sort(reverse=True)
+
+
+expected_model_id = f"{model_name}:{versions[0]}"
+azureml_model_id = f"azureml:{expected_model_id}"
+
+# get the RAI components
+rai_component_version = "0.13.0"
+
+rai_constructor_component = ml_client_registry.components.get(
+    name="microsoft_azureml_rai_tabular_insight_constructor",
+    version=rai_component_version,
+)
+
+
+rai_explanation_component = ml_client_registry.components.get(
+    name="microsoft_azureml_rai_tabular_explanation", version=rai_component_version
+)
+
+rai_counterfactual_component = ml_client_registry.components.get(
+    name="microsoft_azureml_rai_tabular_counterfactual", version=rai_component_version
+)
+
+rai_erroranalysis_component = ml_client_registry.components.get(
+    name="microsoft_azureml_rai_tabular_erroranalysis", version=rai_component_version
+)
+
+rai_gather_component = ml_client_registry.components.get(
+    name="microsoft_azureml_rai_tabular_insight_gather", version=rai_component_version
+)
+
+rai_scorecard_component = ml_client_registry.components.get(
+    name="microsoft_azureml_rai_tabular_score_card", version=rai_component_version
+)
+
+
+# Define the RAI pipeline, built with components above
 @dsl.pipeline(
     compute=compute_name,
-    description="RAI Pipeline for Visit Time Prediction",
-    experiment_name=experiment_name,
+    description="RAI pipeline for visit time project",
+    experiment_name=f"RAI_visit_time",
 )
 def rai_regression_pipeline(
     target_column_name,
@@ -54,46 +111,12 @@ def rai_regression_pipeline(
     test_data,
     score_card_config_path,
 ):
-
-    ################################
-    # Get the RAI components  needed for the RAI pipeline
-    ################################
-    version = "0.13.0"
-
-    rai_constructor_component = ml_client_registry.components.get(
-        name="microsoft_azureml_rai_tabular_insight_constructor", version=version
-    )
-
-    rai_explanation_component = ml_client_registry.components.get(
-        name="microsoft_azureml_rai_tabular_explanation", version=version
-    )
-
-    rai_counterfactual_component = ml_client_registry.components.get(
-        name="microsoft_azureml_rai_tabular_counterfactual", version=version
-    )
-
-    rai_erroranalysis_component = ml_client_registry.components.get(
-        name="microsoft_azureml_rai_tabular_erroranalysis", version=version
-    )
-
-    rai_gather_component = ml_client_registry.components.get(
-        name="microsoft_azureml_rai_tabular_insight_gather", version=version
-    )
-
-    rai_scorecard_component = ml_client_registry.components.get(
-        name="microsoft_azureml_rai_tabular_score_card", version=version
-    )
     # Initiate the RAIInsights
-    model_path = f"azureml:{model_id}"
-    print("Model path: ", model_path)
     create_rai_job = rai_constructor_component(
-        title="RAI Dashboard for Visit Time Prediction",
+        title="RAI Visit Time",
         task_type="regression",
-        model_info=model_id,
-        model_input=Input(
-            type="mlflow_model",
-            # path=model_path,
-        ),
+        model_info=expected_model_id,
+        model_input=Input(type=AssetTypes.MLFLOW_MODEL, path=azureml_model_id),
         train_dataset=train_data,
         test_dataset=test_data,
         target_column_name=target_column_name,
@@ -106,7 +129,7 @@ def rai_regression_pipeline(
 
     # Add an explanation
     explain_job = rai_explanation_component(
-        comment="Explanation for the diabetes regression dataset",
+        comment="Explanation for the visit time dataset",
         rai_insights_dashboard=create_rai_job.outputs.rai_insights_dashboard,
     )
     explain_job.set_limits(timeout=7200)
@@ -207,70 +230,56 @@ def create_rai_datasets(ml_client):
     )
     ml_client.data.create_or_update(test_dataset)
 
-    # Retrieve the latest version of the datasets
-    train_dataset = ml_client.data.get("RAI-train", version=data_version)
-    test_dataset = ml_client.data.get("RAI-test", version=data_version)
-
-    return train_dataset, test_dataset
-
-
-def main():
-
-    credential = DefaultAzureCredential()
-    try:
-        ml_client = MLClient.from_config(credential, path="config.json")
-
-    except Exception as ex:
-        print("HERE IN THE EXCEPTION BLOCK")
-        print(ex)
-
-    try:
-        print(ml_client.compute.get(compute_name))
-    except:
-        print("No compute found")
-
-    print(os.getcwd())
-    print("current", os.listdir())
-
-    # Get handle to azureml registry for the RAI built in components
-    # get subscription_id from config.json
-    with open("config.json") as f:
-        config = json.load(f)
-    subscription_id = config["subscription_id"]
-    resource_group = config["resource_group"]
-    workspace_name = config["workspace_name"]
-    global ml_client_registry
-    ml_client_registry = MLClient(
-        credential=credential,
-        subscription_id=subscription_id,
-        resource_group_name=resource_group,
-        registry_name="azureml",
+    train_pq = Input(
+        type="mltable",
+        path=f"azureml:RAI-train:{data_version}",
+        mode="download",
+    )
+    test_pq = Input(
+        type="mltable",
+        path=f"azureml:RAI-test:{data_version}",
+        mode="download",
     )
 
-    train_dataset, test_dataset = create_rai_datasets(ml_client=ml_client)
-    # Get the latest version of the model
-    versions = [int(m._version) for m in ml_client.models.list(name=model_name)]
-    versions.sort(reverse=True)
-    global model_id
-    model_id = f"{model_name}:{versions[0]}"
-    print(f"Using model {model_id}")
-
-    # Pipeline to construct the RAI Insights
-    insights_pipeline_job = rai_regression_pipeline(
-        target_column_name="VISIT_TIME",
-        train_data=train_dataset,
-        test_data=test_dataset,
-        score_card_config_path=rai_scorecard_config_path,
-    )
-
-    insights_job = submit_and_wait(ml_client, insights_pipeline_job)
-
-    # The dashboard should appear in the AzureML portal in the registered model view. The following cell computes the expected URI:
-
-    expected_uri = f"https://ml.azure.com/model/{model_id}/model_analysis?wsid=/subscriptions/{subscription_id}/resourcegroups/{resource_group}/workspaces/{workspace_name}"
-
-    print(f"Please visit {expected_uri} to see your analysis")
+    return train_pq, test_pq
 
 
-if __name__ == "__main__":
-    main()
+train_pq, test_pq = create_rai_datasets(ml_client)
+score_card_config_path = Input(
+    type="uri_file", path="../rai_scorecard_config.json", mode="download"
+)
+# Pipeline to construct the RAI Insights
+insights_pipeline_job = rai_regression_pipeline(
+    target_column_name="VISIT_TIME",
+    train_data=train_pq,
+    test_data=test_pq,
+    score_card_config_path=score_card_config_path,
+)
+
+# Workaround to enable the download
+rand_path = str(uuid.uuid4())
+insights_pipeline_job.outputs.dashboard = Output(
+    path=f"azureml://datastores/workspaceblobstore/paths/{rand_path}/dashboard/",
+    mode="upload",
+    type="uri_folder",
+)
+insights_pipeline_job.outputs.ux_json = Output(
+    path=f"azureml://datastores/workspaceblobstore/paths/{rand_path}/ux_json/",
+    mode="upload",
+    type="uri_folder",
+)
+insights_pipeline_job.outputs.scorecard = Output(
+    path=f"azureml://datastores/workspaceblobstore/paths/{rand_path}/scorecard/",
+    mode="upload",
+    type="uri_folder",
+)
+
+insights_job = submit_and_wait(ml_client, insights_pipeline_job)
+
+sub_id = ml_client._operation_scope.subscription_id
+rg_name = ml_client._operation_scope.resource_group_name
+ws_name = ml_client.workspace_name
+
+expected_uri = f"https://ml.azure.com/model/{expected_model_id}/model_analysis?wsid=/subscriptions/{sub_id}/resourcegroups/{rg_name}/workspaces/{ws_name}"
+
+print(f"Please visit {expected_uri} to see your analysis")
