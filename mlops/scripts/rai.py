@@ -13,7 +13,7 @@ import os
 
 model_name = "vt-model"
 compute_name = "cpu-cluster"
-score_card_config = "../../rai_scorecard_config.json"
+score_card_config = "../../rai-scorecard-config.json"
 
 with open("config.json") as f:
     config = json.load(f)
