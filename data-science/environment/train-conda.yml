@@ -17,7 +17,6 @@ dependencies:
       - sklearn-pandas
       - azureml-inference-server-http
       - pyodbc
-      - mltable
       - inference_schema
       - git+https://github.com/microsoft/AzureML-Observability#subdirectory=aml-obs-client
       - git+https://github.com/microsoft/AzureML-Observability#subdirectory=aml-obs-collector
