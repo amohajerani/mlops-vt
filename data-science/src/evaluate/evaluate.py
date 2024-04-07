@@ -20,12 +20,27 @@ from mlflow.tracking import MlflowClient
 
 TARGET_COL = "VISIT_TIME"
 # Define your categorical and numerical columns
-categorical_features = ['STATE', 'CLIENT', 'LOB', 'EMPLOYEETYPENAME', 'PROVIDERSTATE', 'DEGREE']
-numerical_features = ['VISIT_TIME_MEAN', 'GENDERID', 'PROVIDERAGE', 'TENURE', 'VISIT_COUNT',  'APPT_LNG', 'APPT_LAT']
+categorical_features = [
+    "STATE",
+    "CLIENT",
+    "LOB",
+    "EMPLOYEETYPENAME",
+    "PROVIDERSTATE",
+    "DEGREE",
+]
+numerical_features = [
+    "VISIT_TIME_MEAN",
+    "GENDERID",
+    "PROVIDERAGE",
+    "TENURE",
+    "VISIT_COUNT",
+    "APPT_LNG",
+    "APPT_LAT",
+]
 
 
 def parse_args():
-    '''Parse input arguments'''
+    """Parse input arguments"""
 
     parser = argparse.ArgumentParser("predict")
     parser.add_argument("--model_name", type=str, help="Name of registered model")
@@ -37,27 +52,29 @@ def parse_args():
 
     return args
 
+
 def main(args):
-    '''Read trained model and test dataset, evaluate model and save result'''
+    """Read trained model and test dataset, evaluate model and save result"""
 
     # Load the test data
     test_data = pd.read_parquet(Path(args.test_data))
 
     # Reorder columns
-    column_order = [        
-            'PROVIDERSTATE', 
-           'PROVIDERAGE', 
-           'TENURE', 
-           'DEGREE', 
-           'EMPLOYEETYPENAME', 
-           'VISIT_TIME_MEAN', 
-           'VISIT_COUNT', 
-           'STATE',
-           'CLIENT',
-           'LOB',
-           'GENDERID',
-           'APPT_LAT', 
-           'APPT_LNG',] + [TARGET_COL]
+    column_order = [
+        "PROVIDERSTATE",
+        "PROVIDERAGE",
+        "TENURE",
+        "DEGREE",
+        "EMPLOYEETYPENAME",
+        "VISIT_TIME_MEAN",
+        "VISIT_COUNT",
+        "STATE",
+        "CLIENT",
+        "LOB",
+        "GENDERID",
+        "APPT_LAT",
+        "APPT_LNG",
+    ] + [TARGET_COL]
     test_data = test_data[column_order]
 
     # Split the data into inputs and outputs
@@ -65,14 +82,33 @@ def main(args):
     X_test = test_data.drop(columns=TARGET_COL)
 
     # Load the model from input port
-    model =  mlflow.sklearn.load_model(args.model_input) 
+    model = mlflow.sklearn.load_model(args.model_input)
 
     # ---------------- Model Evaluation ---------------- #
     yhat_test, score = model_evaluation(X_test, y_test, model, args.evaluation_output)
 
-    # ----------------- Model Promotion ---------------- #
-    predictions, deploy_flag = model_promotion(args.model_name, args.evaluation_output, X_test, y_test, yhat_test, score)
+    # ---------------- Bias Testing ---------------- #
+    protected_groups = [
+        {
+            "feature": "GENDERID",
+            "value": 1,
+            "type": "categorical",
+            "decision_threshold": 0.1,
+            "decision_metric": "rmse",
+        },
+    ]
+    biased_flag = bias_testing(protected_groups, X_test, y_test, yhat_test)
 
+    # ----------------- Model Promotion ---------------- #
+    predictions, deploy_flag = model_promotion(
+        args.model_name,
+        args.evaluation_output,
+        X_test,
+        y_test,
+        yhat_test,
+        score,
+        biased_flag,
+    )
 
 
 def model_evaluation(X_test, y_test, model, evaluation_output):
@@ -97,10 +133,11 @@ def model_evaluation(X_test, y_test, model, evaluation_output):
         f"Scored with the following model:\n{format(model)}"
     )
     with open((Path(evaluation_output) / "score.txt"), "a") as outfile:
-        outfile.write("Mean squared error: {mse.2f} \n")
-        outfile.write("Root mean squared error: {rmse.2f} \n")
-        outfile.write("Mean absolute error: {mae.2f} \n")
-        outfile.write("Coefficient of determination: {r2.2f} \n")
+        outfile.write("Model evaluation results on the holdout set: \n")
+        outfile.write(f"Mean squared error: {mse:.2f} \n")
+        outfile.write(f"Root mean squared error: {rmse:.2f} \n")
+        outfile.write(f"Mean absolute error: {mae:.2f} \n")
+        outfile.write(f"Coefficient of determination: {r2:.2f} \n")
 
     mlflow.log_metric("test r2", r2)
     mlflow.log_metric("test mse", mse)
@@ -108,8 +145,8 @@ def model_evaluation(X_test, y_test, model, evaluation_output):
     mlflow.log_metric("test mae", mae)
 
     # Visualize results
-    plt.scatter(y_test, yhat_test,  color='black')
-    plt.plot(y_test, y_test, color='blue', linewidth=3)
+    plt.scatter(y_test, yhat_test, color="black")
+    plt.plot(y_test, y_test, color="blue", linewidth=3)
     plt.xlabel("Real value")
     plt.ylabel("Predicted value")
     plt.title("Comparing Model Predictions to Real values - Test Data")
@@ -118,8 +155,126 @@ def model_evaluation(X_test, y_test, model, evaluation_output):
 
     return yhat_test, r2
 
-def model_promotion(model_name, evaluation_output, X_test, y_test, yhat_test, score):
-    '''
+
+def bias_testing(protected_groups, X, y, yhat, evaluation_output):
+    """
+    Measure the difference in the model performance between different sub-populations.
+    This implementation applies to the scenarios where we expect the model prediction to be impacted
+    by the protected features (.e.g liver cancer is more likely on men than women).
+    We would need a different function for bias testing if we don't expect the protected attribute to impact predictions
+    .See the wiki page for context.
+
+    The function calculates model performance on each group (e.g. men vs women), and compares the difference in model performance.
+
+    args:
+    protected_groups: list of dict of protected groups: [{'feature': 'age', 'value':50, 'type': 'numerical, decision_threshold': 0.01, 'decision_metric': 'rmse'},]
+     - feature: the protected feature to group by
+     - value: the value of the protected feature to split the data by
+     - type: the type of the protected feature (categorical or numerical)
+     - decision_threshold: the threshold of difference between groups to decide if the model is biased
+     - decision_metric: the metric to use to decide if the model is biased (e.g. rmse, r2, mae)
+    X: dataframe of features
+    y: array of target
+    yhat: array of predictions
+    evaluation_output: path to the evaluation output directory
+
+    returns:
+    string: bias testing results
+
+    """
+    bias_results = {}
+    for group in protected_groups:
+        if group["type"] == "categorical":
+            mask1 = X[group["feature"]] == group["value"]
+            mask2 = X[group["feature"]] != group["value"]
+        elif group["type"] == "numerical":
+            mask1 = X[group["feature"]] < group["value"]
+            mask2 = X[group["feature"]] >= group["value"]
+        else:
+            raise ValueError("Invalid group type")
+
+        y_group1 = y[mask1]
+        yhat_group1 = yhat[mask1]
+        y_group2 = y[mask2]
+        yhat_group2 = yhat[mask2]
+
+        r2_group1 = r2_score(y_group1, yhat_group1)
+        mse_group1 = mean_squared_error(y_group1, yhat_group1)
+        rmse_group1 = np.sqrt(mse_group1)
+        mae_group1 = mean_absolute_error(y_group1, yhat_group1)
+
+        r2_group2 = r2_score(y_group2, yhat_group2)
+        mse_group2 = mean_squared_error(y_group2, yhat_group2)
+        rmse_group2 = np.sqrt(mse_group2)
+        mae_group2 = mean_absolute_error(y_group2, yhat_group2)
+
+        difference_r2 = r2_group2 - r2_group1
+        difference_mse = mse_group2 - mse_group1
+        difference_rmse = rmse_group2 - rmse_group1
+        difference_mae = mae_group2 - mae_group1
+
+        # Decide if the model is biased
+        if group.get("decision_metric") == "r2":
+            decision = difference_r2 > group.get("decision_threshold")
+        elif group.get("decision_metric") == "mse":
+            decision = difference_mse > group.get("decision_threshold")
+        elif group.get("decision_metric") == "rmse":
+            decision = difference_rmse > group.get("decision_threshold")
+        elif group.get("decision_metric") == "mae":
+            decision = difference_mae > group.get("decision_threshold")
+        else:
+            raise ValueError("Invalid decision metric")
+
+        bias_results[f"{group['feature']}_{group['value']}"] = {
+            "r2_group1": r2_group1,
+            "mse_group1": mse_group1,
+            "rmse_group1": rmse_group1,
+            "mae_group1": mae_group1,
+            "r2_group2": r2_group2,
+            "mse_group2": mse_group2,
+            "rmse_group2": rmse_group2,
+            "mae_group2": mae_group2,
+            "difference_r2": difference_r2,
+            "difference_mse": difference_mse,
+            "difference_rmse": difference_rmse,
+            "difference_mae": difference_mae,
+            "decision_threshold": group.get("decision_threshold"),
+            "decision_metric": group.get("decision_metric"),
+            "biased": decision,
+        }
+    biased = any([results["biased"] for results in bias_results.values()])
+    with open((Path(evaluation_output) / "bias_results.txt"), "w") as outfile:
+        for group, results in bias_results.items():
+            outfile.write(f"{group}:\n")
+            outfile.write(f"Group 1:\n")
+            outfile.write(f"r2: {results['r2_group1']:.2f}\n")
+            outfile.write(f"mse: {results['mse_group1']:.2f}\n")
+            outfile.write(f"rmse: {results['rmse_group1']:.2f}\n")
+            outfile.write(f"mae: {results['mae_group1']:.2f}\n")
+            outfile.write(f"Group 2:\n")
+            outfile.write(f"r2: {results['r2_group2']:.2f}\n")
+            outfile.write(f"mse: {results['mse_group2']:.2f}\n")
+            outfile.write(f"rmse: {results['rmse_group2']:.2f}\n")
+            outfile.write(f"mae: {results['mae_group2']:.2f}\n")
+            outfile.write(f"Difference:\n")
+            outfile.write(f"r2: {results['difference_r2']:.2f}\n")
+            outfile.write(f"mse: {results['difference_mse']:.2f}\n")
+            outfile.write(f"rmse: {results['difference_rmse']:.2f}\n")
+            outfile.write(f"mae: {results['difference_mae']:.2f}\n")
+            outfile.write(f"Decision threshold: {results['decision_threshold']}\n")
+            outfile.write(f"Decision metric: {results['decision_metric']}\n")
+            outfile.write("Biased: {results['biased']}\n")
+        outfile.write(f"Biased: {biased}\n")
+    mlflow.log_metric("biased", int(biased))
+    mlflow.log_artifact((Path(evaluation_output) / "bias_results.txt"))
+
+    return biased
+
+
+def model_promotion(
+    model_name, evaluation_output, X_test, y_test, yhat_test, score, biased_flag
+):
+    """
     # Compare the current model with the latest version of the model in the registry.
     # TODO: uncomment this piece
 
@@ -158,17 +313,22 @@ def model_promotion(model_name, evaluation_output, X_test, y_test, yhat_test, sc
     perf_comparison_plot.figure.savefig("perf_comparison.png")
     perf_comparison_plot.figure.savefig(Path(evaluation_output) / "perf_comparison.png")
 
-    
+
     mlflow.log_metric("deploy flag", bool(deploy_flag))
     mlflow.log_artifact("perf_comparison.png")
 
     return predictions, deploy_flag
-    '''
-    deploy_flag = 1
-    with open((Path(evaluation_output) / "deploy_flag"), 'w') as outfile:
+    """
+    performance_flag = 0
+    if performance_flag and biased_flag:
+        deploy_flag = 1
+    else:
+        deploy_flag = 0
+
+    with open((Path(evaluation_output) / "deploy_flag"), "w") as outfile:
         outfile.write(f"{int(deploy_flag)}")
     return None, deploy_flag
-    
+
 
 if __name__ == "__main__":
 
@@ -185,7 +345,7 @@ if __name__ == "__main__":
 
     for line in lines:
         print(line)
-    
+
     main(args)
 
     mlflow.end_run()

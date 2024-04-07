@@ -12,4 +12,5 @@ steps:
     pip install pandas
     pip install pyodbc
     pip install snowflake-connector-python
+    pip install aif360
   displayName: 'Install python dependencies'
