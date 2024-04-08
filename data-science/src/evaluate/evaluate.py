@@ -184,9 +184,6 @@ def bias_testing(protected_groups, X, y, yhat, evaluation_output):
     string: bias testing results
 
     """
-
-
-def bias_testing(protected_groups, X, y, yhat, evaluation_output):
     bias_results = {}
     for group in protected_groups:
         if group["type"] == "categorical":
@@ -313,14 +310,6 @@ def bias_testing(protected_groups, X, y, yhat, evaluation_output):
         outfile.write(f"Overall bias test result:\nBiased: {biased}\n")
     mlflow.log_metric("biased", int(biased))
     mlflow.log_artifact((Path(evaluation_output) / "bias_results.txt"))
-
-    # (Optional) View this model in the fairness dashboard, and see the disparities which appear:
-    from raiwidgets import FairnessDashboard
-
-    protected_df = X[["GENDERID"]]
-    FairnessDashboard(
-        sensitive_features=protected_df, y_true=y, y_pred={"prediction": yhat}
-    )
 
     return biased
 
