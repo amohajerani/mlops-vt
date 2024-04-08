@@ -19,7 +19,7 @@ dependencies:
       - pyodbc
       - inference_schema
       - azureml-contrib-fairness
-      - fairlearn
+      - fairlearn==0.4.6
       - raiwidgets
       - git+https://github.com/microsoft/AzureML-Observability#subdirectory=aml-obs-client
       - git+https://github.com/microsoft/AzureML-Observability#subdirectory=aml-obs-collector
