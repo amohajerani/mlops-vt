@@ -97,7 +97,9 @@ def main(args):
             "decision_metric": "rmse",
         },
     ]
-    biased_flag = bias_testing(protected_groups, X_test, y_test, yhat_test)
+    biased_flag = bias_testing(
+        protected_groups, X_test, y_test, yhat_test, args.evaluation_output
+    )
 
     # ----------------- Model Promotion ---------------- #
     predictions, deploy_flag = model_promotion(
