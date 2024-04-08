@@ -266,7 +266,7 @@ def bias_testing(protected_groups, X, y, yhat, evaluation_output):
         }
         mlflow.log_metric(f"{group['feature']}_{group['value']}_biased", int(decision))
         mlflow.log_metric(
-            f"{group['feature']}_{group['value']}_{group.get("decision_metric")}_difference",
+            f"{group['feature']}_{group['value']}_{group.get('decision_metric')}_difference",
             difference,
         )
         mlflow.log_metric(
