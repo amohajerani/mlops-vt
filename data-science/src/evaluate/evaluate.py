@@ -266,14 +266,13 @@ def bias_testing(protected_groups, X, y, yhat, evaluation_output):
         }
         mlflow.log_metric(f"{group['feature']}_{group['value']}_biased", int(decision))
         mlflow.log_metric(
-            f"{group['feature']}_{group['value']}_decision_metric",
-            group.get("decision_metric"),
+            f"{group['feature']}_{group['value']}_{group.get("decision_metric")}_difference",
+            difference,
         )
         mlflow.log_metric(
             f"{group['feature']}_{group['value']}_decision_threshold",
             group.get("decision_threshold"),
         )
-        mlflow.log_metric(f"{group['feature']}_{group['value']}_difference", difference)
 
     biased = any([results["biased"] for results in bias_results.values()])
     with open((Path(evaluation_output) / "bias_results.txt"), "w") as outfile:
