@@ -362,7 +362,7 @@ def model_promotion(
     return predictions, deploy_flag
     """
     poor_performance = 0  # 0 means there are no issues to be flagged
-    if poor_performance and biased:
+    if poor_performance or biased:
         deploy_flag = 0
     else:
         deploy_flag = 1
