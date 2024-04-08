@@ -230,14 +230,19 @@ def bias_testing(protected_groups, X, y, yhat, evaluation_output):
         # Decide if the model is biased
         if group.get("decision_metric") == "r2":
             decision = difference_r2 > group.get("decision_threshold")
+            difference = difference_r2
         elif group.get("decision_metric") == "mse":
             decision = difference_mse > group.get("decision_threshold")
+            difference = difference_mse
         elif group.get("decision_metric") == "rmse":
             decision = difference_rmse > group.get("decision_threshold")
+            difference = difference_rmse
         elif group.get("decision_metric") == "mae":
             decision = difference_mae > group.get("decision_threshold")
+            difference = difference_mae
         else:
             raise ValueError("Invalid decision metric")
+            difference = None
 
         bias_results[f"{group['feature']}_{group['value']}"] = {
             "count_group1": count_group1,
@@ -262,6 +267,16 @@ def bias_testing(protected_groups, X, y, yhat, evaluation_output):
             "decision_metric": group.get("decision_metric"),
             "biased": decision,
         }
+        mlflow.log_metric(f"{group['feature']}_{group['value']}_biased", int(decision))
+        mlflow.log_metric(
+            f"{group['feature']}_{group['value']}_decision_metric",
+            group.get("decision_metric"),
+        )
+        mlflow.log_metric(
+            f"{group['feature']}_{group['value']}_decision_threshold",
+            group.get("decision_threshold"),
+        )
+        mlflow.log_metric(f"{group['feature']}_{group['value']}_difference", difference)
 
     biased = any([results["biased"] for results in bias_results.values()])
     with open((Path(evaluation_output) / "bias_results.txt"), "w") as outfile:
@@ -298,15 +313,6 @@ def bias_testing(protected_groups, X, y, yhat, evaluation_output):
         outfile.write(f"Overall bias test result:\nBiased: {biased}\n")
     mlflow.log_metric("biased", int(biased))
     mlflow.log_artifact((Path(evaluation_output) / "bias_results.txt"))
-
-    # Log bias testing results
-    for group, results in bias_results.items():
-        mlflow.log_metric(f"{group}_biased", int(results["biased"]))
-        mlflow.log_metric(f"{group}_difference", results["difference"])
-        mlflow.log_metric(
-            f"{group}_difference_threshold", results["decision_threshold"]
-        )
-        mlflow.log_metric(f"{group}_metric", results["metric"])
 
     # (Optional) View this model in the fairness dashboard, and see the disparities which appear:
     from raiwidgets import FairnessDashboard
