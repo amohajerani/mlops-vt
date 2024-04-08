@@ -93,7 +93,7 @@ def main(args):
             "feature": "GENDERID",
             "value": 1,
             "type": "categorical",
-            "decision_threshold": 0.1,
+            "decision_threshold": 1.5,
             "decision_metric": "rmse",
         },
     ]
@@ -184,6 +184,9 @@ def bias_testing(protected_groups, X, y, yhat, evaluation_output):
     string: bias testing results
 
     """
+
+
+def bias_testing(protected_groups, X, y, yhat, evaluation_output):
     bias_results = {}
     for group in protected_groups:
         if group["type"] == "categorical":
@@ -199,6 +202,15 @@ def bias_testing(protected_groups, X, y, yhat, evaluation_output):
         yhat_group1 = yhat[mask1]
         y_group2 = y[mask2]
         yhat_group2 = yhat[mask2]
+
+        # Calculate counts and averages
+        count_group1 = len(y_group1)
+        prediction_avg_group1 = np.mean(yhat_group1)
+        target_avg_group1 = np.mean(y_group1)
+
+        count_group2 = len(y_group2)
+        prediction_avg_group2 = np.mean(yhat_group2)
+        target_avg_group2 = np.mean(y_group2)
 
         r2_group1 = r2_score(y_group1, yhat_group1)
         mse_group1 = mean_squared_error(y_group1, yhat_group1)
@@ -228,10 +240,16 @@ def bias_testing(protected_groups, X, y, yhat, evaluation_output):
             raise ValueError("Invalid decision metric")
 
         bias_results[f"{group['feature']}_{group['value']}"] = {
+            "count_group1": count_group1,
+            "prediction_avg_group1": prediction_avg_group1,
+            "target_avg_group1": target_avg_group1,
             "r2_group1": r2_group1,
             "mse_group1": mse_group1,
             "rmse_group1": rmse_group1,
             "mae_group1": mae_group1,
+            "count_group2": count_group2,
+            "prediction_avg_group2": prediction_avg_group2,
+            "target_avg_group2": target_avg_group2,
             "r2_group2": r2_group2,
             "mse_group2": mse_group2,
             "rmse_group2": rmse_group2,
@@ -244,37 +262,62 @@ def bias_testing(protected_groups, X, y, yhat, evaluation_output):
             "decision_metric": group.get("decision_metric"),
             "biased": decision,
         }
+
     biased = any([results["biased"] for results in bias_results.values()])
     with open((Path(evaluation_output) / "bias_results.txt"), "w") as outfile:
         for group, results in bias_results.items():
             outfile.write(f"{group}:\n")
-            outfile.write(f"Group 1:\n")
-            outfile.write(f"r2: {results['r2_group1']:.2f}\n")
-            outfile.write(f"mse: {results['mse_group1']:.2f}\n")
-            outfile.write(f"rmse: {results['rmse_group1']:.2f}\n")
-            outfile.write(f"mae: {results['mae_group1']:.2f}\n")
-            outfile.write(f"Group 2:\n")
-            outfile.write(f"r2: {results['r2_group2']:.2f}\n")
-            outfile.write(f"mse: {results['mse_group2']:.2f}\n")
-            outfile.write(f"rmse: {results['rmse_group2']:.2f}\n")
-            outfile.write(f"mae: {results['mae_group2']:.2f}\n")
-            outfile.write(f"Difference:\n")
-            outfile.write(f"r2: {results['difference_r2']:.2f}\n")
-            outfile.write(f"mse: {results['difference_mse']:.2f}\n")
-            outfile.write(f"rmse: {results['difference_rmse']:.2f}\n")
-            outfile.write(f"mae: {results['difference_mae']:.2f}\n")
-            outfile.write(f"Decision threshold: {results['decision_threshold']}\n")
-            outfile.write(f"Decision metric: {results['decision_metric']}\n")
-            outfile.write("Biased: {results['biased']}\n")
-        outfile.write(f"Biased: {biased}\n")
+            outfile.write(f"  Group 1:\n")
+            outfile.write(f"    Count: {results['count_group1']}\n")
+            outfile.write(
+                f"    Prediction Average: {results['prediction_avg_group1']:.2f}\n"
+            )
+            outfile.write(f"    Target Average: {results['target_avg_group1']:.2f}\n")
+            outfile.write(f"    r2: {results['r2_group1']:.2f}\n")
+            outfile.write(f"    mse: {results['mse_group1']:.2f}\n")
+            outfile.write(f"    rmse: {results['rmse_group1']:.2f}\n")
+            outfile.write(f"    mae: {results['mae_group1']:.2f}\n")
+            outfile.write(f"  Group 2:\n")
+            outfile.write(f"    Count: {results['count_group2']}\n")
+            outfile.write(
+                f"    Prediction Average: {results['prediction_avg_group2']:.2f}\n"
+            )
+            outfile.write(f"    Target Average: {results['target_avg_group2']:.2f}\n")
+            outfile.write(f"    r2: {results['r2_group2']:.2f}\n")
+            outfile.write(f"    mse: {results['mse_group2']:.2f}\n")
+            outfile.write(f"    rmse: {results['rmse_group2']:.2f}\n")
+            outfile.write(f"    mae: {results['mae_group2']:.2f}\n")
+            outfile.write(f"  Difference:\n")
+            outfile.write(f"    r2: {results['difference_r2']:.2f}\n")
+            outfile.write(f"    mse: {results['difference_mse']:.2f}\n")
+            outfile.write(f"    rmse: {results['difference_rmse']:.2f}\n")
+            outfile.write(f"    mae: {results['difference_mae']:.2f}\n")
+            outfile.write(f"  Decision threshold: {results['decision_threshold']}\n")
+            outfile.write(f"  Decision metric: {results['decision_metric']}\n")
+            outfile.write(f"  Biased: {results['biased']}\n")
+        outfile.write(f"Overall bias test result:\nBiased: {biased}\n")
     mlflow.log_metric("biased", int(biased))
     mlflow.log_artifact((Path(evaluation_output) / "bias_results.txt"))
+
+    flattened_metrics = {}
+    for group, metrics in bias_results.items():
+        for metric, value in metrics.items():
+            flattened_metrics[f"{group}_{metric}"] = value
+    mlflow.log_metrics(flattened_metrics)
+
+    # (Optional) View this model in the fairness dashboard, and see the disparities which appear:
+    from raiwidgets import FairnessDashboard
+
+    protected_df = X[["GENDERID"]]
+    FairnessDashboard(
+        sensitive_features=protected_df, y_true=y, y_pred={"prediction": yhat}
+    )
 
     return biased
 
 
 def model_promotion(
-    model_name, evaluation_output, X_test, y_test, yhat_test, score, biased_flag
+    model_name, evaluation_output, X_test, y_test, yhat_test, score, biased
 ):
     """
     # Compare the current model with the latest version of the model in the registry.
@@ -321,11 +364,11 @@ def model_promotion(
 
     return predictions, deploy_flag
     """
-    performance_flag = 0
-    if performance_flag and biased_flag:
-        deploy_flag = 1
-    else:
+    poor_performance = 0  # 0 means there are no issues to be flagged
+    if poor_performance and biased:
         deploy_flag = 0
+    else:
+        deploy_flag = 1
 
     with open((Path(evaluation_output) / "deploy_flag"), "w") as outfile:
         outfile.write(f"{int(deploy_flag)}")
