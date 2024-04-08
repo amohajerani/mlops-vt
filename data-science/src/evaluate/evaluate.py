@@ -299,11 +299,14 @@ def bias_testing(protected_groups, X, y, yhat, evaluation_output):
     mlflow.log_metric("biased", int(biased))
     mlflow.log_artifact((Path(evaluation_output) / "bias_results.txt"))
 
-    flattened_metrics = {}
-    for group, metrics in bias_results.items():
-        for metric, value in metrics.items():
-            flattened_metrics[f"{group}_{metric}"] = value
-    mlflow.log_metrics(flattened_metrics)
+    # Log bias testing results
+    for group, results in bias_results.items():
+        mlflow.log_metric(f"{group}_biased", int(results["biased"]))
+        mlflow.log_metric(f"{group}_difference", results["difference"])
+        mlflow.log_metric(
+            f"{group}_difference_threshold", results["decision_threshold"]
+        )
+        mlflow.log_metric(f"{group}_metric", results["metric"])
 
     # (Optional) View this model in the fairness dashboard, and see the disparities which appear:
     from raiwidgets import FairnessDashboard
