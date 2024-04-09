@@ -201,16 +201,14 @@ def main():
     logger.info("Bias test results:")
     logger.info(
         open(
-            os.path.join(
-                "ml_pipeline_outputs", "pipeline_job_score_report/bias_results.txt"
+            os.path.join(  # probably have to remove pipeline_job_score_report
+                "ml_pipeline_outputs", "bias_results.txt"
             )
         ).read()
     )
 
     logger.info("Score results:")
-    with open(
-        os.path.join("ml_pipeline_outputs", "pipeline_job_score_report/score.txt")
-    ) as file:
+    with open(os.path.join("ml_pipeline_outputs", "score.txt")) as file:
         lines = file.readlines()
         last_four_lines = lines[-4:]
         for line in last_four_lines:
