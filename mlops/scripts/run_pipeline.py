@@ -196,16 +196,8 @@ def main():
     ml_client.jobs.download(
         name=pipeline_job.name,
         download_path="ml_pipeline_outputs",
-        output_name="pipeline_job_score_report/bias_results.txt",
+        output_name="pipeline_job_score_report",
     )
-    ml_client.jobs.download(
-        name=pipeline_job.name,
-        download_path="ml_pipeline_outputs",
-        output_name="pipeline_job_score_report/score.txt",
-    )
-    # log the list of files in the directory
-    logger.info("Files in the directory:")
-    logger.info(os.listdir("ml_pipeline_outputs"))
 
     # move the score.txt and the bias_results.txt to the home directory and then delete the ml_pipeline_outputs directory
     os.rename(
