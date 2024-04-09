@@ -41,7 +41,7 @@ def parse_args():
         default="vtmonitoring",
     )
     parser.add_argument(
-        "bias_config",
+        "--bias_config",
         type=str,
         help="Bias Config File Path",
     )
