@@ -21,7 +21,22 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
+protected_groups = [
+    {
+        "feature": "GENDERID",
+        "value": 1,
+        "type": "categorical",
+        "decision_threshold": 1.5,
+        "decision_metric": "rmse",
+    },
+    {
+        "feature": "PROVIDERAGE",
+        "value": 50,
+        "type": "numerical",
+        "decision_threshold": 1.5,
+        "decision_metric": "rmse",
+    },
+]
 TARGET_COL = "VISIT_TIME"
 # Define your categorical and numerical columns
 categorical_features = [
@@ -51,7 +66,6 @@ def parse_args():
     parser.add_argument("--model_input", type=str, help="Path of input model")
     parser.add_argument("--test_data", type=str, help="Path to test dataset")
     parser.add_argument("--evaluation_output", type=str, help="Path of eval results")
-    parser.add_argument("--bias_config", type=str, help="string of bias config json")
 
     args = parser.parse_args()
 
@@ -93,13 +107,6 @@ def main(args):
     yhat_test, score = model_evaluation(X_test, y_test, model, args.evaluation_output)
 
     # ---------------- Bias Testing ---------------- #
-    logger.info("bias config : ", args.bias_config)
-    try:
-        protected_groups = json.loads(args.bias_config)
-        logger.info("Protected groups loaded successfully.")
-    except json.JSONDecodeError as e:
-        logger.error(f"Error loading protected groups: {e}")
-        raise e
 
     biased_flag = bias_testing(
         protected_groups, X_test, y_test, yhat_test, args.evaluation_output
