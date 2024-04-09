@@ -5,7 +5,7 @@ Saves predictions, evaluation results and deploy flag.
 
 import argparse
 from pathlib import Path
-
+import json
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -51,9 +51,7 @@ def parse_args():
     parser.add_argument("--model_input", type=str, help="Path of input model")
     parser.add_argument("--test_data", type=str, help="Path to test dataset")
     parser.add_argument("--evaluation_output", type=str, help="Path of eval results")
-    parser.add_argument(
-        "--protected_groups", type=str, help="dictionary of protected groups"
-    )
+    parser.add_argument("--bias_config", type=str, help="string of bias config json")
 
     args = parser.parse_args()
 
@@ -95,7 +93,7 @@ def main(args):
     yhat_test, score = model_evaluation(X_test, y_test, model, args.evaluation_output)
 
     # ---------------- Bias Testing ---------------- #
-
+    protected_groups = json.loads(args.bias_config)
     biased_flag = bias_testing(
         args.protected_groups, X_test, y_test, yhat_test, args.evaluation_output
     )

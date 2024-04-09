@@ -56,8 +56,7 @@ def main():
     print(args)
     # read the bias config file
     with open(args.bias_config, "r") as f:
-        bias_protected_groups = json.load(f)
-    logger.info("Bias protected groups: {}".format(bias_protected_groups))
+        bias_config = f.read()
 
     credential = DefaultAzureCredential()
     try:
@@ -122,12 +121,14 @@ def main():
                 --model_name ${{inputs.model_name}} \
                 --model_input ${{inputs.model_input}} \
                 --test_data ${{inputs.test_data}} \
-                --evaluation_output ${{outputs.evaluation_output}}",
+                --evaluation_output ${{outputs.evaluation_output}}"
+        "--bias_config ${{inputs.bias_config}}",
         environment=args.environment_name + "@latest",
         inputs={
             "model_name": Input(type="string"),
             "model_input": Input(type="uri_folder"),
             "test_data": Input(type="uri_folder"),
+            "bias_config": Input(type="string"),
         },
         outputs={"evaluation_output": Output(type="uri_folder")},
     )
@@ -166,7 +167,7 @@ def main():
             model_name="vt-model",
             model_input=train.outputs.model_output,
             test_data=prep.outputs.test_data,
-            protected_groups=bias_protected_groups,
+            bias_config=bias_config,
         )
 
         register = register_model(
