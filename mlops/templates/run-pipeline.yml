@@ -33,5 +33,5 @@ steps:
           --environment_name ${{ parameters.environment_name }} \
           --compute_name "${{ parameters.compute_name }}" \
           --enable_monitoring ${{ parameters.enable_monitoring }} \
-          --table_name ${{ parameters.table_name }} 
+          --table_name ${{ parameters.table_name }} \
           --bias_config ${{ parameters.bias_config }}
