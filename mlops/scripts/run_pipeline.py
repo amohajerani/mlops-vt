@@ -183,25 +183,12 @@ def main():
         pipeline_job, experiment_name=args.experiment_name
     )
 
-    pipeline_run = ml_client.jobs.submit(
-        pipeline_job, experiment_name=args.experiment_name
-    )
-    pipeline_run.wait_for_completion()
+    pipeline_run = ml_client.jobs.stream(pipeline_job)
 
-    # retrieve the evaluation output of the pipeline
-    outputs = pipeline_run.get_output()
-    from azure.ai.ml.entities import Datastore
-
-    evaluation_output = outputs["pipeline_job_score_report"]
-    datastore = Datastore.get(ml_client, evaluation_output.datastore)
-    # Download the text file from the datastore to local directory
-    datastore.download(
-        target_path=".",
-        prefix=os.path.join(evaluation_output.path_on_datastore, "bias_results.txt"),
-    )
-    # Open the text file and print its content
-    with open("bias_results.txt", "r") as file:
-        print(file.read())
+    # create a tmp directory if does not exist
+    if not os.path.exists("ml_pipeline_outputs"):
+        os.makedirs("ml_pipeline_outputs")
+    ml_client.jobs.download(pipeline_run, "ml_pipeline_outputs", "outputs")
 
 
 if __name__ == "__main__":
