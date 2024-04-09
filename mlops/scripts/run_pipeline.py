@@ -195,35 +195,28 @@ def main():
     ml_client.jobs.download(
         name=pipeline_job.name,
         download_path="ml_pipeline_outputs",
-        output_name="pipeline_job_score_report",
+        output_name="pipeline_job_score_report/bias_results.txt",
+    )
+    ml_client.jobs.download(
+        name=pipeline_job.name,
+        download_path="ml_pipeline_outputs",
+        output_name="pipeline_job_score_report/score.txt",
     )
 
-    # print list of files in the output directory
-    logger.info("Output directory contents:")
-    logger.info(
-        os.listdir("ml_pipeline_outputs/named-outputs/pipeline_job_score_report")
+    # move the score.txt and the bias_results.txt to the home directory and then delete the ml_pipeline_outputs directory
+    os.rename("ml_pipeline_outputs/pipeline_job_score_report/score.txt", "score.txt")
+    os.rename(
+        "ml_pipeline_outputs/pipeline_job_score_report/bias_results.txt",
+        "bias_results.txt",
     )
+    os.rmdir("ml_pipeline_outputs/pipeline_job_score_report")
+
+    logger.info("====================================")
     logger.info("Bias test results:")
-    logger.info(
-        open(
-            os.path.join(
-                "ml_pipeline_outputs",
-                "named-outputs",
-                "pipeline_job_score_report",
-                "bias_results.txt",
-            )
-        ).read()
-    )
-
+    logger.info(open("bias_results.txt").read())
+    logger.info("====================================")
     logger.info("Score results:")
-    with open(
-        os.path.join(
-            "ml_pipeline_outputs",
-            "named-outputs",
-            "pipeline_job_score_report",
-            "score.txt",
-        )
-    ) as file:
+    with open("score.txt") as file:
         lines = file.readlines()
         last_four_lines = lines[-4:]
         for line in last_four_lines:

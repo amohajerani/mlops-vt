@@ -16,6 +16,10 @@ import mlflow
 import mlflow.sklearn
 import mlflow.pyfunc
 from mlflow.tracking import MlflowClient
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 TARGET_COL = "VISIT_TIME"
@@ -366,6 +370,10 @@ def model_promotion(
         deploy_flag = 0
     else:
         deploy_flag = 1
+
+    logger.info(
+        f"Deploy flag: {deploy_flag}, Poor performance: {poor_performance}, Biased: {biased}"
+    )
 
     with open((Path(evaluation_output) / "deploy_flag"), "w") as outfile:
         outfile.write(f"{int(deploy_flag)}")
