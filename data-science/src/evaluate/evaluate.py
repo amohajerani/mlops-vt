@@ -381,7 +381,7 @@ def model_promotion(
     logger.info(
         f"Deploy flag: {deploy_flag}, Poor performance: {poor_performance}, Biased: {biased}"
     )
-    if deploy_flag == 1:
+    if deploy_flag == 0:
         raise Exception(
             f"The new mdoel did not pass evaluation: \n\
                         Deploy flag: {deploy_flag}, Poor performance: {poor_performance}, Biased: {biased}.\n Terminating pipeline."
