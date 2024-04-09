@@ -121,8 +121,8 @@ def main():
                 --model_name ${{inputs.model_name}} \
                 --model_input ${{inputs.model_input}} \
                 --test_data ${{inputs.test_data}} \
-                --evaluation_output ${{outputs.evaluation_output}}"
-        "--bias_config ${{inputs.bias_config}}",
+                --evaluation_output ${{outputs.evaluation_output}} \
+                --bias_config ${{inputs.bias_config}}",
         environment=args.environment_name + "@latest",
         inputs={
             "model_name": Input(type="string"),
