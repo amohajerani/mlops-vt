@@ -93,9 +93,15 @@ def main(args):
     yhat_test, score = model_evaluation(X_test, y_test, model, args.evaluation_output)
 
     # ---------------- Bias Testing ---------------- #
-    protected_groups = json.loads(args.bias_config)
+    try:
+        protected_groups = json.loads(args.bias_config)
+        logger.info("Protected groups loaded successfully.")
+    except json.JSONDecodeError as e:
+        logger.error(f"Error loading protected groups: {e}")
+        raise e
+
     biased_flag = bias_testing(
-        args.protected_groups, X_test, y_test, yhat_test, args.evaluation_output
+        protected_groups, X_test, y_test, yhat_test, args.evaluation_output
     )
 
     # ----------------- Model Promotion ---------------- #
