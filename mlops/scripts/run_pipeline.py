@@ -200,12 +200,18 @@ def main():
 
     # print list of files in the output directory
     logger.info("Output directory contents:")
-    logger.info(os.listdir("ml_pipeline_outputs"))
+    logger.info(os.listdir("ml_pipeline_outputs/named-outputs"))
     logger.info("Bias test results:")
-    logger.info(open(os.path.join("ml_pipeline_outputs", "bias_results.txt")).read())
+    logger.info(
+        open(
+            os.path.join("ml_pipeline_outputs", "named-outputs", "bias_results.txt")
+        ).read()
+    )
 
     logger.info("Score results:")
-    with open(os.path.join("ml_pipeline_outputs", "score.txt")) as file:
+    with open(
+        os.path.join("ml_pipeline_outputs", "named-outputs", "score.txt")
+    ) as file:
         lines = file.readlines()
         last_four_lines = lines[-4:]
         for line in last_four_lines:
