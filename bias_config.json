@@ -1,0 +1,16 @@
+[
+  {
+    "feature": "GENDERID",
+    "value": 1,
+    "type": "categorical",
+    "decision_threshold": 1.5,
+    "decision_metric": "rmse"
+  },
+  {
+    "feature": "PROVIDERAGE",
+    "value": 50,
+    "type": "numerical",
+    "decision_threshold": 1.5,
+    "decision_metric": "rmse"
+  }
+]

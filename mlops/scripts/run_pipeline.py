@@ -40,6 +40,11 @@ def parse_args():
         help="ADX Monitoring Table Name",
         default="vtmonitoring",
     )
+    parser.add_argument(
+        "bias_config",
+        type=str,
+        help="Bias Config File Path",
+    )
 
     args = parser.parse_args()
 
@@ -49,6 +54,10 @@ def parse_args():
 def main():
     args = parse_args()
     print(args)
+    # read the bias config file
+    with open(args.bias_config, "r") as f:
+        bias_protected_groups = json.load(f)
+    logger.info("Bias protected groups: {}".format(bias_protected_groups))
 
     credential = DefaultAzureCredential()
     try:
@@ -157,6 +166,7 @@ def main():
             model_name="vt-model",
             model_input=train.outputs.model_output,
             test_data=prep.outputs.test_data,
+            protected_groups=bias_protected_groups,
         )
 
         register = register_model(

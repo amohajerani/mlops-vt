@@ -51,6 +51,9 @@ def parse_args():
     parser.add_argument("--model_input", type=str, help="Path of input model")
     parser.add_argument("--test_data", type=str, help="Path to test dataset")
     parser.add_argument("--evaluation_output", type=str, help="Path of eval results")
+    parser.add_argument(
+        "--protected_groups", type=str, help="dictionary of protected groups"
+    )
 
     args = parser.parse_args()
 
@@ -92,17 +95,9 @@ def main(args):
     yhat_test, score = model_evaluation(X_test, y_test, model, args.evaluation_output)
 
     # ---------------- Bias Testing ---------------- #
-    protected_groups = [
-        {
-            "feature": "GENDERID",
-            "value": 1,
-            "type": "categorical",
-            "decision_threshold": 1.5,
-            "decision_metric": "rmse",
-        },
-    ]
+
     biased_flag = bias_testing(
-        protected_groups, X_test, y_test, yhat_test, args.evaluation_output
+        args.protected_groups, X_test, y_test, yhat_test, args.evaluation_output
     )
 
     # ----------------- Model Promotion ---------------- #

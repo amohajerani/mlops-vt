@@ -13,6 +13,9 @@ parameters:
 - name: table_name
   type: string
   default: "vtmonitoring"
+- name: bias_config
+  type: string
+  default: "bias_config.json"
 
 
 steps:
@@ -31,3 +34,4 @@ steps:
           --compute_name "${{ parameters.compute_name }}" \
           --enable_monitoring ${{ parameters.enable_monitoring }} \
           --table_name ${{ parameters.table_name }} 
+          --bias_config ${{ parameters.bias_config }}
