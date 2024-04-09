@@ -17,6 +17,10 @@ import time
 
 import json
 import os
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def parse_args():
@@ -189,8 +193,28 @@ def main():
     if not os.path.exists("ml_pipeline_outputs"):
         os.makedirs("ml_pipeline_outputs")
     ml_client.jobs.download(
-        name=pipeline_job.name, download_path="ml_pipeline_outputs", all=True
+        name=pipeline_job.name,
+        download_path="ml_pipeline_outputs",
+        output_name="pipeline_job_score_report",
     )
+
+    logger.info("Bias test results:")
+    logger.info(
+        open(
+            os.path.join(
+                "ml_pipeline_outputs", "pipeline_job_score_report/bias_results.txt"
+            )
+        ).read()
+    )
+
+    logger.info("Score results:")
+    with open(
+        os.path.join("ml_pipeline_outputs", "pipeline_job_score_report/score.txt")
+    ) as file:
+        lines = file.readlines()
+        last_four_lines = lines[-4:]
+        for line in last_four_lines:
+            logger.info(line.strip())
 
 
 if __name__ == "__main__":
