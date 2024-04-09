@@ -183,12 +183,12 @@ def main():
         pipeline_job, experiment_name=args.experiment_name
     )
 
-    pipeline_run = ml_client.jobs.stream(pipeline_job)
+    ml_client.jobs.stream(pipeline_job.name)
 
     # create a tmp directory if does not exist
     if not os.path.exists("ml_pipeline_outputs"):
         os.makedirs("ml_pipeline_outputs")
-    ml_client.jobs.download(pipeline_run, "ml_pipeline_outputs", "outputs")
+    ml_client.jobs.download(pipeline_job.name, "ml_pipeline_outputs", "outputs")
 
 
 if __name__ == "__main__":
