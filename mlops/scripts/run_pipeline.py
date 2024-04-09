@@ -192,6 +192,7 @@ def main():
     # create a tmp directory if does not exist
     if not os.path.exists("ml_pipeline_outputs"):
         os.makedirs("ml_pipeline_outputs")
+
     ml_client.jobs.download(
         name=pipeline_job.name,
         download_path="ml_pipeline_outputs",
@@ -202,14 +203,22 @@ def main():
         download_path="ml_pipeline_outputs",
         output_name="pipeline_job_score_report/score.txt",
     )
+    # log the list of files in the directory
+    logger.info("Files in the directory:")
+    logger.info(os.listdir("ml_pipeline_outputs"))
 
     # move the score.txt and the bias_results.txt to the home directory and then delete the ml_pipeline_outputs directory
-    os.rename("ml_pipeline_outputs/pipeline_job_score_report/score.txt", "score.txt")
     os.rename(
-        "ml_pipeline_outputs/pipeline_job_score_report/bias_results.txt",
+        "ml_pipeline_outputs/named-outputs/pipeline_job_score_report/score.txt",
+        "score.txt",
+    )
+    os.rename(
+        "ml_pipeline_outputs/named-outputs/pipeline_job_score_report/bias_results.txt",
         "bias_results.txt",
     )
-    os.rmdir("ml_pipeline_outputs/pipeline_job_score_report")
+    import shutil
+
+    shutil.rmtree("ml_pipeline_outputs")
 
     logger.info("====================================")
     logger.info("Bias test results:")
