@@ -36,7 +36,7 @@ def main(args):
         deploy_flag = int(infile.read())
 
     mlflow.log_metric("deploy flag", int(deploy_flag))
-    deploy_flag = 1
+
     if deploy_flag == 1:
 
         print("Registering ", args.model_name)
