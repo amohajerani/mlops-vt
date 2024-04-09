@@ -198,14 +198,11 @@ def main():
         output_name="pipeline_job_score_report",
     )
 
+    # print list of files in the output directory
+    logger.info("Output directory contents:")
+    logger.info(os.listdir("ml_pipeline_outputs"))
     logger.info("Bias test results:")
-    logger.info(
-        open(
-            os.path.join(  # probably have to remove pipeline_job_score_report
-                "ml_pipeline_outputs", "bias_results.txt"
-            )
-        ).read()
-    )
+    logger.info(open(os.path.join("ml_pipeline_outputs", "bias_results.txt")).read())
 
     logger.info("Score results:")
     with open(os.path.join("ml_pipeline_outputs", "score.txt")) as file:
