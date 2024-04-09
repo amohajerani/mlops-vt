@@ -188,7 +188,9 @@ def main():
     # create a tmp directory if does not exist
     if not os.path.exists("ml_pipeline_outputs"):
         os.makedirs("ml_pipeline_outputs")
-    ml_client.jobs.download(pipeline_job.name, "ml_pipeline_outputs", "outputs")
+    ml_client.jobs.download(
+        name=pipeline_job.name, download_path="ml_pipeline_outputs", all=True
+    )
 
 
 if __name__ == "__main__":
