@@ -93,6 +93,7 @@ def main(args):
     yhat_test, score = model_evaluation(X_test, y_test, model, args.evaluation_output)
 
     # ---------------- Bias Testing ---------------- #
+    logger.info("bias config : ", args.bias_config)
     try:
         protected_groups = json.loads(args.bias_config)
         logger.info("Protected groups loaded successfully.")
