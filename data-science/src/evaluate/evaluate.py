@@ -26,7 +26,7 @@ protected_groups = [
         "feature": "GENDERID",
         "value": 1,
         "type": "categorical",
-        "decision_threshold": 1.5,
+        "decision_threshold": 1.0,
         "decision_metric": "rmse",
     },
     {
