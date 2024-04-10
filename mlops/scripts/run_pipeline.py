@@ -186,8 +186,11 @@ def main():
     pipeline_job = ml_client.jobs.create_or_update(
         pipeline_job, experiment_name=args.experiment_name
     )
-
-    ml_client.jobs.stream(pipeline_job.name)
+    try:
+        ml_client.jobs.stream(pipeline_job.name)
+    except Exception as e:
+        logger.error(f"ML pipeline failed due to error: {str(e)}")
+        logs = pipeline_job.get_logs()
 
     # Check if the pipeline has failed
     if pipeline_job.status == "Failed":
@@ -201,8 +204,7 @@ def main():
                 error_message = log.split("Error:")[1].strip()
                 break
 
-        # Log the error message
-        logger.error(f"Pipeline failed due to error: {error_message}")
+        raise Exception(f"Pipeline failed due to error: {error_message}")
 
     # create a tmp directory if does not exist
     if not os.path.exists("ml_pipeline_outputs"):
