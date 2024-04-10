@@ -190,7 +190,7 @@ def main():
     ml_client.jobs.stream(pipeline_job.name)
 
     # Check if the pipeline has failed
-    if pipeline_job.get_status() == "Failed":
+    if pipeline_job.status == "Failed":
         # Get the logs
         logs = pipeline_job.get_logs()
 
