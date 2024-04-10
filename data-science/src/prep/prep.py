@@ -12,6 +12,8 @@ import pandas as pd
 import mlflow
 
 TARGET_COL = "VISIT_TIME"
+# set a random seed for numpy
+np.random.seed(42)
 
 
 def parse_args():
