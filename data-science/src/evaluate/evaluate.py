@@ -58,6 +58,15 @@ numerical_features = [
 ]
 
 
+def get_accuracy(y_test, yhat_test):
+    """
+    For the visit time project, we have an ad-hoc definition of accuracy.
+    It is the ratio of the number of predictions within 10 minutes of the actual visit time to the total number of predictions.
+    """
+    accuracy = np.sum(abs(y_test - yhat_test) < 10) / len(y_test)
+    return accuracy
+
+
 def parse_args():
     """Parse input arguments"""
 
@@ -140,6 +149,7 @@ def model_evaluation(X_test, y_test, model, evaluation_output):
     mse = mean_squared_error(y_test, yhat_test)
     rmse = np.sqrt(mse)
     mae = mean_absolute_error(y_test, yhat_test)
+    accuracy = get_accuracy(y_test, yhat_test)
 
     # Print score report to a text file
     (Path(evaluation_output) / "score.txt").write_text(
@@ -151,11 +161,13 @@ def model_evaluation(X_test, y_test, model, evaluation_output):
         outfile.write(f"Root mean squared error: {rmse:.2f} \n")
         outfile.write(f"Mean absolute error: {mae:.2f} \n")
         outfile.write(f"Coefficient of determination: {r2:.2f} \n")
+        outfile.write(f"Accuracy: {accuracy:.2f} \n")
 
     mlflow.log_metric("test r2", r2)
     mlflow.log_metric("test mse", mse)
     mlflow.log_metric("test rmse", rmse)
     mlflow.log_metric("test mae", mae)
+    mlflow.log_metric("test accuracy", accuracy)
 
     # Visualize results
     plt.scatter(y_test, yhat_test, color="black")
