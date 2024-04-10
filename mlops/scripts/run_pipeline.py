@@ -189,22 +189,7 @@ def main():
     try:
         ml_client.jobs.stream(pipeline_job.name)
     except Exception as e:
-        logger.error(f"ML pipeline failed due to error: {str(e)}")
-        logs = pipeline_job.get_logs()
-
-    # Check if the pipeline has failed
-    if pipeline_job.status == "Failed":
-        # Get the logs
-        logs = pipeline_job.get_logs()
-
-        # Find the error message in the logs
-        error_message = "Unknown error"
-        for log in logs:
-            if "Error:" in log:
-                error_message = log.split("Error:")[1].strip()
-                break
-
-        raise Exception(f"Pipeline failed due to error: {error_message}")
+        raise Exception(f"Pipeline failed due to error: {str(e)}")
 
     # create a tmp directory if does not exist
     if not os.path.exists("ml_pipeline_outputs"):
