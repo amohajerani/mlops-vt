@@ -33,7 +33,7 @@ protected_groups = [
         "feature": "PROVIDERAGE",
         "value": 50,
         "type": "numerical",
-        "decision_threshold": 1.5,
+        "decision_threshold": 1.0,
         "decision_metric": "rmse",
     },
 ]
@@ -230,10 +230,10 @@ def bias_testing(protected_groups, X, y, yhat, evaluation_output):
         rmse_group2 = np.sqrt(mse_group2)
         mae_group2 = mean_absolute_error(y_group2, yhat_group2)
 
-        difference_r2 = r2_group2 - r2_group1
-        difference_mse = mse_group2 - mse_group1
-        difference_rmse = rmse_group2 - rmse_group1
-        difference_mae = mae_group2 - mae_group1
+        difference_r2 = abs(r2_group2 - r2_group1)
+        difference_mse = abs(mse_group2 - mse_group1)
+        difference_rmse = abs(rmse_group2 - rmse_group1)
+        difference_mae = abs(mae_group2 - mae_group1)
 
         # Decide if the model is biased
         if group.get("decision_metric") == "r2":
