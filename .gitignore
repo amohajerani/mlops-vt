@@ -27,7 +27,7 @@ node_modules/
 secrets.txt
 credentials.json
 
-# Ignore the moels directory in the local_deploy directory
+# Ignore the models directory in the local_deploy directory
 local_deploy/models/
 
 

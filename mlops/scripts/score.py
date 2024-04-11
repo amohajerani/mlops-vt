@@ -67,14 +67,12 @@ def init():
     ),
 )
 @output_schema(output_type=StandardPythonParameterType([45.00, 37.7]))
-def run(raw_data):
+def run(input_data):
     """
     This function is called for every invocation of the endpoint to perform the actual scoring/prediction.
     In the example we extract the data from the json input and call the scikit-learn model's predict()
     method and return the result back
     """
-
-    data = json.loads(raw_data)["input_data"]
 
     column_names = [
         "PROVIDERSTATE",
