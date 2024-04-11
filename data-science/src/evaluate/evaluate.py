@@ -26,14 +26,14 @@ protected_groups = [
         "feature": "GENDERID",
         "value": 1,
         "type": "categorical",
-        "decision_threshold": 1.0,
+        "decision_threshold": 2.0,
         "decision_metric": "rmse",
     },
     {
         "feature": "PROVIDERAGE",
         "value": 50,
         "type": "numerical",
-        "decision_threshold": 1.0,
+        "decision_threshold": 2.0,
         "decision_metric": "rmse",
     },
 ]
