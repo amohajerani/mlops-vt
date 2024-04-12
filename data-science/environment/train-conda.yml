@@ -18,6 +18,7 @@ dependencies:
       - azureml-inference-server-http
       - pyodbc
       - inference_schema
-      - spicy
+      - scipy
+      - cloudpickle==2.2.1
       - git+https://github.com/microsoft/AzureML-Observability#subdirectory=aml-obs-client
       - git+https://github.com/microsoft/AzureML-Observability#subdirectory=aml-obs-collector
