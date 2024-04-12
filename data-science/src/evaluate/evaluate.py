@@ -17,6 +17,7 @@ import mlflow.sklearn
 import mlflow.pyfunc
 from mlflow.tracking import MlflowClient
 import logging
+from scipy import stats
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -182,31 +183,6 @@ def model_evaluation(X_test, y_test, model, evaluation_output):
 
 
 def bias_testing(protected_groups, X, y, yhat, evaluation_output):
-    """
-    Measure the difference in the model performance between different sub-populations.
-    This implementation applies to the scenarios where we expect the model prediction to be impacted
-    by the protected features (.e.g liver cancer is more likely on men than women).
-    We would need a different function for bias testing if we don't expect the protected attribute to impact predictions
-    .See the wiki page for context.
-
-    The function calculates model performance on each group (e.g. men vs women), and compares the difference in model performance.
-
-    args:
-    protected_groups: list of dict of protected groups: [{'feature': 'age', 'value':50, 'type': 'numerical, decision_threshold': 0.01, 'decision_metric': 'rmse'},]
-     - feature: the protected feature to group by
-     - value: the value of the protected feature to split the data by
-     - type: the type of the protected feature (categorical or numerical)
-     - decision_threshold: the threshold of difference between groups to decide if the model is biased
-     - decision_metric: the metric to use to decide if the model is biased (e.g. rmse, r2, mae)
-    X: dataframe of features
-    y: array of target
-    yhat: array of predictions
-    evaluation_output: path to the evaluation output directory
-
-    returns:
-    string: bias testing results
-
-    """
     bias_results = {}
     for group in protected_groups:
         if group["type"] == "categorical":
@@ -232,26 +208,30 @@ def bias_testing(protected_groups, X, y, yhat, evaluation_output):
         prediction_avg_group2 = np.mean(yhat_group2)
         target_avg_group2 = np.mean(y_group2)
 
-        r2_group1 = r2_score(y_group1, yhat_group1)
         mse_group1 = mean_squared_error(y_group1, yhat_group1)
         rmse_group1 = np.sqrt(mse_group1)
         mae_group1 = mean_absolute_error(y_group1, yhat_group1)
 
-        r2_group2 = r2_score(y_group2, yhat_group2)
         mse_group2 = mean_squared_error(y_group2, yhat_group2)
         rmse_group2 = np.sqrt(mse_group2)
         mae_group2 = mean_absolute_error(y_group2, yhat_group2)
 
-        difference_r2 = abs(r2_group2 - r2_group1)
         difference_mse = abs(mse_group2 - mse_group1)
         difference_rmse = abs(rmse_group2 - rmse_group1)
         difference_mae = abs(mae_group2 - mae_group1)
 
+        # statistical treatmant of the difference in absolute error
+        ttest_abs = stats.ttest_ind(
+            np.abs(y_group1 - yhat_group1), np.abs(y_group2 - yhat_group2)
+        )
+        # statistical treatmant of the difference in squared error
+        ttest_se = stats.ttest_ind(
+            np.sqrt(np.square(y_group1 - yhat_group1)),
+            np.square(y_group2 - yhat_group2),
+        )
+
         # Decide if the model is biased
-        if group.get("decision_metric") == "r2":
-            decision = difference_r2 > group.get("decision_threshold")
-            difference = difference_r2
-        elif group.get("decision_metric") == "mse":
+        if group.get("decision_metric") == "mse":
             decision = difference_mse > group.get("decision_threshold")
             difference = difference_mse
         elif group.get("decision_metric") == "rmse":
@@ -268,24 +248,25 @@ def bias_testing(protected_groups, X, y, yhat, evaluation_output):
             "count_group1": count_group1,
             "prediction_avg_group1": prediction_avg_group1,
             "target_avg_group1": target_avg_group1,
-            "r2_group1": r2_group1,
             "mse_group1": mse_group1,
             "rmse_group1": rmse_group1,
             "mae_group1": mae_group1,
             "count_group2": count_group2,
             "prediction_avg_group2": prediction_avg_group2,
             "target_avg_group2": target_avg_group2,
-            "r2_group2": r2_group2,
             "mse_group2": mse_group2,
             "rmse_group2": rmse_group2,
             "mae_group2": mae_group2,
-            "difference_r2": difference_r2,
             "difference_mse": difference_mse,
             "difference_rmse": difference_rmse,
             "difference_mae": difference_mae,
             "decision_threshold": group.get("decision_threshold"),
             "decision_metric": group.get("decision_metric"),
             "biased": decision,
+            "p_value_abs": ttest_abs.pvalue,
+            "p_value_se": ttest_se.pvalue,
+            "ci_abs": ttest_abs.confidence_interval(confidence_level=0.95),
+            "ci_se": ttest_se.confidence_interval(confidence_level=0.95),
         }
         mlflow.log_metric(f"{group['feature']}_{group['value']}_biased", int(decision))
         mlflow.log_metric(
@@ -307,7 +288,6 @@ def bias_testing(protected_groups, X, y, yhat, evaluation_output):
                 f"    Prediction Average: {results['prediction_avg_group1']:.2f}\n"
             )
             outfile.write(f"    Target Average: {results['target_avg_group1']:.2f}\n")
-            outfile.write(f"    r2: {results['r2_group1']:.2f}\n")
             outfile.write(f"    mse: {results['mse_group1']:.2f}\n")
             outfile.write(f"    rmse: {results['rmse_group1']:.2f}\n")
             outfile.write(f"    mae: {results['mae_group1']:.2f}\n")
@@ -317,18 +297,20 @@ def bias_testing(protected_groups, X, y, yhat, evaluation_output):
                 f"    Prediction Average: {results['prediction_avg_group2']:.2f}\n"
             )
             outfile.write(f"    Target Average: {results['target_avg_group2']:.2f}\n")
-            outfile.write(f"    r2: {results['r2_group2']:.2f}\n")
             outfile.write(f"    mse: {results['mse_group2']:.2f}\n")
             outfile.write(f"    rmse: {results['rmse_group2']:.2f}\n")
             outfile.write(f"    mae: {results['mae_group2']:.2f}\n")
             outfile.write(f"  Difference:\n")
-            outfile.write(f"    r2: {results['difference_r2']:.2f}\n")
             outfile.write(f"    mse: {results['difference_mse']:.2f}\n")
             outfile.write(f"    rmse: {results['difference_rmse']:.2f}\n")
             outfile.write(f"    mae: {results['difference_mae']:.2f}\n")
             outfile.write(f"  Decision threshold: {results['decision_threshold']}\n")
             outfile.write(f"  Decision metric: {results['decision_metric']}\n")
             outfile.write(f"  Biased: {results['biased']}\n")
+            outfile.write(f"  p-value abs: {results['p_value_abs']}\n")
+            outfile.write(f"  p-value se: {results['p_value_se']}\n")
+            outfile.write(f"  Confidence interval abs: {results['ci_abs']}\n")
+            outfile.write(f"  Confidence interval se: {results['ci_se']}\n")
         outfile.write(f"Overall bias test result:\nBiased: {biased}\n")
     mlflow.log_metric("biased", int(biased))
     mlflow.log_artifact((Path(evaluation_output) / "bias_results.txt"))
