@@ -1,10 +1,8 @@
 # Prod environment
 variables:
-  # Global
-  ap_vm_image: ubuntu-20.04
 
   namespace: vtpoc #Note: A namespace with many characters will cause storage account creation to fail due to storage account names having a limit of 24 characters.
-  postfix: 7
+  postfix: 9
   location: eastus
   environment: prod
   subscriptionId: '81abea19-79ba-4bd3-8f04-e9761df1bd23'
@@ -33,3 +31,10 @@ variables:
   terraform_st_key: mlops-tab
 
   enable_aml_computecluster: "false"
+
+  # For deployment K8 reference
+  deployment_compute_target: 'aks-prod'
+  deploymeny_instance_type: 'Standard_B2ms'
+  deployment_instance_count: 1
+  resource_limit_cpu: "100m"
+  resource_limit_memory: "0.5Gi"

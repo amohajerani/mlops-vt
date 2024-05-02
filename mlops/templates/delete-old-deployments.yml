@@ -1,22 +1,17 @@
 parameters:
 - name: endpoint_name
   type: string
-- name: sample_request
-  type: string
 - name: ado_service_connection_aml_ws
   type: string
 
 steps:
-    
 - task: AzureCLI@2
-  displayName: Testing online endpoint
+  displayName: Delete old deployments
   inputs:
     azureSubscription: ${{ parameters.ado_service_connection_aml_ws }}
     scriptType: bash
     scriptLocation: inlineScript
     inlineScript: |
-
-      python mlops/scripts/test_online_endpoint.py \
+      set -x
+      python mlops/scripts/delete_old_deployments.py \
         --endpoint_name "${{parameters.endpoint_name}}" \
-        --request_file "${{parameters.sample_request}}" \
-

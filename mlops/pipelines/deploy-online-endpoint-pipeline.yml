@@ -2,23 +2,24 @@ name: deploy-online-endpoint-pipeline
 
 variables:
   - group: vtpoc-vg
-  - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
-      # 'main' branch: PRD environment
-      - template: ../../config-infra-prod.yml
-  - ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
-      # 'develop' or feature branches: DEV environment
-      - template: ../../config-infra-dev.yml
-  - name: endpoint_name
-    value: vt-online-$(namespace)$(postfix)$(environment)
 
 trigger: none
 
+resources:
+  pipelines:
+  - pipeline: MyBuildPipeline
+    source: build
+    trigger: 
+      branches:
+      - main
+      - dev
+
 pool:
-  vmImage: ubuntu-20.04
+  vmImage: ubuntu-22.04
 
 stages:
   - stage: DeployDev
-    displayName: Create/Update Online Endpoint in Dev
+    displayName: DeployDev
     variables:
       - group: vtpoc-vg
       - template: ../../config-infra-dev.yml
@@ -27,76 +28,163 @@ stages:
     jobs:
       - job: DeployOnlineEndpointDev
         steps:
-          - checkout: self
-            path: s/
-          - task: Bash@3
-            displayName: "Create checkout repository folder(s)"
+          - checkout: none
+          - task: DownloadPipelineArtifact@2
             inputs:
-              targetType: "inline"
-              script: |
-                set -e
-                mkdir "$(Build.Repository.Name)"
-                mkdir "mlops-templates"
+              buildType: 'specific'
+              project: 'vtpoc'
+              pipeline: build
+              runVersion: latest
+              artifactName: 'code'
+              targetPath: $(Pipeline.Workspace)/s
+          - script: |
+              echo "Contents of the s dir:"
+              ls -la $(Pipeline.Workspace)/s
+              echo "vt-online-dp-$(date +%Y%m%d%H%M%S)" > $(Pipeline.Workspace)/s/deployment_name.txt
+              deployment_name=$(cat $(Pipeline.Workspace)/s/deployment_name.txt)
+              echo "##vso[task.setvariable variable=deployment_name;isOutput=true]$deployment_name"
+              cd $(Pipeline.Workspace)/s/mlops/pipelines
+            name: runBash
+            displayName: 'Change directory'
           - template: ../templates/connect-to-workspace.yml
+            parameters:
+              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
+              subscriptionId: ${{ variables.subscriptionId }}
+              resource_group: ${{ variables.resource_group }}
+              aml_workspace: ${{ variables.aml_workspace }}
           - template: ../templates/install-az-ext.yml
+            parameters:
+              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
           - template: ../templates/install-requirements.yml
           - template: ../templates/create-online-endpoint.yml
             parameters:
               endpoint_name: "${{ variables.endpoint_name }}"
               endpoint_description: "VT Online Endpoint"
               auth_mode: "key"
+              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
+              deployment_compute_target: "${{ variables.deployment_compute_target }}"
           - template: ../templates/create-online-deployment.yml
             parameters:
-              deployment_name: vt-online-dp
+              deployment_name: $(runBash.deployment_name)
               endpoint_name: "${{ variables.endpoint_name }}"
               model_path: "vt-model@latest"
               traffic_allocation: 100
+              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
+              instance_type: "${{ variables.deploymeny_instance_type }}"
+              instance_count: "${{ variables.deployment_instance_count }}"
+              resource_limit_cpu: "${{ variables.resource_limit_cpu }}"
+              resource_limit_memory: "${{ variables.resource_limit_memory }}"
           - template: ../templates/test-online-endpoint.yml
             parameters:
               endpoint_name: "${{ variables.endpoint_name }}"
-              sample_request: data/test-request.json
+              sample_request: 'data/test-request.json'
+              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
           - template: ../templates/store_model.yml
+            parameters:
+              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
           - task: PublishPipelineArtifact@1
             inputs:
-              targetPath: './models'
-              artifact: 'MyPipelineArtifact'
+              targetPath: '$(Pipeline.Workspace)/s'
+              artifact: 'code'
               publishLocation: 'pipeline'
+          - template: ../templates/delete-old-deployments.yml
+            parameters:
+              endpoint_name: "${{ variables.endpoint_name }}"
+              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
+
+  - stage: PROD_Approval
+    dependsOn:
+    - DeployDev
+    condition: and(succeeded('DeployDev'), eq( variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - job: waitForValidation
+        displayName: Wait for external validation
+        pool: server
+        timeoutInMinutes: 4320 # job times out in 3 days
+        steps:
+          - task: ManualValidation@0
+            timeoutInMinutes: 1440 # task times out in 1 day
+            inputs:
+              instructions: 'Please validate the PROD build configuration and resume'
+              onTimeout: 'reject'
 
 
   - stage: DeployProd
-    displayName: Create/Update Online Endpoint in Prod
-    dependsOn: DeployDev
-    condition: succeeded('DeployDev')
+    displayName: DeployProd
+    dependsOn: 
+      - PROD_Approval
+      - DeployDev
+    condition: succeeded('PROD_Approval')
     variables:
-      - group: vtpoc-vg
-      - template: ../../config-infra-prod.yml
-      - name: endpoint_name
-        value: vt-online-$(namespace)$(postfix)$(environment)
+    - group: vtpoc-vg
+    - template: ../../config-infra-prod.yml
+    - name: endpoint_name
+      value: vt-online-$(namespace)$(postfix)$(environment)
     jobs:
       - job: DeployOnlineEndpointProd
         steps:
+          - checkout: none
           - task: DownloadPipelineArtifact@2
             inputs:
-              artifact: 'MyPipelineArtifact'
-              path: './models'
+              buildType: 'current'
+              artifactName: 'code'
+              targetPath: '$(Pipeline.Workspace)/s'
+          - script: |
+              set -x
+              deployment_name=$(cat $(Pipeline.Workspace)/s/deployment_name.txt)
+              echo "##vso[task.setvariable variable=deployment_name;isOutput=true]$deployment_name"
+              cd $(Pipeline.Workspace)/s/mlops/pipelines
+            name: runBash
+            displayName: 'Run bash'
           - template: ../templates/connect-to-workspace.yml
+            parameters:
+              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
+              subscriptionId: ${{ variables.subscriptionId }}
+              resource_group: ${{ variables.resource_group }}
+              aml_workspace: ${{ variables.aml_workspace }}
           - template: ../templates/install-az-ext.yml
+            parameters:
+              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
           - template: ../templates/install-requirements.yml
+          - template: ../templates/register-environment.yml
+            parameters:
+              environment_name: vt-train-env
+              environment_description: "Training and Deployment Environment for VT Pipeline"
+              environment_path: data-science/environment/train-conda.yml
+              build_type: conda
+              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
+          - task: Bash@3
+            inputs:
+              targetType: 'inline'
+              script: 'ls -la $(Pipeline.Workspace)/s'
           - template: ../templates/register_model.yml
             parameters:
-              model_path: './models/vt-model/vt-model'
+              model_path: 'models/vt-model/vt-model'
+              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
           - template: ../templates/create-online-endpoint.yml
             parameters:
               endpoint_name: "${{ variables.endpoint_name }}"
               endpoint_description: "VT Online Endpoint"
               auth_mode: "key"
+              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
+              deployment_compute_target: "${{ variables.deployment_compute_target }}"
           - template: ../templates/create-online-deployment.yml
             parameters:
-              deployment_name: vt-online-dp
+              deployment_name: $(runBash.deployment_name)
               endpoint_name: "${{ variables.endpoint_name }}"
               model_path: "vt-model@latest"
               traffic_allocation: 100
+              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
+              instance_type: "${{ variables.deploymeny_instance_type }}"
+              instance_count: "${{ variables.deployment_instance_count }}"
+              resource_limit_cpu: "${{ variables.resource_limit_cpu }}"
+              resource_limit_memory: "${{ variables.resource_limit_memory }}"
           - template: ../templates/test-online-endpoint.yml
             parameters:
               endpoint_name: "${{ variables.endpoint_name }}"
               sample_request: data/test-request.json
+              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
+          - template: ../templates/delete-old-deployments.yml
+            parameters:
+              endpoint_name: "${{ variables.endpoint_name }}"
+              ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}

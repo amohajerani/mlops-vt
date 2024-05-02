@@ -1,16 +1,19 @@
+parameters:
+- name: ado_service_connection_aml_ws
+  type: string
 steps:
   - task: AzureCLI@2
     displayName: 'Download model from AML workspace'
     inputs:
-      azureSubscription: $(ado_service_connection_aml_ws)
+      azureSubscription: ${{ parameters.ado_service_connection_aml_ws }}
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
         set -x
         model_list=$(az ml model list -n vt-model --query "[?name=='vt-model'].version" -o tsv)
         echo "Model list: $model_list"  # Debug output
-        latest_model_version=$(echo "$model_list" | sort -r | head -n 1)
+        latest_model_version=$(echo "$model_list" | sort -nr | head -n 1)
         echo "Latest model version: $latest_model_version"  # Debug output
         model_path=$(az ml model show -n vt-model --version $latest_model_version --query 'path')
         echo "Model show: $model_path"  # Debug output
-        az ml model download -n vt-model --version $latest_model_version  -p ./models
+        az ml model download -n vt-model --version $latest_model_version  -p $(Pipeline.Workspace)/s/models

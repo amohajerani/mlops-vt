@@ -1,0 +1,39 @@
+@startuml Variable Visit Time Container
+skinparam defaultFontName Arial
+title Variable Visit Time Container Diagram
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+!define ICONURL https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v2.4.0
+!includeurl ICONURL/common.puml
+!includeurl ICONURL/devicons/postgresql.puml
+!includeurl ICONURL/devicons2/dot_net.puml
+
+Person(User, "User")
+
+
+SystemDb(snowflakedb, "SnowFlake", "Stores Providers Attributes and Historical Provider Visit Time Data")
+
+System_Boundary(visittime, "Variable Visit Time System") {
+    Container(visittimeservice, "VisitTime Data Service", "ASP.NET", "Updates Api")
+    Container(visittimeapi, "VisitTime API", "ASP.NET", "Provides Visit Time Data")
+    ContainerDb(visittimedb, "Providers", "PostgresSql", "Stores Providers Data")
+    Container(visittimeml, "VisitTime ML", "Python", "Serves ML Predictions")
+}
+
+System(capacity, "Capacity System")
+
+
+System(visitimesentinel, "VisitTime Sentinel System", "Monitors Variable Visit Time System")
+
+
+Rel(visittimeservice, visittimedb, "Updates DB")
+Rel(visittimeapi, visittimedb, "Reads Data")
+Rel(capacity, visittimeapi, "Retrieve estimated visit time")
+BiRel(visittimeservice, snowflakedb, "Reads Data", "Periodic Data Import")
+Rel(visitimesentinel, visittime, "Monitors System")
+Rel(visittimeapi, visittimeml, "Request Prediction")
+Rel_D(User, capacity, "Views Capacity Data")
+
+SHOW_LEGEND()
+
+@enduml

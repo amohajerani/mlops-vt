@@ -7,15 +7,10 @@ steps:
 
 - script: |
     pip install azure-ai-ml
-    pip install azure-identity
-    pip install azure-core
     pip install azure-cli
-    pip install azure-common
-    pip install azure-mgmt-core 
-    pip install azure-storage-blob
-    pip install azure-storage-file-datalake
-    pip install azure-storage-file-share
     pip install pytest
     pip install pandas
+    pip install pyodbc
     pip install snowflake-connector-python
+    pip install aif360
   displayName: 'Install python dependencies'

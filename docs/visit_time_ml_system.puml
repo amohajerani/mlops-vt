@@ -1,0 +1,35 @@
+@startuml Visit Time System Context Diagram
+title Visit Time System Context Diagram
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+!define ICONURL https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v2.4.0
+!includeurl ICONURL/common.puml
+!includeurl ICONURL/devicons/postgresql.puml
+!includeurl ICONURL/devicons2/dot_net.puml
+
+Person(User, "User")
+
+System(VariableVisitTimeSystem, "Variable Visit Time System", "Allows users to view and edit variable visit times")
+
+System(VisitTimeSentinelSystem, "Visit Time Sentinel", "Monitors model performance and sends alerts to users")
+
+System(CapacitySystem, "Capacity System")
+
+System(AnalyticsReportingSystem, "Analytics Reporting System")
+
+System(ConfluentSystem, "Confluent System", "Handles Kafka Streams")
+
+
+System(EODS, "EODS", "Data Warehouse")
+
+Rel(User, CapacitySystem, "Views")
+Rel(CapacitySystem, VariableVisitTimeSystem, "Retrieves Estimated Visit Times")
+Rel(VisitTimeSentinelSystem, VariableVisitTimeSystem, "Monitors Model Performance")
+Rel(VisitTimeSentinelSystem, EODS, "Reads")
+Rel(VisitTimeSentinelSystem, ConfluentSystem, "Publishes")
+Rel(AnalyticsReportingSystem, VisitTimeSentinelSystem, "Reports")
+
+
+SHOW_LEGEND()
+
+@enduml
