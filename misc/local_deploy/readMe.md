@@ -4,8 +4,8 @@ To iterate quickly, and have a better visibility to logs, we can deploy the ML m
 Follow these steps:
 - Build the docker image using build_img.sh. This image provides a workaround for ssl certificate error that you'd otherwise may experience.
 - store the image in azure container repository: 
-- Login to the ACR: az acr login --name myRegistry
-- Tag your Docker image with the login server name of the ACR (replace 'myRegistry' with your own name): docker tag local_deploy_img myRegistry.azurecr.io/local_deploy_img:v1
+    Login to the ACR: az acr login --name myRegistry
+    Tag your Docker image with the login server name of the ACR (replace 'myRegistry' with your own name): docker tag local_deploy_img myRegistry.azurecr.io/local_deploy_img:v1
 - Push the Docker image to the ACR: docker push myRegistry.azurecr.io/local_deploy_img:v1
 - ensure the reference to the docker image in your python script env definition is correct.
 - In the scoring script, revise the path to the model.pkl
