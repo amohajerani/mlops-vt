@@ -67,7 +67,7 @@ stages:
               experiment_name: vt-train-pipeline
               data_name: train
               environment_name: vt-train-env
-              compute_name: cpu-cluster
+              compute_name: dev-usc-visittime-mlw-compute
               enable_monitoring: $(enable_monitoring)
               table_name: "vtmonitoring"
           - script: |
