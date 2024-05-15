@@ -9,7 +9,7 @@ variables:
 
   # Azure DevOps
   ado_service_connection_rg: DEV (3fb8bc6a-65bc-4af9-9f18-e664c908e7e7)
-  ado_service_connection_aml_ws: dev-usc-visittime-mlw
+  ado_service_connection_aml_ws: DEV (3fb8bc6a-65bc-4af9-9f18-e664c908e7e7)
 
 
   # For pipeline reference
