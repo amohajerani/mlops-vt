@@ -16,7 +16,7 @@ variables:
   resource_group: dev-usc-visittime-rg
   aml_workspace: dev-usc-visittime-mlw
   application_insights: dev-usc-visittime-mlw-ai
-  key_vault: uat-usc-infra-kv
+  key_vault: dev-usc-visittimeml-kv
   container_registry: visittime
   storage_account: devuscvisittimesa
 
