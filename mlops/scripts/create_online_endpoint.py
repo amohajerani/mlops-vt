@@ -42,7 +42,7 @@ def main():
     online_endpoint = KubernetesOnlineEndpoint(
         name=args.endpoint_name,
         description=args.description,
-        auth_mode=None,  # args.auth_mode,
+        auth_mode=args.auth_mode,
         compute=args.deployment_compute_target,
     )
 
