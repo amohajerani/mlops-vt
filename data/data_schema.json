@@ -6,17 +6,6 @@
             "type": "object",
             "description": "The data to be ingested by the model",
             "properties": {
-                "LOB": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "description": "Line of Business",
-                    "examples": [
-                        "Medicare",
-                        "Commercial"
-                    ]
-                },
                 "GENDERID": {
                     "type": "array",
                     "items": {
@@ -58,18 +47,6 @@
                     "examples": [
                         42.0,
                         63.0
-                    ]
-                },
-                "HIRINGDATE": {
-                    "type": "array",
-                    "items": {
-                        "type": "string",
-                        "format": "date"
-                    },
-                    "description": "Date of hiring",
-                    "examples": [
-                        "2023-03-13",
-                        "2023-05-30"
                     ]
                 },
                 "TENURE": {
@@ -118,12 +95,10 @@
                 }
             },
             "required": [
-                "LOB",
                 "GENDERID",
                 "EMPLOYEETYPENAME",
                 "PROVIDERSTATE",
                 "PROVIDERAGE",
-                "HIRINGDATE",
                 "TENURE",
                 "DEGREE",
                 "VISIT_TIME_MEAN",
