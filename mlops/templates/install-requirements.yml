@@ -4,6 +4,7 @@ steps:
   inputs:
     versionSpec: '3.10.4'
     architecture: 'x64'
+    addToPath: true
 
 - script: |
     pip install azure-ai-ml
