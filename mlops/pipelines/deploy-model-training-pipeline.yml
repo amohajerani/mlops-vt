@@ -26,7 +26,8 @@ trigger: none
 #     - main
 #   always: true
 
-pool: k8s-agents
+pool:
+  vmImage: ubuntu-22.04
 
 stages:
   - stage: DeployTrainingPipeline
