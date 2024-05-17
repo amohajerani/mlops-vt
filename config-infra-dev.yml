@@ -5,7 +5,7 @@ variables:
   location: centralus
   environment: dev
   subscriptionId: '3fb8bc6a-65bc-4af9-9f18-e664c908e7e7'
-  enable_monitoring: false
+  enable_monitoring: true
 
   # Azure DevOps
   ado_service_connection_rg: DEV (3fb8bc6a-65bc-4af9-9f18-e664c908e7e7)
@@ -29,7 +29,7 @@ variables:
   # terraform_st_container_name: default
   # terraform_st_key: mlops-tab
 
-  enable_aml_computecluster: "false"
+  enable_aml_computecluster: "true"
 
   # For deployment K8 reference
   deployment_compute_target: 'aks-dev'
