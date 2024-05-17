@@ -3,8 +3,7 @@ import argparse
 from azure.ai.ml.entities import Data
 from azure.ai.ml.constants import AssetTypes
 
-from azure.identity import DefaultAzureCredential, ManagedIdentityCredential, ClientSecretCredential, EnvironmentCredential
-from azure.core.exceptions import ClientAuthenticationError
+from azure.identity import DefaultAzureCredential
 from azure.ai.ml import MLClient
 
 from azure.ai.ml.entities import AmlCompute
@@ -23,24 +22,6 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class CustomDefaultAzureCredential(DefaultAzureCredential):
-    def get_active_credential(self):
-        # Iterate over the possible credentials and find the one that succeeds
-        for credential in self._successful_credentials:
-            if isinstance(credential, (ManagedIdentityCredential, ClientSecretCredential, EnvironmentCredential)):
-                return credential
-        raise ClientAuthenticationError(message="No suitable credential found")
-
-    def print_client_id(self):
-        try:
-            active_credential = self.get_active_credential()
-            client_id = getattr(active_credential, '_client_id', None)
-            if client_id:
-                print(f"Client ID: {client_id}")
-            else:
-                print("Client ID not found in the active credential")
-        except ClientAuthenticationError as e:
-            print(e.message)
 
 
 def parse_args():
@@ -71,7 +52,6 @@ def main():
     print(args)
 
     credential = DefaultAzureCredential()
-    credential.print_client_id()
     print()
     try:
         ml_client = MLClient.from_config(credential, path="config.json")
