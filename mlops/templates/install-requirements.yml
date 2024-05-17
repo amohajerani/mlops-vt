@@ -12,11 +12,11 @@ steps:
     wget https://www.python.org/ftp/python/3.12.3/Python-3.12.3.tar.xz
     tar -xvf Python-3.12.3.tar.xz
     PATH=$PATH:~/Python-3.12.3
-    pip install azure-ai-ml
-    pip install azure-cli
-    pip install pytest
-    pip install pandas
-    pip install pyodbc
-    pip install snowflake-connector-python
-    pip install aif360
+    Python-3.12.3 -m pip install azure-ai-ml
+    Python-3.12.3 -m pip install azure-cli
+    Python-3.12.3 -m pip install pytest
+    Python-3.12.3 -m pip install pandas
+    Python-3.12.3 -m pip install pyodbc
+    Python-3.12.3 -m pip install snowflake-connector-python
+    Python-3.12.3 -m pip install aif360
   displayName: 'Install python dependencies'
