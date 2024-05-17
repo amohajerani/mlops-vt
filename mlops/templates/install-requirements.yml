@@ -2,8 +2,8 @@ steps:
 
 - task: UsePythonVersion@0
   inputs:
-    versionSpec: '3.13.0'
-    architecture: 'x86'
+    versionSpec: '3.10.4'
+    architecture: 'x64'
     addToPath: true
 
 
