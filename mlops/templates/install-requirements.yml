@@ -1,4 +1,4 @@
-/steps:
+steps:
 
 - task: Bash@3
   inputs:
