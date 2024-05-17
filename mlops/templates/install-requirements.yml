@@ -4,7 +4,7 @@ steps:
   inputs:
     targetType: "inline"
     script: |
-      echo "##vso[task.setvariable variable=LD_LIBRARY_PATH;]:/azp/_work/_tool/Python/3.10.4/x64/lib/"
+      echo "##vso[task.setvariable variable=LD_LIBRARY_PATH;]:/agent/_work/_tool/Python/3.10.4/x64/lib/"
 
 - task: UsePythonVersion@0
   inputs:
