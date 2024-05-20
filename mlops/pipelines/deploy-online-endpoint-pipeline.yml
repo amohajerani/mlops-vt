@@ -14,8 +14,7 @@ resources:
       - main
       - dev
 
-pool:
-  vmImage: ubuntu-22.04
+pool: prod-linux-scaleset
 
 stages:
   - stage: DeployDev
