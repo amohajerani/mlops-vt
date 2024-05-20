@@ -9,6 +9,7 @@ dependencies:
       - azureml-mlflow
       - azure-ai-ml
       - pyarrow
+      - numpy
       - scikit-learn
       - pandas
       - joblib
