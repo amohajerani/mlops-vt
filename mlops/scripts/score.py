@@ -8,6 +8,8 @@ from inference_schema.parameter_types.pandas_parameter_type import PandasParamet
 from inference_schema.parameter_types.standard_py_parameter_type import (
     StandardPythonParameterType,
 )
+from inference_schema.parameter_types.numpy_parameter_type import NumpyParameterType
+
 import logging
 
 logging.basicConfig(level=logging.WARNING)
@@ -45,7 +47,14 @@ def init():
         )
     ),
 )
-@output_schema(output_type=StandardPythonParameterType([45.00, 37.7]))
+@output_schema(
+    output_type=StandardPythonParameterType(
+        {
+            "predictions": NumpyParameterType(numpy.array([45.00, 37.7])),
+            "deployment_name": StandardPythonParameterType("string"),
+        }
+    )
+)
 def run(input_data):
     """
     This function is called for every invocation of the endpoint to perform the actual scoring/prediction.
