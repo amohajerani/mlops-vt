@@ -76,4 +76,7 @@ def run(input_data):
 
     # Predict
     results = model.predict(input_data)
-    return results.tolist()
+    return {
+        "predictions": results.tolist(),
+        "deployment_name": os.getenv("DEPLOYMENT_NAME", "N/A"),
+    }
