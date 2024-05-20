@@ -69,7 +69,7 @@ stages:
               model_path: "vt-model@latest"
               traffic_allocation: 100
               ado_service_connection_aml_ws: ${{ variables.ado_service_connection_aml_ws }}
-              instance_type: "${{ variables.deploymeny_instance_type }}"
+              instance_type: "${{ variables.deployment_instance_type }}"
               instance_count: "${{ variables.deployment_instance_count }}"
               resource_limit_cpu: "${{ variables.resource_limit_cpu }}"
               resource_limit_memory: "${{ variables.resource_limit_memory }}"
