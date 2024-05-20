@@ -1,18 +1,18 @@
 name: deploy-online-endpoint-pipeline
 
-variables:
-  - group: vtpoc-vg
+# variables:
+#   - group: vtpoc-vg
 
 trigger: none
 
 resources:
   pipelines:
-  - pipeline: MyBuildPipeline
+  - pipeline: visit-time-ml-model-training-build
     source: build
-    trigger: 
-      branches:
-      - main
-      - dev
+    # trigger: 
+    #   branches:
+    #   - main
+    #   - dev
 
 pool: prod-linux-scaleset
 
