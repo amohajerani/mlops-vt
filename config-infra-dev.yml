@@ -32,8 +32,8 @@ variables:
   enable_aml_computecluster: "true"
 
   # For deployment K8 reference
-  deployment_compute_target: 'aks-dev'
-  deployment_instance_type: 'Standard_B2ms'
+  deployment_compute_target: 'sresharedakstest'
+  deployment_instance_type: 'Standard_D4as_v5'
   deployment_instance_count: 1
   resource_limit_cpu: "100m"
   resource_limit_memory: "0.5Gi"
