@@ -31,7 +31,7 @@ stages:
           - task: DownloadPipelineArtifact@2
             inputs:
               buildType: 'specific'
-              project: 'vtpoc'
+              project: 'hcc'
               pipeline: build
               runVersion: latest
               artifactName: 'code'
