@@ -23,5 +23,5 @@ variables:
   deployment_compute_target: 'sresharedakstest'
   deployment_instance_type: 'Standard_D4as_v5'
   deployment_instance_count: 1
-  resource_limit_cpu: "100m"
-  resource_limit_memory: "0.5Gi"
+  resource_limit_cpu: "500m"
+  resource_limit_memory: "1Gi"
