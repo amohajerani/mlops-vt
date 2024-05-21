@@ -1,0 +1,112 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+        "input_data": {
+            "type": "object",
+            "description": "The data to be ingested by the model",
+            "properties": {
+                "GENDERID": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    },
+                    "description": "Gender ID, where 1.0 represents male and 2.0 represents female",
+                    "examples": [
+                        1.0,
+                        2.0
+                    ]
+                },
+                "EMPLOYEETYPENAME": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Type of employment",
+                    "examples": [
+                        "1099 Contractor"
+                    ]
+                },
+                "PROVIDERSTATE": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "State of the provider",
+                    "examples": [
+                        "AL",
+                        "TX"
+                    ]
+                },
+                "PROVIDERAGE": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    },
+                    "description": "Age of the provider",
+                    "examples": [
+                        42.0,
+                        63.0
+                    ]
+                },
+                "TENURE": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    },
+                    "description": "Tenure in days",
+                    "examples": [
+                        267.0,
+                        198.0
+                    ]
+                },
+                "DEGREE": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Degree of the provider",
+                    "examples": [
+                        "NP",
+                        "DO"
+                    ]
+                },
+                "VISIT_TIME_MEAN": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    },
+                    "description": "Mean visit time",
+                    "examples": [
+                        29,
+                        42
+                    ]
+                },
+                "VISIT_COUNT": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    },
+                    "description": "Count of visits",
+                    "examples": [
+                        319,
+                        489
+                    ]
+                }
+            },
+            "required": [
+                "GENDERID",
+                "EMPLOYEETYPENAME",
+                "PROVIDERSTATE",
+                "PROVIDERAGE",
+                "TENURE",
+                "DEGREE",
+                "VISIT_TIME_MEAN",
+                "VISIT_COUNT"
+            ]
+        }
+    },
+    "required": [
+        "input_data"
+    ]
+}

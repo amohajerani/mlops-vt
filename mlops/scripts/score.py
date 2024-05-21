@@ -8,6 +8,8 @@ from inference_schema.parameter_types.pandas_parameter_type import PandasParamet
 from inference_schema.parameter_types.standard_py_parameter_type import (
     StandardPythonParameterType,
 )
+from inference_schema.parameter_types.numpy_parameter_type import NumpyParameterType
+
 import logging
 
 logging.basicConfig(level=logging.WARNING)
@@ -33,32 +35,11 @@ def init():
     param_type=PandasParameterType(
         pd.DataFrame(
             {
-                "STATE": ["AL", "TX"],
-                "SERVICE_DAY": ["2023-12-05", "2023-12-14"],
-                "APPT_LAT": [31, 30],
-                "APPT_LNG": [-88, -99],
-                "CLIENT": ["Humana", "Aetna_Commercial"],
-                "LOB": ["Medicare", "Commercial"],
                 "GENDERID": [2.0, 1.0],
-                "DATEOFBIRTH": ["1980-12-31", "1960-03-16"],
                 "EMPLOYEETYPENAME": ["1099 Contractor", "1099 Contractor"],
                 "PROVIDERSTATE": ["AL", "TX"],
                 "PROVIDERAGE": [42.0, 63.0],
-                "HIRINGDATE": ["2023-03-13", "2023-05-30"],
                 "TENURE": [267.0, 198.0],
-                "PROD_DSNP": [0.0, 0.0],
-                "PROD_CKD": [0.0, 0.0],
-                "PROD_DEE": [0.0, 0.0],
-                "PROD_FLU": [0.0, 0.0],
-                "PROD_FOBT": [0.0, 0.0],
-                "PROD_SPIROMETRY": [0.0, 0.0],
-                "PROD_HBA1C": [0.0, 0.0],
-                "PROD_HHRA": [1.0, 1.0],
-                "PROD_MHC": [1.0, 0.0],
-                "PROD_MTM": [0.0, 0.0],
-                "PROD_OMW": [0.0, 0.0],
-                "PROD_PAD": [1.0, 0.0],
-                "PROD_VHRA": [0.0, 0.0],
                 "DEGREE": ["NP", "DO"],
                 "VISIT_TIME_MEAN": [29, 42],
                 "VISIT_COUNT": [319, 489],
@@ -66,28 +47,31 @@ def init():
         )
     ),
 )
-@output_schema(output_type=StandardPythonParameterType([45.00, 37.7]))
+@output_schema(
+    output_type=StandardPythonParameterType(
+        {
+            "predictions": NumpyParameterType(numpy.array([45.00, 37.7])),
+            "deployment_name": StandardPythonParameterType("string"),
+        }
+    )
+)
 def run(input_data):
     """
     This function is called for every invocation of the endpoint to perform the actual scoring/prediction.
     In the example we extract the data from the json input and call the scikit-learn model's predict()
-    method and return the result back
+    method and return the result back.
+
+    The PROVIDERSTATE is supplied by client but not used in the model.
     """
 
     column_names = [
-        "PROVIDERSTATE",
         "PROVIDERAGE",
         "TENURE",
         "DEGREE",
         "EMPLOYEETYPENAME",
         "VISIT_TIME_MEAN",
         "VISIT_COUNT",
-        "STATE",
-        "CLIENT",
-        "LOB",
         "GENDERID",
-        "APPT_LAT",
-        "APPT_LNG",
     ]
 
     # Convert the input data to a DataFrame
@@ -101,4 +85,7 @@ def run(input_data):
 
     # Predict
     results = model.predict(input_data)
-    return results.tolist()
+    return {
+        "predictions": results.tolist(),
+        "deployment_name": os.getenv("DEPLOYMENT_NAME", "N/A"),
+    }

@@ -41,11 +41,7 @@ protected_groups = [
 TARGET_COL = "VISIT_TIME"
 # Define your categorical and numerical columns
 categorical_features = [
-    "STATE",
-    "CLIENT",
-    "LOB",
     "EMPLOYEETYPENAME",
-    "PROVIDERSTATE",
     "DEGREE",
 ]
 numerical_features = [
@@ -54,8 +50,6 @@ numerical_features = [
     "PROVIDERAGE",
     "TENURE",
     "VISIT_COUNT",
-    "APPT_LNG",
-    "APPT_LAT",
 ]
 
 
@@ -90,19 +84,13 @@ def main(args):
 
     # Reorder columns
     column_order = [
-        "PROVIDERSTATE",
         "PROVIDERAGE",
         "TENURE",
         "DEGREE",
         "EMPLOYEETYPENAME",
         "VISIT_TIME_MEAN",
         "VISIT_COUNT",
-        "STATE",
-        "CLIENT",
-        "LOB",
         "GENDERID",
-        "APPT_LAT",
-        "APPT_LNG",
     ] + [TARGET_COL]
     test_data = test_data[column_order]
 

@@ -27,12 +27,18 @@ logger = logging.getLogger("azureml.training.tabular")
 
 TARGET_COL = "VISIT_TIME"
 # Define your categorical and numerical columns
-categorical_features = ['STATE', 'CLIENT', 'LOB', 'EMPLOYEETYPENAME', 'PROVIDERSTATE', 'DEGREE']
-numerical_features = ['VISIT_TIME_MEAN', 'GENDERID', 'PROVIDERAGE', 'TENURE', 'VISIT_COUNT', 'APPT_LNG', 'APPT_LAT']
+categorical_features = ["EMPLOYEETYPENAME", "DEGREE"]
+numerical_features = [
+    "VISIT_TIME_MEAN",
+    "GENDERID",
+    "PROVIDERAGE",
+    "TENURE",
+    "VISIT_COUNT",
+]
 
 
 def parse_args():
-    '''Parse input arguments'''
+    """Parse input arguments"""
 
     parser = argparse.ArgumentParser("train")
     parser.add_argument("--train_data", type=str, help="Path to train dataset")
@@ -41,6 +47,7 @@ def parse_args():
     args = parser.parse_args()
 
     return args
+
 
 class ArrayToDataFrameTransformer(BaseEstimator, TransformerMixin):
     def __init__(self, column_names):
@@ -54,108 +61,68 @@ class ArrayToDataFrameTransformer(BaseEstimator, TransformerMixin):
             X = pd.DataFrame(X, columns=self.column_names)
         return X
 
-class CustomStringTruncator(BaseEstimator, TransformerMixin):
-    def __init__(self, column_name):
-        self.column_name = column_name
 
-    def fit(self, X, y=None):
-        return self
+def model_definition():
+    algorithm = XGBRegressor()
 
-    def transform(self, X):
-        X[self.column_name] = X[self.column_name].str[:4].str.lower()
-        return X    
-    
-def model_definition():  
-    algorithm = XGBRegressor(
-        base_score=0.5,
-        booster='gbtree',
-        colsample_bylevel=1,
-        colsample_bynode=1,
-        colsample_bytree=0.5,
-        eta=0.2,
-        gamma=0,
-        gpu_id=-1,
-        grow_policy='lossguide',
-        importance_type='gain',
-        interaction_constraints='',
-        learning_rate=0.200000003,
-        max_bin=63,
-        max_delta_step=0,
-        max_depth=2,
-        max_leaves=0,
-        min_child_weight=1,
-        missing=numpy.nan,
-        monotone_constraints='()',
-        n_estimators=200,
-        n_jobs=0,
-        num_parallel_tree=1,
-        objective='reg:squarederror',
-        random_state=0,
-        reg_alpha=2.3958333333333335,
-        reg_lambda=0.9375,
-        scale_pos_weight=1,
-        subsample=0.9,
-        tree_method='hist',
-        validate_parameters=1,
-        verbose=-10,
-        verbosity=0
-    )
-    
     return algorithm
 
 
 # Create the transformers
-categorical_transformer = Pipeline(steps=[
-    ('imputer', SimpleImputer(strategy='most_frequent')),
-    ('onehot', OneHotEncoder(handle_unknown='ignore'))])
+categorical_transformer = Pipeline(
+    steps=[
+        ("imputer", SimpleImputer(strategy="most_frequent")),
+        ("onehot", OneHotEncoder(handle_unknown="ignore")),
+    ]
+)
 
-numerical_transformer = Pipeline(steps=[
-    ('imputer', SimpleImputer(strategy='median')),
-    ('scaler', StandardScaler())])
+numerical_transformer = Pipeline(
+    steps=[("imputer", SimpleImputer(strategy="median")), ("scaler", StandardScaler())]
+)
 
 # Combine the transformers using ColumnTransformer
 preprocessor = ColumnTransformer(
     transformers=[
-        ('num', numerical_transformer, numerical_features),
-        ('cat', categorical_transformer, categorical_features)])
+        ("num", numerical_transformer, numerical_features),
+        ("cat", categorical_transformer, categorical_features),
+    ]
+)
+
 
 def build_model_pipeline():
-    '''
+    """
     Defines the scikit-learn pipeline steps.
-    '''
-    
+    """
+
     column_names = numerical_features + categorical_features
     logger.info("Running build_model_pipeline")
     # Create the pipeline
-    pipeline = Pipeline(steps=[
-        ('array_to_df', ArrayToDataFrameTransformer(column_names)),
-        ('truncator', CustomStringTruncator('CLIENT')),
-        ('preprocessor', preprocessor),
-        ('classifier', model_definition())])
+    pipeline = Pipeline(
+        steps=[
+            ("array_to_df", ArrayToDataFrameTransformer(column_names)),
+            ("preprocessor", preprocessor),
+            ("classifier", model_definition()),
+        ]
+    )
     return pipeline
 
 
 def main(args):
-    '''Read train dataset, train model, save trained model'''
+    """Read train dataset, train model, save trained model"""
 
     # Read train data
     train_data = pd.read_parquet(Path(args.train_data))
 
     # Reorder columns
-    column_order = [        
-           'PROVIDERSTATE', 
-           'PROVIDERAGE',  
-           'TENURE', 
-           'DEGREE', 
-           'EMPLOYEETYPENAME', 
-           'VISIT_TIME_MEAN', 
-           'VISIT_COUNT', 
-           'STATE',
-           'CLIENT',
-           'LOB',
-           'GENDERID',
-           'APPT_LAT', 
-           'APPT_LNG',] + [TARGET_COL]
+    column_order = [
+        "PROVIDERAGE",
+        "TENURE",
+        "DEGREE",
+        "EMPLOYEETYPENAME",
+        "VISIT_TIME_MEAN",
+        "VISIT_COUNT",
+        "GENDERID",
+    ] + [TARGET_COL]
     train_data = train_data[column_order]
 
     # Split the data into input(X) and output(y)
@@ -167,11 +134,21 @@ def main(args):
 
     # log model hyperparameters
     mlflow.log_param("model", "XGBRegressor")
-    mlflow.log_param("n_estimators", model.named_steps['classifier'].get_params()['n_estimators'])
-    mlflow.log_param("max_depth", model.named_steps['classifier'].get_params()['max_depth'])
-    mlflow.log_param("objective", model.named_steps['classifier'].get_params()['objective'])
-    mlflow.log_param("reg_alpha", model.named_steps['classifier'].get_params()['reg_alpha'])
-    mlflow.log_param("reg_lambda", model.named_steps['classifier'].get_params()['reg_lambda'])
+    mlflow.log_param(
+        "n_estimators", model.named_steps["classifier"].get_params()["n_estimators"]
+    )
+    mlflow.log_param(
+        "max_depth", model.named_steps["classifier"].get_params()["max_depth"]
+    )
+    mlflow.log_param(
+        "objective", model.named_steps["classifier"].get_params()["objective"]
+    )
+    mlflow.log_param(
+        "reg_alpha", model.named_steps["classifier"].get_params()["reg_alpha"]
+    )
+    mlflow.log_param(
+        "reg_lambda", model.named_steps["classifier"].get_params()["reg_lambda"]
+    )
 
     # Predict using the Regression Model
     yhat_train = model.predict(X_train)
@@ -181,7 +158,7 @@ def main(args):
     mse = mean_squared_error(y_train, yhat_train)
     rmse = np.sqrt(mse)
     mae = mean_absolute_error(y_train, yhat_train)
-    
+
     # log model performance metrics
     mlflow.log_metric("train r2", r2)
     mlflow.log_metric("train mse", mse)
@@ -189,8 +166,8 @@ def main(args):
     mlflow.log_metric("train mae", mae)
 
     # Visualize results
-    plt.scatter(y_train, yhat_train,  color='black')
-    plt.plot(y_train, y_train, color='blue', linewidth=3)
+    plt.scatter(y_train, yhat_train, color="black")
+    plt.plot(y_train, y_train, color="blue", linewidth=3)
     plt.xlabel("Real value")
     plt.ylabel("Predicted value")
     plt.savefig("regression_results.png")
@@ -201,7 +178,7 @@ def main(args):
 
 
 if __name__ == "__main__":
-    
+
     mlflow.start_run()
 
     # ---------- Parse Arguments ----------- #
@@ -212,4 +189,3 @@ if __name__ == "__main__":
     main(args)
 
     mlflow.end_run()
-    
