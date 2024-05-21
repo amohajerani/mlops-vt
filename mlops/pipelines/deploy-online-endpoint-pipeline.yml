@@ -32,7 +32,7 @@ stages:
             inputs:
               buildType: 'specific'
               project: 'hcc'
-              pipeline: build
+              pipeline: visit-time-ml-model-training-build
               runVersion: latest
               artifactName: 'code'
               targetPath: $(Pipeline.Workspace)/s
