@@ -7,8 +7,8 @@ trigger: none
 
 resources:
   pipelines:
-  - pipeline: visit-time-ml-model-training-build
-    source: build
+  - pipeline: build
+    source: visit-time-ml-model-training-build
     # trigger: 
     #   branches:
     #   - main
