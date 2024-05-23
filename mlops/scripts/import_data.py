@@ -1,15 +1,15 @@
 import argparse
-import snowflake.connector
+
 import pandas as pd
 import logging
 from azure.ai.ml import MLClient
 from azure.identity import DefaultAzureCredential
-import sys
+import time
+from azure.ai.ml.entities import Data
+from azure.ai.ml.constants import AssetTypes
 
-# Terminate the script. Our Snowflake account is not free tier anymore.
-# Therefore, we cannot run this script. Instead, we will use the latest data
-sys.exit()
-
+"""
+import snowflake.connector
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 
@@ -72,3 +72,31 @@ logging.info("Converted data to pandas DataFrame")
 
 # store the file as a csv file
 df.to_csv("../../data/train.csv", index=False)
+"""
+credential = DefaultAzureCredential()
+try:
+    ml_client = MLClient.from_config(credential, path="config.json")
+
+except Exception as ex:
+    print("HERE IN THE EXCEPTION BLOCK")
+    print(ex)
+
+# instantiate a data object
+version = "v" + time.strftime("%Y.%m.%d.%H%M%S", time.gmtime())
+dataset = Data(
+    name="train",
+    description="train dataset",
+    version=version,
+    path="../../data/train.csv",
+    type=AssetTypes.URI_FILE,
+)
+
+# create data asset on Azure ML
+ml_client.data.create_or_update(dataset)
+
+# verify the dataset is registered
+datasets = ml_client.data.list()
+for d in datasets:
+    if d.name == "train":
+        logging.info("Dataset registered in Azure ML workspace")
+        break
